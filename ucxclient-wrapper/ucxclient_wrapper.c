@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-#include "ucx_wrapper_config.h"  // Must be first to override U_CX_PORT_PRINTF
-#include "u_port_windows.h"  // Must be included before other ucxclient headers
+// Note: ucx_wrapper_config.h and u_port_windows.h are force-included by CMake
 #include "ucxclient_wrapper.h"
 #include "u_cx_at_client.h"
 #include "u_cx_log.h"

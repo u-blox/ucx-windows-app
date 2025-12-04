@@ -21,6 +21,7 @@ set(UCXCLIENT_PORT_SRC
 add_library(ucxclient_wrapper SHARED
     ucxclient_wrapper.c
     ucxclient_wrapper.h
+    ucx_wrapper_config.h
     ${UCXCLIENT_UCX_API_SRC}
     ${UCXCLIENT_AT_API_SRC}
     ${UCXCLIENT_PORT_SRC}
@@ -37,11 +38,17 @@ target_compile_definitions(ucxclient_wrapper PRIVATE
     U_CX_USE_URC_QUEUE=1
 )
 
-# Force include the Windows port header before all other files
+# Force include our config header first, then the Windows port header
 if(MSVC)
-    target_compile_options(ucxclient_wrapper PRIVATE /FI"${UCXCLIENT_PORT_DIR}/os/u_port_windows.h")
+    target_compile_options(ucxclient_wrapper PRIVATE 
+        /FI"${CMAKE_CURRENT_SOURCE_DIR}/ucx_wrapper_config.h"
+        /FI"${UCXCLIENT_PORT_DIR}/os/u_port_windows.h"
+    )
 else()
-    target_compile_options(ucxclient_wrapper PRIVATE -include "${UCXCLIENT_PORT_DIR}/os/u_port_windows.h")
+    target_compile_options(ucxclient_wrapper PRIVATE 
+        -include "${CMAKE_CURRENT_SOURCE_DIR}/ucx_wrapper_config.h"
+        -include "${UCXCLIENT_PORT_DIR}/os/u_port_windows.h"
+    )
 endif()
 
 # Export all symbols for DLL

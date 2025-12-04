@@ -17,8 +17,18 @@
 #ifndef UCX_WRAPPER_CONFIG_H
 #define UCX_WRAPPER_CONFIG_H
 
-/* Custom printf redirect for logging */
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/* Forward declaration for custom printf */
 int ucx_wrapper_printf(const char* format, ...);
+
+/* Override ucxclient's printf to use our custom implementation */
 #define U_CX_PORT_PRINTF ucx_wrapper_printf
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // UCX_WRAPPER_CONFIG_H
