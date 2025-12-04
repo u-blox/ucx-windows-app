@@ -1,7 +1,10 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using UcxAvaloniaApp.Models;
 
 namespace UcxAvaloniaApp.Services;
 
@@ -27,7 +30,6 @@ public class UcxClient : IDisposable
     private bool _disposed;
 
     public event EventHandler<UrcEventArgs>? UrcReceived;
-    public event EventHandler<string>? LogMessage;
 
     public bool IsConnected => _handle != IntPtr.Zero && UcxNative.ucx_is_connected(_handle);
 
@@ -89,6 +91,30 @@ public class UcxClient : IDisposable
             return null;
 
         return UcxNative.ucx_get_last_error(_handle);
+    }
+
+    public async Task<List<WifiScanResult>> ScanWifiAsync(int timeoutMs = 10000)
+    {
+        return await Task.Run(() =>
+        {
+            if (_handle == IntPtr.Zero)
+            {
+                throw new ObjectDisposedException(nameof(UcxClient));
+            }
+
+            const int maxResults = 50;
+            var results = new WifiScanResult[maxResults];
+
+            int count = UcxNative.ucx_wifi_scan(_handle, results, maxResults, timeoutMs);
+
+            if (count < 0)
+            {
+                string? error = UcxNative.ucx_get_last_error(_handle);
+                throw new InvalidOperationException($"WiFi scan failed: {error ?? "Unknown error"}");
+            }
+
+            return new List<WifiScanResult>(results.Take(count));
+        });
     }
 
     public void Dispose()

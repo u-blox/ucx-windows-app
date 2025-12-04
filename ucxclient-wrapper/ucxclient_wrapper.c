@@ -18,6 +18,8 @@
 #include "ucxclient_wrapper.h"
 #include "u_cx_at_client.h"
 #include "u_cx_log.h"
+#include "u_cx.h"
+#include "u_cx_wifi.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -33,6 +35,7 @@
 typedef struct {
     uCxAtClient_t at_client;
     uCxAtClientConfig_t config;
+    uCxHandle_t cx_handle;
     uint8_t rx_buffer[RX_BUFFER_SIZE];
     uint8_t urc_buffer[URC_BUFFER_SIZE];
     char error_msg[ERROR_MSG_SIZE];
@@ -113,6 +116,9 @@ ucx_handle_t ucx_create(const char* port_name, int baud_rate)
     
     // Set internal URC callback
     uCxAtClientSetUrcCallback(&inst->at_client, internal_urc_callback, inst);
+    
+    // Initialize uCX handle
+    uCxInit(&inst->at_client, &inst->cx_handle);
     
     inst->error_msg[0] = '\0';
     return (ucx_handle_t)inst;
@@ -216,4 +222,53 @@ const char* ucx_get_last_error(ucx_handle_t handle)
     
     ucx_instance_t* inst = (ucx_instance_t*)handle;
     return inst->error_msg[0] != '\0' ? inst->error_msg : NULL;
+}
+
+int ucx_wifi_scan(ucx_handle_t handle, ucx_wifi_scan_result_t* results, 
+                  int max_results, int timeout_ms)
+{
+    if (!handle || !results || max_results <= 0) {
+        return UCX_ERROR_INVALID_PARAM;
+    }
+    
+    ucx_instance_t* inst = (ucx_instance_t*)handle;
+    
+    if (!inst->at_client.opened) {
+        strncpy(inst->error_msg, "Not connected", ERROR_MSG_SIZE);
+        return UCX_ERROR_NOT_CONNECTED;
+    }
+    
+    // Start WiFi scan (passive mode = 0)
+    uCxWifiStationScan1Begin(&inst->cx_handle, 0);
+    
+    int count = 0;
+    uCxWifiStationScan_t scan_result;
+    
+    // Get all scan results
+    while (count < max_results && uCxWifiStationScan1GetNext(&inst->cx_handle, &scan_result)) {
+        // Copy BSSID
+        memcpy(results[count].bssid, scan_result.bssid.address, 6);
+        
+        // Copy SSID (ensure null termination)
+        strncpy(results[count].ssid, scan_result.ssid, sizeof(results[count].ssid) - 1);
+        results[count].ssid[sizeof(results[count].ssid) - 1] = '\0';
+        
+        // Copy other fields
+        results[count].channel = scan_result.channel;
+        results[count].rssi = scan_result.rssi;
+        results[count].auth_suites = scan_result.authentication_suites;
+        results[count].unicast_ciphers = scan_result.unicast_ciphers;
+        results[count].group_ciphers = scan_result.group_ciphers;
+        
+        count++;
+    }
+    
+    // End the command
+    int32_t status = uCxEnd(&inst->cx_handle);
+    if (status < 0) {
+        snprintf(inst->error_msg, ERROR_MSG_SIZE, "WiFi scan failed with status: %d", status);
+        return UCX_ERROR_AT_FAIL;
+    }
+    
+    return count;
 }

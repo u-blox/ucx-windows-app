@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using UcxAvaloniaApp.Services;
+using UcxAvaloniaApp.Models;
 
 namespace UcxAvaloniaApp.ViewModels;
 
@@ -23,13 +25,18 @@ public partial class MainWindowViewModel : ViewModelBase
     [ObservableProperty]
     private bool _isConnected;
 
+    [ObservableProperty]
+    private bool _isScanning;
+
     public ObservableCollection<string> AvailablePorts { get; }
     public ObservableCollection<string> LogMessages { get; }
+    public ObservableCollection<WifiScanResult> WifiNetworks { get; }
 
     public MainWindowViewModel()
     {
         AvailablePorts = new ObservableCollection<string>(SerialPortService.GetAvailablePorts());
         LogMessages = new ObservableCollection<string>();
+        WifiNetworks = new ObservableCollection<WifiScanResult>();
         
         SelectedPort = AvailablePorts.FirstOrDefault();
         
@@ -48,7 +55,7 @@ public partial class MainWindowViewModel : ViewModelBase
     }
 
     [RelayCommand]
-    private async void Connect()
+    private async Task Connect()
     {
         if (string.IsNullOrEmpty(SelectedPort))
         {
@@ -97,7 +104,7 @@ public partial class MainWindowViewModel : ViewModelBase
     }
 
     [RelayCommand]
-    private async void SendAtCommand()
+    private async Task SendAtCommand()
     {
         if (_ucxClient == null || !IsConnected)
         {
@@ -141,6 +148,41 @@ public partial class MainWindowViewModel : ViewModelBase
     private void OnUrcReceived(object? sender, UrcEventArgs e)
     {
         AddLogMessage($"[URC] {e.UrcLine}");
+    }
+
+    [RelayCommand]
+    private async Task WifiScan()
+    {
+        if (_ucxClient == null || !IsConnected)
+        {
+            AddLogMessage("ERROR: Not connected");
+            return;
+        }
+
+        try
+        {
+            IsScanning = true;
+            WifiNetworks.Clear();
+            AddLogMessage("Starting WiFi scan...");
+            
+            var networks = await _ucxClient.ScanWifiAsync();
+            
+            AddLogMessage($"Found {networks.Count} network(s)");
+            
+            foreach (var network in networks.OrderByDescending(n => n.Rssi))
+            {
+                WifiNetworks.Add(network);
+                AddLogMessage($"  {network.Ssid} - Channel {network.Channel}, RSSI {network.Rssi} dBm, {network.SecurityString}");
+            }
+        }
+        catch (Exception ex)
+        {
+            AddLogMessage($"ERROR: WiFi scan failed - {ex.Message}");
+        }
+        finally
+        {
+            IsScanning = false;
+        }
     }
 
     private void AddLogMessage(string message)

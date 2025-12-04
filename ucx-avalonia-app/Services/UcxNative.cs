@@ -62,4 +62,11 @@ internal static class UcxNative
     [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
     [return: MarshalAs(UnmanagedType.LPStr)]
     public static extern string? ucx_get_last_error(IntPtr handle);
+
+    [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ucx_wifi_scan(
+        IntPtr handle,
+        [Out, MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 2)] Models.WifiScanResult[] results,
+        int maxResults,
+        int timeoutMs);
 }

@@ -46,6 +46,17 @@ typedef void (*ucx_urc_callback_t)(const char* urc_line, void* user_data);
 /* Callback for log messages */
 typedef void (*ucx_log_callback_t)(int level, const char* message, void* user_data);
 
+/* WiFi scan result structure */
+typedef struct {
+    uint8_t bssid[6];           /* MAC address */
+    char ssid[33];              /* SSID (max 32 chars + null terminator) */
+    int32_t channel;            /* Channel */
+    int32_t rssi;               /* Signal strength */
+    int32_t auth_suites;        /* Authentication suites bitmask */
+    int32_t unicast_ciphers;    /* Unicast ciphers bitmask */
+    int32_t group_ciphers;      /* Group ciphers bitmask */
+} ucx_wifi_scan_result_t;
+
 /* ----------------------------------------------------------------
  * PUBLIC FUNCTIONS
  * -------------------------------------------------------------- */
@@ -112,6 +123,18 @@ void ucx_set_log_callback(ucx_handle_t handle, ucx_log_callback_t callback, void
  * @return Error message string, or NULL if no error
  */
 const char* ucx_get_last_error(ucx_handle_t handle);
+
+/**
+ * Perform WiFi scan and get results.
+ * 
+ * @param handle        UCX handle
+ * @param results       Array to store scan results
+ * @param max_results   Maximum number of results to return
+ * @param timeout_ms    Timeout in milliseconds
+ * @return Number of networks found (>=0) on success, error code (<0) on failure
+ */
+int ucx_wifi_scan(ucx_handle_t handle, ucx_wifi_scan_result_t* results, 
+                  int max_results, int timeout_ms);
 
 #ifdef __cplusplus
 }
