@@ -68,6 +68,7 @@ public partial class MainWindowViewModel : ViewModelBase
             AddLogMessage($"Connecting to {SelectedPort}...");
             _ucxClient = new UcxClient(SelectedPort, 115200);
             _ucxClient.UrcReceived += OnUrcReceived;
+            _ucxClient.LogReceived += OnLogReceived;
             
             IsConnected = _ucxClient.IsConnected;
             StatusMessage = IsConnected ? $"Connected to {SelectedPort}" : "Failed to connect";
@@ -94,6 +95,7 @@ public partial class MainWindowViewModel : ViewModelBase
         if (_ucxClient != null)
         {
             _ucxClient.UrcReceived -= OnUrcReceived;
+            _ucxClient.LogReceived -= OnLogReceived;
             _ucxClient.Dispose();
             _ucxClient = null;
         }
@@ -148,6 +150,20 @@ public partial class MainWindowViewModel : ViewModelBase
     private void OnUrcReceived(object? sender, UrcEventArgs e)
     {
         AddLogMessage($"[URC] {e.UrcLine}");
+    }
+
+    private void OnLogReceived(object? sender, LogEventArgs e)
+    {
+        // Log AT RX/TX messages - strip ANSI color codes if present
+        string message = e.Message.Replace("\u001b[0;36m", "")
+                                   .Replace("\u001b[0;35m", "")
+                                   .Replace("\u001b[0m", "")
+                                   .TrimEnd('\r', '\n');
+        
+        if (!string.IsNullOrWhiteSpace(message))
+        {
+            AddLogMessage(message);
+        }
     }
 
     [RelayCommand]

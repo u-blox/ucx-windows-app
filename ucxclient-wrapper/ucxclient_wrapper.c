@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include "ucx_wrapper_config.h"  // Must be first to override U_CX_PORT_PRINTF
 #include "u_port_windows.h"  // Must be included before other ucxclient headers
 #include "ucxclient_wrapper.h"
 #include "u_cx_at_client.h"
@@ -23,6 +24,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <stdarg.h>
+#include <Windows.h>
 
 /* ----------------------------------------------------------------
  * TYPES
@@ -45,9 +48,32 @@ typedef struct {
     void* log_user_data;
 } ucx_instance_t;
 
+/* Global pointer to current instance (for log callback) */
+static ucx_instance_t* g_current_instance = NULL;
+
 /* ----------------------------------------------------------------
  * STATIC FUNCTIONS
  * -------------------------------------------------------------- */
+
+/* Custom printf implementation that forwards to C# log callback */
+int ucx_wrapper_printf(const char* format, ...)
+{
+    char buffer[512];
+    va_list args;
+    va_start(args, format);
+    int ret = vsnprintf(buffer, sizeof(buffer), format, args);
+    va_end(args);
+    
+    // Always output to debug console for Windows debugging
+    OutputDebugStringA(buffer);
+    
+    // Forward to C# callback if set
+    if (g_current_instance && g_current_instance->log_callback) {
+        g_current_instance->log_callback(0, buffer, g_current_instance->log_user_data);
+    }
+    
+    return ret;
+}
 
 static void internal_urc_callback(struct uCxAtClient *pClient, void *pTag, char *pLine,
                                    size_t lineLength, uint8_t *pBinaryData, size_t binaryDataLen)
@@ -88,6 +114,9 @@ ucx_handle_t ucx_create(const char* port_name, int baud_rate)
     if (!inst) {
         return NULL;
     }
+    
+    // Set global instance for logging
+    g_current_instance = inst;
     
     // Setup configuration
     inst->config.pRxBuffer = inst->rx_buffer;
