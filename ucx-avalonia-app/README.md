@@ -86,6 +86,10 @@ dotnet run --configuration Release
 - ✅ URC (Unsolicited Result Code) handling
 - ✅ Timestamped log viewer
 - ✅ Native ucxclient integration
+- ✅ **WiFi scan using ucx_api functions**
+  - Displays SSID, BSSID, channel, RSSI
+  - Shows security type (Open/WPA/WPA2/WPA3)
+  - Results displayed in sortable DataGrid
 
 ## What Works
 
@@ -93,6 +97,8 @@ dotnet run --configuration Release
 - Connects to a NORA-W36 module using the native ucxclient library
 - Sends AT commands through the wrapper DLL
 - Receives and displays URCs in real-time
+- **Performs WiFi scans using `uCxWifiStationScan1Begin/GetNext`**
+- **Parses security information (authentication suites, ciphers)**
 - Clean MVVM architecture with proper separation of concerns
 
 ## Next Steps
