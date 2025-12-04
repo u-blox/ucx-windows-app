@@ -177,9 +177,29 @@ int ucx_send_at_command(ucx_handle_t handle, const char* command,
     
     // Get response if buffer provided
     if (response && response_len > 0) {
-        // For now, just clear the response buffer
-        // TODO: Implement proper response parsing
-        response[0] = '\0';
+        response[0] = '\0';  // Clear initially
+        
+        // Try to read response lines (for commands that return data)
+        // This captures responses without a specific prefix (like AT+GMM, ATI, etc.)
+        char* line = uCxAtClientCmdGetRspParamLine(&inst->at_client, NULL, NULL, NULL);
+        if (line != NULL) {
+            // Copy first response line to output buffer
+            strncpy(response, line, response_len - 1);
+            response[response_len - 1] = '\0';
+            
+            // Continue reading any additional response lines and append them
+            size_t current_len = strlen(response);
+            while ((line = uCxAtClientCmdGetRspParamLine(&inst->at_client, NULL, NULL, NULL)) != NULL) {
+                if (current_len + 1 < (size_t)response_len) {
+                    strncat(response, "\n", response_len - current_len - 1);
+                    current_len++;
+                }
+                if (current_len < (size_t)response_len) {
+                    strncat(response, line, response_len - current_len - 1);
+                    current_len = strlen(response);
+                }
+            }
+        }
     }
     
     // Wait for command completion and get status
