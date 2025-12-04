@@ -2,6 +2,7 @@
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
+using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using UcxAvaloniaApp.Services;
@@ -66,10 +67,13 @@ public partial class MainWindowViewModel : ViewModelBase
         try
         {
             AddLogMessage($"Connecting to {SelectedPort}...");
+            AddLogMessage("Creating UCX client instance...");
+            
             _ucxClient = new UcxClient(SelectedPort, 115200);
             _ucxClient.UrcReceived += OnUrcReceived;
             _ucxClient.LogReceived += OnLogReceived;
             
+            AddLogMessage("Checking connection status...");
             IsConnected = _ucxClient.IsConnected;
             StatusMessage = IsConnected ? $"Connected to {SelectedPort}" : "Failed to connect";
             
@@ -77,6 +81,7 @@ public partial class MainWindowViewModel : ViewModelBase
 
             if (IsConnected)
             {
+                AddLogMessage("Sending test AT command...");
                 // Send test command
                 await SendCommand("AT");
             }
@@ -149,7 +154,7 @@ public partial class MainWindowViewModel : ViewModelBase
 
     private void OnUrcReceived(object? sender, UrcEventArgs e)
     {
-        AddLogMessage($"[URC] {e.UrcLine}");
+        Dispatcher.UIThread.Post(() => AddLogMessage($"[URC] {e.UrcLine}"));
     }
 
     private void OnLogReceived(object? sender, LogEventArgs e)
@@ -162,7 +167,7 @@ public partial class MainWindowViewModel : ViewModelBase
         
         if (!string.IsNullOrWhiteSpace(message))
         {
-            AddLogMessage(message);
+            Dispatcher.UIThread.Post(() => AddLogMessage(message));
         }
     }
 
