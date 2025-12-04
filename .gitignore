@@ -1,4 +1,5 @@
 build/
+build-wrapper/
 
 # Binaries and build outputs
 bin/
@@ -15,6 +16,12 @@ ucx-windows-app/bin/ucx-windows-app-debug.exe
 # Release binaries (tracked in git for distribution)
 !ucx-windows-app/release/
 !ucx-windows-app/release/*.exe
+
+# .NET / Avalonia
+ucx-avalonia-app/bin/
+ucx-avalonia-app/obj/
+*.user
+*.suo
 
 # Python
 __pycache__/
