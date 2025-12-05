@@ -4,11 +4,14 @@ using System.Runtime.InteropServices;
 namespace UcxAvaloniaApp.Services;
 
 /// <summary>
-/// P/Invoke declarations for ucxclient_wrapper.dll
+/// P/Invoke declarations for ucxclient_wrapper native library (cross-platform)
 /// </summary>
 internal static class UcxNative
 {
-    private const string DllName = "ucxclient_wrapper.dll";
+    // Platform-specific library name
+    private const string DllName = "ucxclient_wrapper";
+    
+    // Note: .NET will automatically append .dll (Windows), .so (Linux), or .dylib (macOS)
 
     // Error codes
     public const int UCX_OK = 0;
