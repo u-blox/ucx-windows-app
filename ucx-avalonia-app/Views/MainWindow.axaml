@@ -121,17 +121,16 @@
                     <Border Grid.Row="2" 
                             BorderBrush="LightGray" 
                             BorderThickness="1" 
-                            Background="#F5F5F5"
+                            Background="Black"
                             IsVisible="{Binding IsTableView}">
                         <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
-                            <TextBox Text="{Binding WifiScanOutput}"
-                                     IsReadOnly="True"
-                                     FontFamily="Consolas"
-                                     FontSize="12"
-                                     Background="Transparent"
-                                     BorderThickness="0"
-                                     TextWrapping="NoWrap"
-                                     AcceptsReturn="True"/>
+                            <SelectableTextBlock Text="{Binding WifiScanOutput}"
+                                                 FontFamily="Consolas"
+                                                 FontSize="12"
+                                                 Foreground="White"
+                                                 Background="Transparent"
+                                                 Padding="5"
+                                                 TextWrapping="NoWrap"/>
                         </ScrollViewer>
                     </Border>
                     
