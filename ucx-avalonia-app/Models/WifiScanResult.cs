@@ -9,41 +9,38 @@ namespace UcxAvaloniaApp.Models;
 public struct WifiScanResult
 {
     [MarshalAs(UnmanagedType.ByValArray, SizeConst = 6)]
-    private byte[] _bssid;
+    public byte[] bssid;
     
     [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 33)]
-    private string _ssid;
+    public string ssid;
     
-    private int _channel;
-    private int _rssi;
-    private int _authSuites;
-    private int _unicastCiphers;
-    private int _groupCiphers;
+    public int channel;
+    public int rssi;
+    public int auth_suites;
+    public int unicast_ciphers;
+    public int group_ciphers;
     
-    public byte[] Bssid => _bssid;
-    public string Ssid => _ssid ?? string.Empty;
-    public int Channel => _channel;
-    public int Rssi => _rssi;
-    public int AuthSuites => _authSuites;
-    public int UnicastCiphers => _unicastCiphers;
-    public int GroupCiphers => _groupCiphers;
+    // Read-only properties for UI binding
+    public readonly string Ssid => ssid ?? string.Empty;
+    public readonly int Channel => channel;
+    public readonly int Rssi => rssi;
     
-    public string BssidString => _bssid != null ? 
-        string.Join(":", _bssid.Select(b => b.ToString("X2"))) : "N/A";
+    public readonly string BssidString => bssid != null ? 
+        string.Join(":", bssid.Select(b => b.ToString("X2"))) : "N/A";
     
-    public string SecurityString
+    public readonly string SecurityString
     {
         get
         {
-            if (_authSuites == 0) return "Open";
+            if (auth_suites == 0) return "Open";
             
-            var auth = new List<string>();
-            if ((_authSuites & (1 << 3)) != 0) auth.Add("WPA");
-            if ((_authSuites & (1 << 4)) != 0) auth.Add("WPA2");
-            if ((_authSuites & (1 << 5)) != 0) auth.Add("WPA3");
-            if ((_authSuites & (1 << 1)) != 0) auth.Add("PSK");
+            var authList = new List<string>();
+            if ((auth_suites & (1 << 3)) != 0) authList.Add("WPA");
+            if ((auth_suites & (1 << 4)) != 0) authList.Add("WPA2");
+            if ((auth_suites & (1 << 5)) != 0) authList.Add("WPA3");
+            if ((auth_suites & (1 << 1)) != 0) authList.Add("PSK");
             
-            return auth.Count > 0 ? string.Join("/", auth) : "Unknown";
+            return authList.Count > 0 ? string.Join("/", authList) : "Unknown";
         }
     }
 }
