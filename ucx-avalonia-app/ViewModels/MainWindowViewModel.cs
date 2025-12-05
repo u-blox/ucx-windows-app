@@ -34,13 +34,13 @@ public partial class MainWindowViewModel : ViewModelBase
 
     public ObservableCollection<string> AvailablePorts { get; }
     public ObservableCollection<string> LogMessages { get; }
-    public ObservableCollection<WifiScanResult> WifiNetworks { get; }
+    public ObservableCollection<WifiNetwork> WifiNetworks { get; }
 
     public MainWindowViewModel()
     {
         AvailablePorts = new ObservableCollection<string>(SerialPortService.GetAvailablePorts());
         LogMessages = new ObservableCollection<string>();
-        WifiNetworks = new ObservableCollection<WifiScanResult>();
+        WifiNetworks = new ObservableCollection<WifiNetwork>();
         
         SelectedPort = AvailablePorts.FirstOrDefault();
         
@@ -196,11 +196,16 @@ public partial class MainWindowViewModel : ViewModelBase
             WifiScanStatus = $"Scan complete - found {networks.Count} network(s)";
             AddLogMessage($"Found {networks.Count} network(s)");
             
-            foreach (var network in networks.OrderByDescending(n => n.Rssi))
+            foreach (var result in networks.OrderByDescending(n => n.rssi))
             {
-                WifiNetworks.Add(network);
-                AddLogMessage($"  {network.Ssid} - Channel {network.Channel}, RSSI {network.Rssi} dBm, {network.SecurityString}");
+                var network = WifiNetwork.FromScanResult(result);
+                AddLogMessage($"  Adding: {network.Ssid} - Channel {network.Channel}, RSSI {network.Rssi} dBm, {network.SecurityString}");
+                
+                // Update on UI thread
+                Dispatcher.UIThread.Post(() => WifiNetworks.Add(network));
             }
+            
+            AddLogMessage($"Total networks in collection: {WifiNetworks.Count}");
             
             if (networks.Count == 0)
             {
