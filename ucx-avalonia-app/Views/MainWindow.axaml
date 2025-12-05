@@ -59,8 +59,9 @@
             </StackPanel>
         </Border>
 
-        <!-- WiFi Scan -->
-        <Grid Grid.Row="1" RowDefinitions="Auto,*">
+        <!-- WiFi Control -->
+        <Grid Grid.Row="1" RowDefinitions="Auto,Auto,*">
+            <!-- Scan Section -->
             <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,10">
                 <Button Content="Scan WiFi Networks" 
                         Command="{Binding WifiScanCommand}"
@@ -72,8 +73,47 @@
                            FontWeight="Bold"/>
             </StackPanel>
             
-            <!-- Table View -->
-            <Border Grid.Row="1" 
+            <!-- Connect Section -->
+            <Border Grid.Row="1" BorderBrush="Gray" BorderThickness="1" Padding="10" Margin="0,0,0,10">
+                <Grid ColumnDefinitions="Auto,*,Auto,Auto" RowDefinitions="Auto,Auto">
+                    <TextBlock Grid.Row="0" Grid.Column="0" Text="SSID:" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                    <TextBox Grid.Row="0" Grid.Column="1" 
+                             Text="{Binding SelectedSsid}" 
+                             Watermark="Enter network SSID..."
+                             IsEnabled="{Binding IsConnected}"
+                             Margin="0,0,10,0"/>
+                    
+                    <TextBlock Grid.Row="1" Grid.Column="0" Text="Password:" VerticalAlignment="Center" Margin="0,5,10,0"/>
+                    <TextBox Grid.Row="1" Grid.Column="1" 
+                             Text="{Binding WifiPassword}" 
+                             Watermark="Enter password (leave empty for open networks)..."
+                             PasswordChar="●"
+                             IsEnabled="{Binding IsConnected}"
+                             Margin="0,5,10,0"/>
+                    
+                    <Button Grid.Row="0" Grid.Column="2" 
+                            Content="Connect" 
+                            Command="{Binding WifiConnectCommand}"
+                            IsEnabled="{Binding IsConnected}"
+                            Padding="20,5"
+                            Margin="0,0,10,0"/>
+                    
+                    <Button Grid.Row="0" Grid.Column="3" 
+                            Content="Disconnect" 
+                            Command="{Binding WifiDisconnectCommand}"
+                            IsEnabled="{Binding IsConnected}"
+                            Padding="20,5"/>
+                    
+                    <TextBlock Grid.Row="1" Grid.Column="2" Grid.ColumnSpan="2"
+                               Text="{Binding WifiConnectStatus}" 
+                               VerticalAlignment="Center"
+                               FontWeight="Bold"
+                               Margin="0,5,0,0"/>
+                </Grid>
+            </Border>
+            
+            <!-- Scan Results -->
+            <Border Grid.Row="2" 
                     BorderBrush="LightGray" 
                     BorderThickness="1" 
                     Background="Black">

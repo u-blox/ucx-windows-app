@@ -136,6 +136,25 @@ const char* ucx_get_last_error(ucx_handle_t handle);
 int ucx_wifi_scan(ucx_handle_t handle, ucx_wifi_scan_result_t* results, 
                   int max_results, int timeout_ms);
 
+/**
+ * Connect to a WiFi network.
+ * 
+ * @param handle        UCX handle
+ * @param ssid          Network SSID
+ * @param password      Network password (NULL for open networks)
+ * @param timeout_ms    Timeout in milliseconds
+ * @return UCX_OK on success, error code otherwise
+ */
+int ucx_wifi_connect(ucx_handle_t handle, const char* ssid, const char* password, int timeout_ms);
+
+/**
+ * Disconnect from WiFi network.
+ * 
+ * @param handle  UCX handle
+ * @return UCX_OK on success, error code otherwise
+ */
+int ucx_wifi_disconnect(ucx_handle_t handle);
+
 #ifdef __cplusplus
 }
 #endif

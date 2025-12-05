@@ -37,6 +37,18 @@ public partial class MainWindowViewModel : ViewModelBase
     private string _wifiScanOutput = "";
     
     [ObservableProperty]
+    private string _wifiConnectStatus = "";
+    
+    [ObservableProperty]
+    private string _selectedSsid = "";
+    
+    [ObservableProperty]
+    private string _wifiPassword = "";
+    
+    [ObservableProperty]
+    private bool _isConnecting;
+    
+    [ObservableProperty]
     private bool _isTableView = true;
     
     [ObservableProperty]
@@ -266,6 +278,75 @@ public partial class MainWindowViewModel : ViewModelBase
         finally
         {
             IsScanning = false;
+        }
+    }
+
+    [RelayCommand]
+    private async Task WifiConnect()
+    {
+        if (_ucxClient == null || !IsConnected)
+        {
+            WifiConnectStatus = "ERROR: Not connected";
+            AddLogMessage("ERROR: Not connected");
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(SelectedSsid))
+        {
+            WifiConnectStatus = "ERROR: No SSID entered";
+            AddLogMessage("ERROR: No SSID entered");
+            return;
+        }
+
+        try
+        {
+            IsConnecting = true;
+            WifiConnectStatus = $"Connecting to {SelectedSsid}...";
+            AddLogMessage($"Connecting to WiFi: {SelectedSsid}");
+            
+            await _ucxClient.ConnectWifiAsync(SelectedSsid, string.IsNullOrWhiteSpace(WifiPassword) ? null : WifiPassword);
+            
+            WifiConnectStatus = $"Connected to {SelectedSsid}";
+            AddLogMessage($"Successfully connected to {SelectedSsid}");
+            
+            // Clear password for security
+            WifiPassword = "";
+        }
+        catch (Exception ex)
+        {
+            WifiConnectStatus = $"Connection failed: {ex.Message}";
+            AddLogMessage($"ERROR: WiFi connection failed - {ex.Message}");
+        }
+        finally
+        {
+            IsConnecting = false;
+        }
+    }
+
+    [RelayCommand]
+    private async Task WifiDisconnect()
+    {
+        if (_ucxClient == null || !IsConnected)
+        {
+            WifiConnectStatus = "ERROR: Not connected to module";
+            AddLogMessage("ERROR: Not connected to module");
+            return;
+        }
+
+        try
+        {
+            WifiConnectStatus = "Disconnecting...";
+            AddLogMessage("Disconnecting from WiFi");
+            
+            await _ucxClient.DisconnectWifiAsync();
+            
+            WifiConnectStatus = "Disconnected from WiFi";
+            AddLogMessage("Successfully disconnected from WiFi");
+        }
+        catch (Exception ex)
+        {
+            WifiConnectStatus = $"Disconnect failed: {ex.Message}";
+            AddLogMessage($"ERROR: WiFi disconnect failed - {ex.Message}");
         }
     }
 

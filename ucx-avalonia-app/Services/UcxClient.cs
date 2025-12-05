@@ -151,6 +151,44 @@ public class UcxClient : IDisposable
         });
     }
 
+    public async Task ConnectWifiAsync(string ssid, string? password, int timeoutMs = 30000)
+    {
+        await Task.Run(() =>
+        {
+            if (_handle == IntPtr.Zero)
+            {
+                throw new ObjectDisposedException(nameof(UcxClient));
+            }
+
+            int result = UcxNative.ucx_wifi_connect(_handle, ssid, password, timeoutMs);
+
+            if (result < 0)
+            {
+                string? error = UcxNative.ucx_get_last_error(_handle);
+                throw new InvalidOperationException($"WiFi connect failed: {error ?? "Unknown error"}");
+            }
+        });
+    }
+
+    public async Task DisconnectWifiAsync()
+    {
+        await Task.Run(() =>
+        {
+            if (_handle == IntPtr.Zero)
+            {
+                throw new ObjectDisposedException(nameof(UcxClient));
+            }
+
+            int result = UcxNative.ucx_wifi_disconnect(_handle);
+
+            if (result < 0)
+            {
+                string? error = UcxNative.ucx_get_last_error(_handle);
+                throw new InvalidOperationException($"WiFi disconnect failed: {error ?? "Unknown error"}");
+            }
+        });
+    }
+
     public void Dispose()
     {
         if (!_disposed)

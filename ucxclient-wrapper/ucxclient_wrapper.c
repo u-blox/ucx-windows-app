@@ -328,3 +328,90 @@ int ucx_wifi_scan(ucx_handle_t handle, ucx_wifi_scan_result_t* results,
     ucx_wrapper_printf("WiFi scan completed successfully\n");
     return count;
 }
+
+// WiFi connect function
+int ucx_wifi_connect(ucx_handle_t handle, const char* ssid, const char* password, int timeout_ms)
+{
+    ucx_instance_t* inst = (ucx_instance_t*)handle;
+    if (!inst || !ssid) {
+        return UCX_ERROR_INVALID_PARAM;
+    }
+    
+    ucx_wrapper_printf("Connecting to WiFi: %s\n", ssid);
+    
+    // Use wlan_handle 0 (default)
+    int32_t wlan_handle = 0;
+    int32_t status;
+    
+    // Set IP config to DHCP
+    status = uCxWifiStationSetIpConfigDhcp(&inst->cx_handle, wlan_handle);
+    if (status < 0) {
+        snprintf(inst->error_msg, ERROR_MSG_SIZE, "Failed to set DHCP: %d", status);
+        ucx_wrapper_printf("Set DHCP failed: %d\n", status);
+        return UCX_ERROR_AT_FAIL;
+    }
+    ucx_wrapper_printf("Set DHCP config\n");
+    
+    // Set connection parameters (SSID)
+    status = uCxWifiStationSetConnectionParams(&inst->cx_handle, wlan_handle, ssid);
+    if (status < 0) {
+        snprintf(inst->error_msg, ERROR_MSG_SIZE, "Failed to set connection params: %d", status);
+        ucx_wrapper_printf("Set connection params failed: %d\n", status);
+        return UCX_ERROR_AT_FAIL;
+    }
+    ucx_wrapper_printf("Set connection params (SSID: %s)\n", ssid);
+    
+    // Set authentication (password)
+    if (password && strlen(password) > 0) {
+        // Use WPA/WPA2 with auto threshold (0 = auto)
+        status = uCxWifiStationSetSecurityWpa(&inst->cx_handle, wlan_handle, password, 0);
+        if (status < 0) {
+            snprintf(inst->error_msg, ERROR_MSG_SIZE, "Failed to set security: %d", status);
+            ucx_wrapper_printf("Set security failed: %d\n", status);
+            return UCX_ERROR_AT_FAIL;
+        }
+        ucx_wrapper_printf("Set WPA/WPA2 security\n");
+    } else {
+        // Open network
+        status = uCxWifiStationSetSecurityOpen(&inst->cx_handle, wlan_handle);
+        if (status < 0) {
+            snprintf(inst->error_msg, ERROR_MSG_SIZE, "Failed to set open security: %d", status);
+            ucx_wrapper_printf("Set open security failed: %d\n", status);
+            return UCX_ERROR_AT_FAIL;
+        }
+        ucx_wrapper_printf("Set open security\n");
+    }
+    
+    // Initiate connection
+    status = uCxWifiStationConnect(&inst->cx_handle, wlan_handle);
+    if (status < 0) {
+        snprintf(inst->error_msg, ERROR_MSG_SIZE, "WiFi connect failed: %d", status);
+        ucx_wrapper_printf("WiFi connect failed: %d\n", status);
+        return UCX_ERROR_AT_FAIL;
+    }
+    
+    ucx_wrapper_printf("WiFi connection initiated successfully\n");
+    return UCX_OK;
+}
+
+// WiFi disconnect function
+int ucx_wifi_disconnect(ucx_handle_t handle)
+{
+    ucx_instance_t* inst = (ucx_instance_t*)handle;
+    if (!inst) {
+        return UCX_ERROR_INVALID_PARAM;
+    }
+    
+    ucx_wrapper_printf("Disconnecting from WiFi\n");
+    
+    int32_t status = uCxWifiStationDisconnect(&inst->cx_handle);
+    if (status < 0) {
+        snprintf(inst->error_msg, ERROR_MSG_SIZE, "WiFi disconnect failed: %d", status);
+        ucx_wrapper_printf("WiFi disconnect failed: %d\n", status);
+        return UCX_ERROR_AT_FAIL;
+    }
+    
+    ucx_wrapper_printf("WiFi disconnected successfully\n");
+    return UCX_OK;
+}
+
