@@ -199,11 +199,18 @@ public partial class MainWindowViewModel : ViewModelBase
 
     private void OnUrcReceived(object? sender, UrcEventArgs e)
     {
+        System.Console.WriteLine($"[ViewModel-URC] *** URC RECEIVED: '{e.UrcLine}' ***");
+        
         // Check for network up URC (+UEWSNU - WiFi Station Network Up)
         if (e.UrcLine.Contains("+UEWSNU"))
         {
-            System.Console.WriteLine("[ViewModel] Received network up URC: " + e.UrcLine);
-            _networkUpEvent?.TrySetResult(true);
+            System.Console.WriteLine("[ViewModel] *** NETWORK UP URC DETECTED! Setting event... ***");
+            bool result = _networkUpEvent?.TrySetResult(true) ?? false;
+            System.Console.WriteLine($"[ViewModel] TrySetResult returned: {result}");
+        }
+        else
+        {
+            System.Console.WriteLine($"[ViewModel] URC does not contain +UEWSNU");
         }
         
         Dispatcher.UIThread.Post(() => AddLogMessage($"[URC] {e.UrcLine}"));

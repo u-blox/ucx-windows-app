@@ -79,14 +79,19 @@ static void internal_urc_callback(struct uCxAtClient *pClient, void *pTag, char 
 {
     ucx_instance_t* inst = (ucx_instance_t*)pTag;
     
+    // Debug: always log URCs
+    char urc_line[512];
+    size_t copy_len = lineLength < sizeof(urc_line) - 1 ? lineLength : sizeof(urc_line) - 1;
+    memcpy(urc_line, pLine, copy_len);
+    urc_line[copy_len] = '\0';
+    
+    ucx_wrapper_printf("[URC-DEBUG] Received URC: '%s' (length=%zu)\n", urc_line, lineLength);
+    
     if (inst && inst->urc_callback) {
-        // Ensure null-terminated string
-        char urc_line[512];
-        size_t copy_len = lineLength < sizeof(urc_line) - 1 ? lineLength : sizeof(urc_line) - 1;
-        memcpy(urc_line, pLine, copy_len);
-        urc_line[copy_len] = '\0';
-        
+        ucx_wrapper_printf("[URC-DEBUG] Forwarding to C# callback\n");
         inst->urc_callback(urc_line, inst->urc_user_data);
+    } else {
+        ucx_wrapper_printf("[URC-DEBUG] No C# callback registered!\n");
     }
 }
 
