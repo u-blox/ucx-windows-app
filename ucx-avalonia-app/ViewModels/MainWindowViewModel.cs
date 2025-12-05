@@ -34,6 +34,15 @@ public partial class MainWindowViewModel : ViewModelBase
     private string _wifiScanStatus = "";
     
     [ObservableProperty]
+    private string _wifiScanOutput = "";
+    
+    [ObservableProperty]
+    private bool _isTableView = true;
+    
+    [ObservableProperty]
+    private bool _isGridView = false;
+    
+    [ObservableProperty]
     private ObservableCollection<WifiNetwork> _wifiNetworks;
 
     public ObservableCollection<string> AvailablePorts { get; }
@@ -48,6 +57,22 @@ public partial class MainWindowViewModel : ViewModelBase
         SelectedPort = AvailablePorts.FirstOrDefault();
         
         AddLogMessage("Application started. Select a port to connect.");
+    }
+    
+    partial void OnIsTableViewChanged(bool value)
+    {
+        if (value)
+        {
+            IsGridView = false;
+        }
+    }
+    
+    partial void OnIsGridViewChanged(bool value)
+    {
+        if (value)
+        {
+            IsTableView = false;
+        }
     }
 
     [RelayCommand]
@@ -191,46 +216,47 @@ public partial class MainWindowViewModel : ViewModelBase
         {
             IsScanning = true;
             WifiScanStatus = "Scanning...";
+            WifiScanOutput = "Scanning for WiFi networks...\n";
             WifiNetworks.Clear();
             AddLogMessage("Starting WiFi scan...");
-            System.Diagnostics.Debug.WriteLine("[ViewModel] Calling ScanWifiAsync...");
             
             var networks = await _ucxClient.ScanWifiAsync();
             
-            System.Diagnostics.Debug.WriteLine($"[ViewModel] Scan returned {networks.Count} networks");
             WifiScanStatus = $"Scan complete - found {networks.Count} network(s)";
             AddLogMessage($"Found {networks.Count} network(s)");
             
-            // Convert all results to WifiNetwork objects
-            var networkList = new List<WifiNetwork>();
-            int addedCount = 0;
-            foreach (var result in networks.OrderByDescending(n => n.rssi))
-            {
-                System.Diagnostics.Debug.WriteLine($"[ViewModel] Processing result: ssid='{result.ssid}', rssi={result.rssi}");
-                System.Console.WriteLine($"[ViewModel] Processing result: ssid='{result.ssid}', rssi={result.rssi}");
-                
-                var network = WifiNetwork.FromScanResult(result);
-                System.Diagnostics.Debug.WriteLine($"[ViewModel] Converted to WifiNetwork: Ssid='{network.Ssid}', Rssi={network.Rssi}");
-                System.Console.WriteLine($"[ViewModel] Converted to WifiNetwork: Ssid='{network.Ssid}', Rssi={network.Rssi}");
-                
-                AddLogMessage($"  Adding: {network.Ssid} - Channel {network.Channel}, RSSI {network.Rssi} dBm, {network.SecurityString}");
-                
-                networkList.Add(network);
-                addedCount++;
-            }
-            
-            // Replace the entire collection instead of adding items individually
-            System.Console.WriteLine($"[ViewModel] Replacing collection with {networkList.Count} networks");
-            WifiNetworks = new ObservableCollection<WifiNetwork>(networkList);
-            
-            System.Diagnostics.Debug.WriteLine($"[ViewModel] Collection replaced. Count: {WifiNetworks.Count}");
-            System.Console.WriteLine($"[ViewModel] Collection replaced. Count: {WifiNetworks.Count}");
-            AddLogMessage($"Total networks in collection: {WifiNetworks.Count}");
-            
             if (networks.Count == 0)
             {
+                WifiScanOutput = "No networks found.";
                 WifiScanStatus = "No networks found";
+                return;
             }
+            
+            // Build formatted text output
+            var output = new System.Text.StringBuilder();
+            output.AppendLine($"Found {networks.Count} network(s):\n");
+            output.AppendLine("SSID                              BSSID              CH  RSSI  Security");
+            output.AppendLine("================================  =================  ==  ====  ========");
+            
+            // Convert all results to WifiNetwork objects and format
+            var networkList = new List<WifiNetwork>();
+            foreach (var result in networks.OrderByDescending(n => n.rssi))
+            {
+                var network = WifiNetwork.FromScanResult(result);
+                networkList.Add(network);
+                
+                // Format: SSID (32 chars), BSSID (17 chars), Channel (2), RSSI (4), Security
+                output.AppendLine($"{network.Ssid,-32}  {network.BssidString,-17}  {network.Channel,2}  {network.Rssi,4}  {network.SecurityString}");
+                
+                AddLogMessage($"  {network.Ssid} - Channel {network.Channel}, RSSI {network.Rssi} dBm, {network.SecurityString}");
+            }
+            
+            WifiScanOutput = output.ToString();
+            
+            // Also keep the collection for when we switch back to DataGrid
+            WifiNetworks = new ObservableCollection<WifiNetwork>(networkList);
+            
+            AddLogMessage($"Scan complete - found {networks.Count} network(s)");
         }
         catch (Exception ex)
         {

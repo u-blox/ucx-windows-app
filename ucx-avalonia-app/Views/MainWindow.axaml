@@ -111,12 +111,36 @@
                                    FontWeight="Bold"/>
                     </StackPanel>
                     
-                    <TextBlock Grid.Row="1" 
-                               Text="{Binding WifiNetworks.Count, StringFormat='Found {0} network(s)'}"
-                               Margin="0,0,0,10"
-                               FontSize="14"/>
+                    <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,10">
+                        <TextBlock Text="View:" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                        <RadioButton Content="Table" IsChecked="{Binding IsTableView}" GroupName="ViewMode" Margin="0,0,15,0"/>
+                        <RadioButton Content="Grid" IsChecked="{Binding IsGridView}" GroupName="ViewMode"/>
+                    </StackPanel>
                     
-                    <Border Grid.Row="2" BorderBrush="LightGray" BorderThickness="1" Background="White">
+                    <!-- Table View (TextBox) -->
+                    <Border Grid.Row="2" 
+                            BorderBrush="LightGray" 
+                            BorderThickness="1" 
+                            Background="#F5F5F5"
+                            IsVisible="{Binding IsTableView}">
+                        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+                            <TextBox Text="{Binding WifiScanOutput}"
+                                     IsReadOnly="True"
+                                     FontFamily="Consolas"
+                                     FontSize="12"
+                                     Background="Transparent"
+                                     BorderThickness="0"
+                                     TextWrapping="NoWrap"
+                                     AcceptsReturn="True"/>
+                        </ScrollViewer>
+                    </Border>
+                    
+                    <!-- Grid View (DataGrid) -->
+                    <Border Grid.Row="2" 
+                            BorderBrush="LightGray" 
+                            BorderThickness="1" 
+                            Background="White"
+                            IsVisible="{Binding IsGridView}">
                         <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
                             <DataGrid ItemsSource="{Binding WifiNetworks}"
                                       IsReadOnly="True"
