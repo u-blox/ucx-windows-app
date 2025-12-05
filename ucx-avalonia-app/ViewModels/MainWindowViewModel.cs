@@ -48,6 +48,8 @@ public partial class MainWindowViewModel : ViewModelBase
     [ObservableProperty]
     private bool _isConnecting;
     
+    private TaskCompletionSource<bool>? _networkUpEvent;
+    
     [ObservableProperty]
     private bool _isTableView = true;
     
@@ -197,6 +199,13 @@ public partial class MainWindowViewModel : ViewModelBase
 
     private void OnUrcReceived(object? sender, UrcEventArgs e)
     {
+        // Check for network up URC (+UEWSNU - WiFi Station Network Up)
+        if (e.UrcLine.Contains("+UEWSNU"))
+        {
+            System.Console.WriteLine("[ViewModel] Received network up URC: " + e.UrcLine);
+            _networkUpEvent?.TrySetResult(true);
+        }
+        
         Dispatcher.UIThread.Post(() => AddLogMessage($"[URC] {e.UrcLine}"));
     }
 
@@ -310,13 +319,34 @@ public partial class MainWindowViewModel : ViewModelBase
             WifiConnectStatus = $"Connecting to {SelectedSsid}...";
             AddLogMessage($"Connecting to WiFi: {SelectedSsid}");
             
+            // Create event to wait for network up URC
+            _networkUpEvent = new TaskCompletionSource<bool>();
+            
             System.Console.WriteLine($"[ViewModel] About to call ConnectWifiAsync for '{SelectedSsid}'");
             await _ucxClient.ConnectWifiAsync(SelectedSsid, string.IsNullOrWhiteSpace(WifiPassword) ? null : WifiPassword);
             
-            System.Console.WriteLine($"[ViewModel] ConnectWifiAsync returned successfully");
+            System.Console.WriteLine($"[ViewModel] ConnectWifiAsync returned successfully (connection initiated)");
+            WifiConnectStatus = $"Waiting for network up...";
             
-            // Wait a moment for network to fully initialize
-            await Task.Delay(1500);
+            // Wait for network up URC (+UEWSNU) with timeout
+            System.Console.WriteLine($"[ViewModel] Waiting for network up URC (+UEWSNU)...");
+            using var cts = new System.Threading.CancellationTokenSource(TimeSpan.FromSeconds(20));
+            var networkUpTask = _networkUpEvent.Task;
+            var timeoutTask = Task.Delay(-1, cts.Token);
+            
+            var completedTask = await Task.WhenAny(networkUpTask, timeoutTask);
+            
+            if (completedTask == networkUpTask && await networkUpTask)
+            {
+                System.Console.WriteLine($"[ViewModel] Network up event received!");
+            }
+            else
+            {
+                System.Console.WriteLine($"[ViewModel] Timeout waiting for network up URC");
+                WifiConnectStatus = "Connected (link up) but network timeout";
+                AddLogMessage("WiFi link established but network layer timed out (no IP address)");
+                return;
+            }
             
             // Get connection info
             System.Console.WriteLine($"[ViewModel] Getting connection info...");
