@@ -99,16 +99,24 @@
             
             <!-- WiFi Scan Tab -->
             <TabItem Header="WiFi Scan">
-                <Grid RowDefinitions="Auto,*">
-                    <Button Grid.Row="0" 
-                            Content="Scan WiFi Networks" 
-                            Command="{Binding WifiScanCommand}"
-                            IsEnabled="{Binding IsConnected}"
-                            HorizontalAlignment="Left"
-                            Margin="0,0,0,10" 
-                            Padding="20,10"/>
+                <Grid RowDefinitions="Auto,Auto,*">
+                    <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,10">
+                        <Button Content="Scan WiFi Networks" 
+                                Command="{Binding WifiScanCommand}"
+                                IsEnabled="{Binding IsConnected}"
+                                Padding="20,10"
+                                Margin="0,0,10,0"/>
+                        <TextBlock Text="{Binding WifiScanStatus}" 
+                                   VerticalAlignment="Center"
+                                   FontWeight="Bold"/>
+                    </StackPanel>
                     
-                    <Border Grid.Row="1" BorderBrush="LightGray" BorderThickness="1">
+                    <TextBlock Grid.Row="1" 
+                               Text="{Binding WifiNetworks.Count, StringFormat='Found {0} network(s)'}"
+                               Margin="0,0,0,10"
+                               FontSize="14"/>
+                    
+                    <Border Grid.Row="2" BorderBrush="LightGray" BorderThickness="1">
                         <DataGrid ItemsSource="{Binding WifiNetworks}"
                                   IsReadOnly="True"
                                   AutoGenerateColumns="False"

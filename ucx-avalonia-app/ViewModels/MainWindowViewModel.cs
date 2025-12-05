@@ -29,6 +29,9 @@ public partial class MainWindowViewModel : ViewModelBase
     [ObservableProperty]
     private bool _isScanning;
 
+    [ObservableProperty]
+    private string _wifiScanStatus = "";
+
     public ObservableCollection<string> AvailablePorts { get; }
     public ObservableCollection<string> LogMessages { get; }
     public ObservableCollection<WifiScanResult> WifiNetworks { get; }
@@ -176,6 +179,7 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         if (_ucxClient == null || !IsConnected)
         {
+            WifiScanStatus = "ERROR: Not connected";
             AddLogMessage("ERROR: Not connected");
             return;
         }
@@ -183,11 +187,13 @@ public partial class MainWindowViewModel : ViewModelBase
         try
         {
             IsScanning = true;
+            WifiScanStatus = "Scanning...";
             WifiNetworks.Clear();
             AddLogMessage("Starting WiFi scan...");
             
             var networks = await _ucxClient.ScanWifiAsync();
             
+            WifiScanStatus = $"Scan complete - found {networks.Count} network(s)";
             AddLogMessage($"Found {networks.Count} network(s)");
             
             foreach (var network in networks.OrderByDescending(n => n.Rssi))
@@ -195,9 +201,15 @@ public partial class MainWindowViewModel : ViewModelBase
                 WifiNetworks.Add(network);
                 AddLogMessage($"  {network.Ssid} - Channel {network.Channel}, RSSI {network.Rssi} dBm, {network.SecurityString}");
             }
+            
+            if (networks.Count == 0)
+            {
+                WifiScanStatus = "No networks found";
+            }
         }
         catch (Exception ex)
         {
+            WifiScanStatus = $"Scan failed: {ex.Message}";
             AddLogMessage($"ERROR: WiFi scan failed - {ex.Message}");
         }
         finally

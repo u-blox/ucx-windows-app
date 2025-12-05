@@ -286,6 +286,8 @@ int ucx_wifi_scan(ucx_handle_t handle, ucx_wifi_scan_result_t* results,
         return UCX_ERROR_NOT_CONNECTED;
     }
     
+    ucx_wrapper_printf("Starting WiFi scan (passive mode)...\n");
+    
     // Start WiFi scan (passive mode = 0)
     uCxWifiStationScan1Begin(&inst->cx_handle, 0);
     
@@ -294,6 +296,8 @@ int ucx_wifi_scan(ucx_handle_t handle, ucx_wifi_scan_result_t* results,
     
     // Get all scan results
     while (count < max_results && uCxWifiStationScan1GetNext(&inst->cx_handle, &scan_result)) {
+        ucx_wrapper_printf("Found network: %s (RSSI: %d)\n", scan_result.ssid, scan_result.rssi);
+        
         // Copy BSSID
         memcpy(results[count].bssid, scan_result.bssid.address, 6);
         
@@ -311,12 +315,16 @@ int ucx_wifi_scan(ucx_handle_t handle, ucx_wifi_scan_result_t* results,
         count++;
     }
     
+    ucx_wrapper_printf("WiFi scan found %d networks\n", count);
+    
     // End the command
     int32_t status = uCxEnd(&inst->cx_handle);
     if (status < 0) {
         snprintf(inst->error_msg, ERROR_MSG_SIZE, "WiFi scan failed with status: %d", status);
+        ucx_wrapper_printf("WiFi scan end failed: %d\n", status);
         return UCX_ERROR_AT_FAIL;
     }
     
+    ucx_wrapper_printf("WiFi scan completed successfully\n");
     return count;
 }
