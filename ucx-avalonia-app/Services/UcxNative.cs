@@ -6,7 +6,7 @@ namespace UcxAvaloniaApp.Services;
 /// <summary>
 /// P/Invoke declarations for ucxclient_wrapper native library (cross-platform)
 /// </summary>
-internal static class UcxNative
+public static class UcxNative
 {
     // Platform-specific library name
     private const string DllName = "ucxclient_wrapper";
@@ -28,6 +28,23 @@ internal static class UcxNative
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     public delegate void LogCallback(int level, [MarshalAs(UnmanagedType.LPStr)] string message, IntPtr userData);
+
+    // Structures
+    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
+    public struct WifiConnectionInfo
+    {
+        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 40)]
+        public string ip_address;
+        
+        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 40)]
+        public string subnet_mask;
+        
+        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 40)]
+        public string gateway;
+        
+        public int channel;
+        public int rssi;
+    }
 
     // Native functions
     [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
