@@ -32,12 +32,13 @@ elseif(UNIX)
     set(PORT_HEADER "${UCXCLIENT_PORT_DIR}/os/u_port_posix.h")
 endif()
 
-# Wrapper library (shared library)
+# Wrapper library (shared library) - using AUTO-GENERATED code
 add_library(ucxclient_wrapper SHARED
-    ucxclient_wrapper.c
-    ucxclient_wrapper.h
-    ucxclient_wrapper_generated.c
-    ucxclient_wrapper_generated.h
+    ucxclient_wrapper_core.c      # Core functions: ucx_create, ucx_destroy, callbacks, printf
+    ucxclient_wrapper_generated.c # Auto-generated: 365 UCX API functions
+    ucxclient_wrapper.h            # Public API header
+    ucxclient_wrapper_internal.h   # Internal shared definitions
+    ucxclient_wrapper_generated.h  # Generated function declarations
     ucx_wrapper_config.h
     ${UCXCLIENT_UCX_API_SRC}
     ${UCXCLIENT_AT_API_SRC}

@@ -28,6 +28,10 @@ extern "C" {
  * TYPES
  * -------------------------------------------------------------- */
 
+/* Forward declaration for internal instance type */
+struct ucx_instance;
+typedef struct ucx_instance ucx_instance_t;
+
 typedef void* ucx_handle_t;
 
 typedef enum {

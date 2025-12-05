@@ -134,7 +134,7 @@ public partial class MainWindowViewModel : ViewModelBase
         catch (Exception ex)
         {
             AddLogMessage($"ERROR: {ex.Message}");
-            StatusMessage = "Connection failed";
+            StatusMessage = $"Connection failed: {ex.Message}";
             IsConnected = false;
         }
     }
@@ -354,26 +354,32 @@ public partial class MainWindowViewModel : ViewModelBase
             System.Console.WriteLine($"[ViewModel] Network up event received!");
             
             // Get connection info
-            System.Console.WriteLine($"[ViewModel] Getting connection info...");
-            var connInfo = await _ucxClient.GetWifiConnectionInfoAsync();
-            
-            WifiConnectStatus = $"Connected to {SelectedSsid}";
-            
-            // Build detailed connection info message
-            var infoMsg = new System.Text.StringBuilder();
-            infoMsg.AppendLine($"Successfully connected to {SelectedSsid}");
-            infoMsg.AppendLine($"");
-            infoMsg.AppendLine($"  IP Address:    {connInfo.ip_address}");
-            infoMsg.AppendLine($"  Subnet Mask:   {connInfo.subnet_mask}");
-            infoMsg.AppendLine($"  Gateway:       {connInfo.gateway}");
-            infoMsg.AppendLine($"  Channel:       {connInfo.channel}");
-            infoMsg.AppendLine($"  Signal (RSSI): {connInfo.rssi} dBm");
-            
-            string connectionDetails = infoMsg.ToString();
-            AddLogMessage(connectionDetails);
-            
-            // Also display in the scan output area
-            WifiScanOutput = connectionDetails;
+            try
+            {
+                var connInfo = await _ucxClient.GetWifiConnectionInfoAsync();
+                
+                // Connection successful!
+                WifiConnectStatus = $"Connected to {SelectedSsid}";
+                AddLogMessage($"Successfully connected to {SelectedSsid}!");
+                AddLogMessage("Network is up - IP address assigned");
+                AddLogMessage($"IP Address: {connInfo.IpAddress}");
+                AddLogMessage($"Subnet Mask: {connInfo.SubnetMask}");
+                AddLogMessage($"Gateway: {connInfo.Gateway}");
+                
+                // Display success message with connection details
+                WifiScanOutput = $"Successfully connected to {SelectedSsid}\n\n" +
+                                 $"Network is up - IP address assigned\n" +
+                                 $"IP Address: {connInfo.IpAddress}\n" +
+                                 $"Subnet Mask: {connInfo.SubnetMask}\n" +
+                                 $"Gateway: {connInfo.Gateway}";
+            }
+            catch (Exception infoEx)
+            {
+                // Connection succeeded but failed to get info
+                AddLogMessage($"Connected but failed to get connection info: {infoEx.Message}");
+                WifiConnectStatus = $"Connected to {SelectedSsid} (info unavailable)";
+                WifiScanOutput = $"Successfully connected to {SelectedSsid}\n\nNetwork is up - IP address assigned\n(Connection info unavailable)";
+            }
             
             // Clear password for security
             WifiPassword = "";

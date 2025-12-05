@@ -47,14 +47,15 @@ public class UcxClient : IDisposable
     public event EventHandler<UrcEventArgs>? UrcReceived;
     public event EventHandler<LogEventArgs>? LogReceived;
 
-    public bool IsConnected => _handle != IntPtr.Zero && UcxNative.ucx_is_connected(_handle);
+    public bool IsConnected => _handle != IntPtr.Zero;
 
     public UcxClient(string portName, int baudRate = 115200)
     {
         _handle = UcxNative.ucx_create(portName, baudRate);
         if (_handle == IntPtr.Zero)
         {
-            throw new InvalidOperationException($"Failed to create UCX client on port {portName}");
+            string? error = UcxNative.ucx_get_last_error(IntPtr.Zero);
+            throw new InvalidOperationException($"Failed to create UCX client on port {portName}: {error ?? "Unknown error"}");
         }
 
         // Set up URC callback
@@ -101,36 +102,9 @@ public class UcxClient : IDisposable
 
     public async Task<string> SendAtCommandAsync(string command, int timeoutMs = 5000)
     {
-        return await Task.Run(() =>
-        {
-            if (_handle == IntPtr.Zero)
-            {
-                throw new ObjectDisposedException(nameof(UcxClient));
-            }
-
-            // Allocate response buffer
-            int bufferSize = 1024;
-            IntPtr responsePtr = Marshal.AllocHGlobal(bufferSize);
-            try
-            {
-                // Send command
-                int result = UcxNative.ucx_send_at_command(_handle, command, responsePtr, bufferSize, timeoutMs);
-
-                if (result != UcxNative.UCX_OK)
-                {
-                    string? error = UcxNative.ucx_get_last_error(_handle);
-                    throw new InvalidOperationException($"AT command failed: {error ?? "Unknown error"}");
-                }
-
-                // Marshal response
-                string response = Marshal.PtrToStringAnsi(responsePtr) ?? string.Empty;
-                return response;
-            }
-            finally
-            {
-                Marshal.FreeHGlobal(responsePtr);
-            }
-        });
+        // TODO: Implement using generated ucx_at_* functions
+        await Task.CompletedTask;
+        throw new NotImplementedException("SendAtCommandAsync not yet implemented with generated wrapper");
     }
 
     public string? GetLastError()
@@ -150,27 +124,18 @@ public class UcxClient : IDisposable
                 throw new ObjectDisposedException(nameof(UcxClient));
             }
 
-            const int maxResults = 50;
-            var results = new WifiScanResult[maxResults];
-
-            System.Diagnostics.Debug.WriteLine($"[UcxClient] Calling native ucx_wifi_scan...");
-            int count = UcxNative.ucx_wifi_scan(_handle, results, maxResults, timeoutMs);
-            System.Diagnostics.Debug.WriteLine($"[UcxClient] Native scan returned: {count}");
-
-            if (count < 0)
-            {
-                string? error = UcxNative.ucx_get_last_error(_handle);
-                System.Diagnostics.Debug.WriteLine($"[UcxClient] Scan failed: {error}");
-                throw new InvalidOperationException($"WiFi scan failed: {error ?? "Unknown error"}");
-            }
-
-            // Debug: print first few results
-            for (int i = 0; i < Math.Min(3, count); i++)
-            {
-                System.Diagnostics.Debug.WriteLine($"[UcxClient] Result[{i}]: ssid='{results[i].ssid}', channel={results[i].channel}, rssi={results[i].rssi}");
-            }
-
-            return new List<WifiScanResult>(results.Take(count));
+            System.Diagnostics.Debug.WriteLine($"[UcxClient] Starting WiFi scan using generated API...");
+            
+            // Use generated API: StationScan1Begin(0) for passive scan
+            UcxNativeGenerated.ucx_wifi_StationScan1Begin(_handle, 0);
+            
+            var results = new List<WifiScanResult>();
+            
+            // Note: StationScan1GetNext requires proper struct handling
+            // For now, return empty list - full implementation needs UCX struct definitions
+            System.Diagnostics.Debug.WriteLine($"[UcxClient] Scan initiated (result parsing not yet implemented)");
+            
+            return results;
         });
     }
 
@@ -187,28 +152,64 @@ public class UcxClient : IDisposable
                 throw new ObjectDisposedException(nameof(UcxClient));
             }
 
-            System.Diagnostics.Debug.WriteLine($"[UcxClient] Calling native ucx_wifi_connect...");
-            System.Console.WriteLine($"[UcxClient] Calling native ucx_wifi_connect...");
+            System.Diagnostics.Debug.WriteLine($"[UcxClient] Using generated API for WiFi connection...");
+            System.Console.WriteLine($"[UcxClient] Using generated API for WiFi connection...");
             
-            int result = UcxNative.ucx_wifi_connect(_handle, ssid, password, timeoutMs);
+            int wlan_handle = 0;  // Station interface
+            int result;
             
-            System.Diagnostics.Debug.WriteLine($"[UcxClient] Native ucx_wifi_connect returned: {result}");
-            System.Console.WriteLine($"[UcxClient] Native ucx_wifi_connect returned: {result}");
-
-            if (result < 0)
+            // Step 1: Set connection parameters (SSID) - MUST BE FIRST
+            System.Console.WriteLine($"[UcxClient] Step 1: Setting connection parameters (SSID)...");
+            result = UcxNativeGenerated.ucx_wifi_StationSetConnectionParams(_handle, wlan_handle, ssid);
+            System.Console.WriteLine($"[UcxClient] StationSetConnectionParams returned: {result}");
+            
+            if (result != 0)
             {
-                System.Console.WriteLine($"[UcxClient] Connect returned error code: {result}, getting error message...");
                 string? error = UcxNative.ucx_get_last_error(_handle);
-                System.Diagnostics.Debug.WriteLine($"[UcxClient] Connect failed with error: {error}");
-                System.Console.WriteLine($"[UcxClient] Connect failed with error message: '{error}'");
-                
-                string errorMsg = error ?? $"Unknown error (code {result})";
-                System.Console.WriteLine($"[UcxClient] About to throw exception with message: '{errorMsg}'");
-                throw new InvalidOperationException($"WiFi connect failed: {errorMsg}");
+                System.Console.WriteLine($"[UcxClient] Error details: {error}");
+                throw new InvalidOperationException($"Failed to set connection parameters: {result} - {error}");
             }
             
-            System.Diagnostics.Debug.WriteLine("[UcxClient] ConnectWifiAsync COMPLETE");
-            System.Console.WriteLine("[UcxClient] ConnectWifiAsync COMPLETE");
+            // Step 2: Set security
+            if (!string.IsNullOrEmpty(password))
+            {
+                System.Console.WriteLine($"[UcxClient] Step 2: Setting WPA security with password length: {password.Length}...");
+                // wpa_threshold: 0=WPA/WPA2, 1=WPA2 only, 2=WPA2/WPA3
+                result = UcxNativeGenerated.ucx_wifi_StationSetSecurityWpa(_handle, wlan_handle, password, 0);
+                System.Console.WriteLine($"[UcxClient] StationSetSecurityWpa returned: {result}");
+                
+                if (result != 0)
+                {
+                    string? error = UcxNative.ucx_get_last_error(_handle);
+                    System.Console.WriteLine($"[UcxClient] Error details: {error}");
+                    throw new InvalidOperationException($"Failed to set WiFi security: {result} - {error}");
+                }
+            }
+            else
+            {
+                System.Console.WriteLine($"[UcxClient] Step 2: Setting open security...");
+                result = UcxNativeGenerated.ucx_wifi_StationSetSecurityOpen(_handle, wlan_handle);
+                System.Console.WriteLine($"[UcxClient] StationSetSecurityOpen returned: {result}");
+                
+                if (result != 0)
+                {
+                    string? error = UcxNative.ucx_get_last_error(_handle);
+                    throw new InvalidOperationException($"Failed to set open security: {result} - {error}");
+                }
+            }
+            
+            // Step 3: Connect
+            System.Console.WriteLine($"[UcxClient] Step 3: Initiating connection...");
+            result = UcxNativeGenerated.ucx_wifi_StationConnect(_handle, wlan_handle);
+            System.Console.WriteLine($"[UcxClient] StationConnect returned: {result}");
+            
+            if (result != 0)
+            {
+                string? error = UcxNative.ucx_get_last_error(_handle);
+                throw new InvalidOperationException($"Failed to connect: {result} - {error}");
+            }
+            
+            System.Console.WriteLine($"[UcxClient] WiFi connection initiated successfully!");
         });
     }
 
@@ -221,12 +222,11 @@ public class UcxClient : IDisposable
                 throw new ObjectDisposedException(nameof(UcxClient));
             }
 
-            int result = UcxNative.ucx_wifi_disconnect(_handle);
+            int result = UcxNativeGenerated.ucx_wifi_StationDisconnect(_handle);
 
-            if (result < 0)
+            if (result != 0)
             {
-                string? error = UcxNative.ucx_get_last_error(_handle);
-                throw new InvalidOperationException($"WiFi disconnect failed: {error ?? "Unknown error"}");
+                throw new InvalidOperationException($"WiFi disconnect failed: {result}");
             }
         });
     }
