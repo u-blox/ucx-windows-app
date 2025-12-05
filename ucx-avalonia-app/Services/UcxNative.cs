@@ -82,4 +82,7 @@ internal static class UcxNative
 
     [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
     public static extern int ucx_wifi_disconnect(IntPtr handle);
+
+    [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ucx_wifi_get_connection_info(IntPtr handle, out WifiConnectionInfo info);
 }

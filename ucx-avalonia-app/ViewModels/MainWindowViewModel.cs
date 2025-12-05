@@ -314,8 +314,27 @@ public partial class MainWindowViewModel : ViewModelBase
             await _ucxClient.ConnectWifiAsync(SelectedSsid, string.IsNullOrWhiteSpace(WifiPassword) ? null : WifiPassword);
             
             System.Console.WriteLine($"[ViewModel] ConnectWifiAsync returned successfully");
+            
+            // Wait a moment for network to fully initialize
+            await Task.Delay(1500);
+            
+            // Get connection info
+            System.Console.WriteLine($"[ViewModel] Getting connection info...");
+            var connInfo = await _ucxClient.GetWifiConnectionInfoAsync();
+            
             WifiConnectStatus = $"Connected to {SelectedSsid}";
-            AddLogMessage($"Successfully connected to {SelectedSsid}");
+            
+            // Build detailed connection info message
+            var infoMsg = new System.Text.StringBuilder();
+            infoMsg.AppendLine($"Successfully connected to {SelectedSsid}");
+            infoMsg.AppendLine($"  IP Address:   {connInfo.ip_address}");
+            infoMsg.AppendLine($"  Subnet Mask:  {connInfo.subnet_mask}");
+            infoMsg.AppendLine($"  Gateway:      {connInfo.gateway}");
+            infoMsg.AppendLine($"  Channel:      {connInfo.channel}");
+            infoMsg.AppendLine($"  Signal (RSSI): {connInfo.rssi} dBm");
+            
+            AddLogMessage(infoMsg.ToString());
+            OutputText += $"\n{infoMsg}";
             
             // Clear password for security
             WifiPassword = "";

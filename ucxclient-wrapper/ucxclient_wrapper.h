@@ -57,6 +57,15 @@ typedef struct {
     int32_t group_ciphers;      /* Group ciphers bitmask */
 } ucx_wifi_scan_result_t;
 
+/* WiFi connection info structure */
+typedef struct {
+    char ip_address[40];
+    char subnet_mask[40];
+    char gateway[40];
+    int32_t channel;
+    int32_t rssi;
+} ucx_wifi_connection_info_t;
+
 /* ----------------------------------------------------------------
  * PUBLIC FUNCTIONS
  * -------------------------------------------------------------- */
@@ -150,10 +159,19 @@ int ucx_wifi_connect(ucx_handle_t handle, const char* ssid, const char* password
 /**
  * Disconnect from WiFi network.
  * 
- * @param handle  UCX handle
+ * @param handle    UCX handle
  * @return UCX_OK on success, error code otherwise
  */
 int ucx_wifi_disconnect(ucx_handle_t handle);
+
+/**
+ * Get WiFi connection information (IP address, gateway, channel, RSSI).
+ * 
+ * @param handle    UCX handle
+ * @param info      Pointer to structure to fill with connection info
+ * @return UCX_OK on success, error code otherwise
+ */
+int ucx_wifi_get_connection_info(ucx_handle_t handle, ucx_wifi_connection_info_t* info);
 
 #ifdef __cplusplus
 }

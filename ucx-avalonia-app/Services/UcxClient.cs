@@ -197,10 +197,14 @@ public class UcxClient : IDisposable
 
             if (result < 0)
             {
+                System.Console.WriteLine($"[UcxClient] Connect returned error code: {result}, getting error message...");
                 string? error = UcxNative.ucx_get_last_error(_handle);
                 System.Diagnostics.Debug.WriteLine($"[UcxClient] Connect failed with error: {error}");
-                System.Console.WriteLine($"[UcxClient] Connect failed with error: {error}");
-                throw new InvalidOperationException($"WiFi connect failed: {error ?? "Unknown error"}");
+                System.Console.WriteLine($"[UcxClient] Connect failed with error message: '{error}'");
+                
+                string errorMsg = error ?? $"Unknown error (code {result})";
+                System.Console.WriteLine($"[UcxClient] About to throw exception with message: '{errorMsg}'");
+                throw new InvalidOperationException($"WiFi connect failed: {errorMsg}");
             }
             
             System.Diagnostics.Debug.WriteLine("[UcxClient] ConnectWifiAsync COMPLETE");
@@ -224,6 +228,28 @@ public class UcxClient : IDisposable
                 string? error = UcxNative.ucx_get_last_error(_handle);
                 throw new InvalidOperationException($"WiFi disconnect failed: {error ?? "Unknown error"}");
             }
+        });
+    }
+
+    public async Task<UcxNative.WifiConnectionInfo> GetWifiConnectionInfoAsync()
+    {
+        return await Task.Run(() =>
+        {
+            if (_handle == IntPtr.Zero)
+            {
+                throw new ObjectDisposedException(nameof(UcxClient));
+            }
+
+            UcxNative.WifiConnectionInfo info;
+            int result = UcxNative.ucx_wifi_get_connection_info(_handle, out info);
+
+            if (result < 0)
+            {
+                string? error = UcxNative.ucx_get_last_error(_handle);
+                throw new InvalidOperationException($"Failed to get connection info: {error ?? "Unknown error"}");
+            }
+
+            return info;
         });
     }
 

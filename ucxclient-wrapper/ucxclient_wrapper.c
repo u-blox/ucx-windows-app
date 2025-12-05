@@ -406,3 +406,50 @@ int ucx_wifi_disconnect(ucx_handle_t handle)
     return UCX_OK;
 }
 
+// Get WiFi connection info
+int ucx_wifi_get_connection_info(ucx_handle_t handle, ucx_wifi_connection_info_t* info)
+{
+    ucx_instance_t* inst = (ucx_instance_t*)handle;
+    if (!inst || !info) {
+        return UCX_ERROR_INVALID_PARAM;
+    }
+    
+    // Initialize all fields to empty/zero
+    memset(info, 0, sizeof(ucx_wifi_connection_info_t));
+    
+    // Get IP address
+    uSockIpAddress_t ipAddr;
+    if (uCxWifiStationGetNetworkStatus(&inst->cx_handle, U_WIFI_NET_STATUS_ID_IPV4, &ipAddr) == 0) {
+        uCxIpAddressToString(&ipAddr, info->ip_address, sizeof(info->ip_address));
+    }
+    
+    // Get subnet mask
+    if (uCxWifiStationGetNetworkStatus(&inst->cx_handle, U_WIFI_NET_STATUS_ID_SUBNET, &ipAddr) == 0) {
+        uCxIpAddressToString(&ipAddr, info->subnet_mask, sizeof(info->subnet_mask));
+    }
+    
+    // Get gateway
+    if (uCxWifiStationGetNetworkStatus(&inst->cx_handle, U_WIFI_NET_STATUS_ID_GATE_WAY, &ipAddr) == 0) {
+        uCxIpAddressToString(&ipAddr, info->gateway, sizeof(info->gateway));
+    }
+    
+    // Get channel
+    uCxWifiStationStatus_t channelStatus;
+    if (uCxWifiStationStatusBegin(&inst->cx_handle, U_WIFI_STATUS_ID_CHANNEL, &channelStatus)) {
+        info->channel = channelStatus.rsp.StatusIdInt.int_val;
+        uCxEnd(&inst->cx_handle);
+    }
+    
+    // Get RSSI
+    uCxWifiStationStatus_t rssiStatus;
+    if (uCxWifiStationStatusBegin(&inst->cx_handle, U_WIFI_STATUS_ID_RSSI, &rssiStatus)) {
+        info->rssi = rssiStatus.rsp.StatusIdInt.int_val;
+        uCxEnd(&inst->cx_handle);
+    }
+    
+    ucx_wrapper_printf("Connection info: IP=%s, Gateway=%s, Channel=%d, RSSI=%d dBm\n",
+                      info->ip_address, info->gateway, info->channel, info->rssi);
+    
+    return UCX_OK;
+}
+
