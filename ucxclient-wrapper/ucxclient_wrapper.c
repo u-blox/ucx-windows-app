@@ -385,24 +385,31 @@ int ucx_wifi_connect(ucx_handle_t handle, const char* ssid, const char* password
     }
     
     ucx_wrapper_printf("Connecting to WiFi: %s\n", ssid);
+    ucx_wrapper_printf("Password: %s\n", password ? (strlen(password) > 0 ? "***" : "(empty)") : "(null)");
     
     // Use wlan_handle 0 (default)
     int32_t wlan_handle = 0;
     int32_t status;
     
+    ucx_wrapper_printf("Step 1: Setting security...\n");
+    
     // Set authentication (password) - must be done BEFORE setting connection params
     if (password && strlen(password) > 0) {
+        ucx_wrapper_printf("Setting WPA/WPA2 security with password\n");
         // Use WPA/WPA2 with WPA2 threshold (following http_example pattern)
         status = uCxWifiStationSetSecurityWpa(&inst->cx_handle, wlan_handle, password, U_WIFI_WPA_THRESHOLD_WPA2);
+        ucx_wrapper_printf("uCxWifiStationSetSecurityWpa returned: %d\n", status);
         if (status < 0) {
             snprintf(inst->error_msg, ERROR_MSG_SIZE, "Failed to set security: %d", status);
             ucx_wrapper_printf("Set security failed: %d\n", status);
             return UCX_ERROR_AT_FAIL;
         }
-        ucx_wrapper_printf("Set WPA/WPA2 security\n");
+        ucx_wrapper_printf("Set WPA/WPA2 security SUCCESS\n");
     } else {
+        ucx_wrapper_printf("Setting open security (no password)\n");
         // Open network
         status = uCxWifiStationSetSecurityOpen(&inst->cx_handle, wlan_handle);
+        ucx_wrapper_printf("uCxWifiStationSetSecurityOpen returned: %d\n", status);
         if (status < 0) {
             snprintf(inst->error_msg, ERROR_MSG_SIZE, "Failed to set open security: %d", status);
             ucx_wrapper_printf("Set open security failed: %d\n", status);
