@@ -327,13 +327,18 @@ public partial class MainWindowViewModel : ViewModelBase
             // Build detailed connection info message
             var infoMsg = new System.Text.StringBuilder();
             infoMsg.AppendLine($"Successfully connected to {SelectedSsid}");
-            infoMsg.AppendLine($"  IP Address:   {connInfo.ip_address}");
-            infoMsg.AppendLine($"  Subnet Mask:  {connInfo.subnet_mask}");
-            infoMsg.AppendLine($"  Gateway:      {connInfo.gateway}");
-            infoMsg.AppendLine($"  Channel:      {connInfo.channel}");
+            infoMsg.AppendLine($"");
+            infoMsg.AppendLine($"  IP Address:    {connInfo.ip_address}");
+            infoMsg.AppendLine($"  Subnet Mask:   {connInfo.subnet_mask}");
+            infoMsg.AppendLine($"  Gateway:       {connInfo.gateway}");
+            infoMsg.AppendLine($"  Channel:       {connInfo.channel}");
             infoMsg.AppendLine($"  Signal (RSSI): {connInfo.rssi} dBm");
             
-            AddLogMessage(infoMsg.ToString());
+            string connectionDetails = infoMsg.ToString();
+            AddLogMessage(connectionDetails);
+            
+            // Also display in the scan output area
+            WifiScanOutput = connectionDetails;
             
             // Clear password for security
             WifiPassword = "";
