@@ -6,8 +6,8 @@
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="600"
         x:Class="UcxAvaloniaApp.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
-        Icon="/Assets/avalonia-logo.ico"
-        Title="UCX Avalonia Test App"
+        Icon="/images/ShortRange.ico"
+        Title="UCX WiFi Control"
         Width="900" Height="650">
 
     <Design.DataContext>
