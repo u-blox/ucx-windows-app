@@ -2,6 +2,27 @@
 
 This application runs on Windows, Linux, and macOS.
 
+## Quick Start
+
+### Windows
+```cmd
+cd ucx-avalonia-app
+launch.cmd
+```
+
+### Linux / macOS
+```bash
+cd ucx-avalonia-app
+chmod +x launch.sh
+./launch.sh
+```
+
+The launcher scripts will:
+1. Check for .NET SDK
+2. Check for native library
+3. Copy native library to output directory
+4. Build and run the application
+
 ## Prerequisites
 
 ### All Platforms
