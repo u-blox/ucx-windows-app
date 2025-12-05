@@ -343,28 +343,10 @@ int ucx_wifi_connect(ucx_handle_t handle, const char* ssid, const char* password
     int32_t wlan_handle = 0;
     int32_t status;
     
-    // Set IP config to DHCP
-    status = uCxWifiStationSetIpConfigDhcp(&inst->cx_handle, wlan_handle);
-    if (status < 0) {
-        snprintf(inst->error_msg, ERROR_MSG_SIZE, "Failed to set DHCP: %d", status);
-        ucx_wrapper_printf("Set DHCP failed: %d\n", status);
-        return UCX_ERROR_AT_FAIL;
-    }
-    ucx_wrapper_printf("Set DHCP config\n");
-    
-    // Set connection parameters (SSID)
-    status = uCxWifiStationSetConnectionParams(&inst->cx_handle, wlan_handle, ssid);
-    if (status < 0) {
-        snprintf(inst->error_msg, ERROR_MSG_SIZE, "Failed to set connection params: %d", status);
-        ucx_wrapper_printf("Set connection params failed: %d\n", status);
-        return UCX_ERROR_AT_FAIL;
-    }
-    ucx_wrapper_printf("Set connection params (SSID: %s)\n", ssid);
-    
-    // Set authentication (password)
+    // Set authentication (password) - must be done BEFORE setting connection params
     if (password && strlen(password) > 0) {
-        // Use WPA/WPA2 with auto threshold (0 = auto)
-        status = uCxWifiStationSetSecurityWpa(&inst->cx_handle, wlan_handle, password, 0);
+        // Use WPA/WPA2 with WPA2 threshold (following http_example pattern)
+        status = uCxWifiStationSetSecurityWpa(&inst->cx_handle, wlan_handle, password, U_WIFI_WPA_THRESHOLD_WPA2);
         if (status < 0) {
             snprintf(inst->error_msg, ERROR_MSG_SIZE, "Failed to set security: %d", status);
             ucx_wrapper_printf("Set security failed: %d\n", status);
@@ -381,6 +363,15 @@ int ucx_wifi_connect(ucx_handle_t handle, const char* ssid, const char* password
         }
         ucx_wrapper_printf("Set open security\n");
     }
+    
+    // Set connection parameters (SSID) - must be done AFTER security
+    status = uCxWifiStationSetConnectionParams(&inst->cx_handle, wlan_handle, ssid);
+    if (status < 0) {
+        snprintf(inst->error_msg, ERROR_MSG_SIZE, "Failed to set connection params: %d", status);
+        ucx_wrapper_printf("Set connection params failed: %d\n", status);
+        return UCX_ERROR_AT_FAIL;
+    }
+    ucx_wrapper_printf("Set connection params (SSID: %s)\n", ssid);
     
     // Initiate connection
     status = uCxWifiStationConnect(&inst->cx_handle, wlan_handle);
