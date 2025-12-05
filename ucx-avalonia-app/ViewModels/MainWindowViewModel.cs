@@ -334,7 +334,6 @@ public partial class MainWindowViewModel : ViewModelBase
             infoMsg.AppendLine($"  Signal (RSSI): {connInfo.rssi} dBm");
             
             AddLogMessage(infoMsg.ToString());
-            OutputText += $"\n{infoMsg}";
             
             // Clear password for security
             WifiPassword = "";
