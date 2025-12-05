@@ -190,21 +190,34 @@ public partial class MainWindowViewModel : ViewModelBase
             WifiScanStatus = "Scanning...";
             WifiNetworks.Clear();
             AddLogMessage("Starting WiFi scan...");
+            System.Diagnostics.Debug.WriteLine("[ViewModel] Calling ScanWifiAsync...");
             
             var networks = await _ucxClient.ScanWifiAsync();
             
+            System.Diagnostics.Debug.WriteLine($"[ViewModel] Scan returned {networks.Count} networks");
             WifiScanStatus = $"Scan complete - found {networks.Count} network(s)";
             AddLogMessage($"Found {networks.Count} network(s)");
             
+            int addedCount = 0;
             foreach (var result in networks.OrderByDescending(n => n.rssi))
             {
+                System.Diagnostics.Debug.WriteLine($"[ViewModel] Processing result: ssid='{result.ssid}', rssi={result.rssi}");
+                System.Console.WriteLine($"[ViewModel] Processing result: ssid='{result.ssid}', rssi={result.rssi}");
+                
                 var network = WifiNetwork.FromScanResult(result);
+                System.Diagnostics.Debug.WriteLine($"[ViewModel] Converted to WifiNetwork: Ssid='{network.Ssid}', Rssi={network.Rssi}");
+                System.Console.WriteLine($"[ViewModel] Converted to WifiNetwork: Ssid='{network.Ssid}', Rssi={network.Rssi}");
+                
                 AddLogMessage($"  Adding: {network.Ssid} - Channel {network.Channel}, RSSI {network.Rssi} dBm, {network.SecurityString}");
                 
-                // Update on UI thread
-                Dispatcher.UIThread.Post(() => WifiNetworks.Add(network));
+                // Add directly on current thread since we're already in async context
+                WifiNetworks.Add(network);
+                addedCount++;
+                System.Diagnostics.Debug.WriteLine($"[ViewModel] Added to collection. Count now: {WifiNetworks.Count}");
+                System.Console.WriteLine($"[ViewModel] Added to collection. Count now: {WifiNetworks.Count}");
             }
             
+            System.Diagnostics.Debug.WriteLine($"[ViewModel] Finished adding {addedCount} networks. Collection count: {WifiNetworks.Count}");
             AddLogMessage($"Total networks in collection: {WifiNetworks.Count}");
             
             if (networks.Count == 0)

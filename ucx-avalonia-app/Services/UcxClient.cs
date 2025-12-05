@@ -130,12 +130,21 @@ public class UcxClient : IDisposable
             const int maxResults = 50;
             var results = new WifiScanResult[maxResults];
 
+            System.Diagnostics.Debug.WriteLine($"[UcxClient] Calling native ucx_wifi_scan...");
             int count = UcxNative.ucx_wifi_scan(_handle, results, maxResults, timeoutMs);
+            System.Diagnostics.Debug.WriteLine($"[UcxClient] Native scan returned: {count}");
 
             if (count < 0)
             {
                 string? error = UcxNative.ucx_get_last_error(_handle);
+                System.Diagnostics.Debug.WriteLine($"[UcxClient] Scan failed: {error}");
                 throw new InvalidOperationException($"WiFi scan failed: {error ?? "Unknown error"}");
+            }
+
+            // Debug: print first few results
+            for (int i = 0; i < Math.Min(3, count); i++)
+            {
+                System.Diagnostics.Debug.WriteLine($"[UcxClient] Result[{i}]: ssid='{results[i].ssid}', channel={results[i].channel}, rssi={results[i].rssi}");
             }
 
             return new List<WifiScanResult>(results.Take(count));
