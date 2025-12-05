@@ -68,12 +68,30 @@ public class UcxClient : IDisposable
 
     private void OnUrcReceived(string urcLine, IntPtr userData)
     {
-        UrcReceived?.Invoke(this, new UrcEventArgs(urcLine));
+        try
+        {
+            // URC callback is called from native thread - must not throw exceptions
+            UrcReceived?.Invoke(this, new UrcEventArgs(urcLine));
+        }
+        catch (Exception ex)
+        {
+            // Log error but don't let it propagate to native code
+            System.Diagnostics.Debug.WriteLine($"[UcxClient] URC callback exception: {ex.Message}");
+        }
     }
 
     private void OnLogReceived(int level, string message, IntPtr userData)
     {
-        LogReceived?.Invoke(this, new LogEventArgs(level, message));
+        try
+        {
+            // Log callback is called from native thread - must not throw exceptions
+            LogReceived?.Invoke(this, new LogEventArgs(level, message));
+        }
+        catch (Exception ex)
+        {
+            // Log error but don't let it propagate to native code
+            System.Diagnostics.Debug.WriteLine($"[UcxClient] Log callback exception: {ex.Message}");
+        }
     }
 
     public async Task<string> SendAtCommandAsync(string command, int timeoutMs = 5000)
