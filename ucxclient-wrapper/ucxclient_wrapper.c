@@ -148,6 +148,13 @@ ucx_handle_t ucx_create(const char* port_name, int baud_rate)
     // Initialize uCX handle
     uCxInit(&inst->at_client, &inst->cx_handle);
     
+    // Register WiFi URC handlers (these will be forwarded via internal_urc_callback)
+    // This is necessary for the ucx_api to properly parse and forward WiFi events
+    uCxWifiRegisterLinkUp(&inst->cx_handle, NULL);
+    uCxWifiRegisterLinkDown(&inst->cx_handle, NULL);
+    uCxWifiRegisterStationNetworkUp(&inst->cx_handle, NULL);
+    uCxWifiRegisterStationNetworkDown(&inst->cx_handle, NULL);
+    
     inst->error_msg[0] = '\0';
     return (ucx_handle_t)inst;
 }
