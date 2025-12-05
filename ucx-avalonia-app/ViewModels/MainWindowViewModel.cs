@@ -31,16 +31,18 @@ public partial class MainWindowViewModel : ViewModelBase
 
     [ObservableProperty]
     private string _wifiScanStatus = "";
+    
+    [ObservableProperty]
+    private ObservableCollection<WifiNetwork> _wifiNetworks;
 
     public ObservableCollection<string> AvailablePorts { get; }
     public ObservableCollection<string> LogMessages { get; }
-    public ObservableCollection<WifiNetwork> WifiNetworks { get; }
 
     public MainWindowViewModel()
     {
         AvailablePorts = new ObservableCollection<string>(SerialPortService.GetAvailablePorts());
         LogMessages = new ObservableCollection<string>();
-        WifiNetworks = new ObservableCollection<WifiNetwork>();
+        _wifiNetworks = new ObservableCollection<WifiNetwork>();
         
         SelectedPort = AvailablePorts.FirstOrDefault();
         
