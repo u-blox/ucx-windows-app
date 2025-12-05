@@ -17,41 +17,266 @@ namespace UcxAvaloniaApp.Services
         public static extern int ucx_bluetooth_SetMode(IntPtr instance, uBtMode_t mode);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int ucx_bluetooth_GetMode(IntPtr instance, ref uBtMode_t pMode);
+        public static extern int ucx_bluetooth_GetMode(IntPtr instance, out uBtMode_t pMode);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int ucx_bluetooth_Connect(IntPtr instance, ref uBtLeAddress_t bd_addr);
+        public static extern int ucx_bluetooth_Connect(IntPtr instance, out uBtLeAddress_t bd_addr);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern int ucx_bluetooth_Disconnect(IntPtr instance, int conn_handle);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern bool ucx_bluetooth_GetLocalNameBegin(IntPtr instance, ref byte ppDeviceName);
+        public static extern bool ucx_bluetooth_GetLocalNameBegin(IntPtr instance, [MarshalAs(UnmanagedType.LPStr)] string ppDeviceName);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int ucx_bluetooth_SetLocalName(IntPtr instance, ref byte device_name);
+        public static extern int ucx_bluetooth_SetLocalName(IntPtr instance, [MarshalAs(UnmanagedType.LPStr)] string device_name);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void ucx_bluetooth_DiscoveryDefaultBegin(IntPtr instance);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern bool ucx_bluetooth_DiscoveryDefaultGetNext(IntPtr instance, ref uCxBtDiscoveryDefault_t pBtDiscoveryDefaultRsp);
+        public static extern bool ucx_bluetooth_DiscoveryDefaultGetNext(IntPtr instance, out uCxBtDiscoveryDefault_t pBtDiscoveryDefaultRsp);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void ucx_bluetooth_Discovery1Begin(IntPtr instance, uBtDiscoveryType_t discovery_type);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern bool ucx_bluetooth_Discovery1GetNext(IntPtr instance, ref uCxBtDiscovery_t pBtDiscoveryRsp);
+        public static extern bool ucx_bluetooth_Discovery1GetNext(IntPtr instance, out uCxBtDiscovery_t pBtDiscoveryRsp);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void ucx_bluetooth_Discovery2Begin(IntPtr instance, uBtDiscoveryType_t discovery_type, uBtDiscoveryMode_t discovery_mode);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern bool ucx_bluetooth_Discovery2GetNext(IntPtr instance, out uCxBtDiscovery_t pBtDiscoveryRsp);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void ucx_bluetooth_Discovery3Begin(IntPtr instance, uBtDiscoveryType_t discovery_type, uBtDiscoveryMode_t discovery_mode, int discovery_length);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern bool ucx_bluetooth_Discovery3GetNext(IntPtr instance, out uCxBtDiscovery_t pBtDiscoveryRsp);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_bluetooth_BgDiscoveryDefaultStart(IntPtr instance);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_bluetooth_BgDiscoveryStart1(IntPtr instance, uBtDiscoveryType_t discovery_type);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_bluetooth_BgDiscoveryStart2(IntPtr instance, uBtDiscoveryType_t discovery_type, uBtDiscoveryMode_t discovery_mode);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_bluetooth_BgDiscoveryStart3(IntPtr instance, uBtDiscoveryType_t discovery_type, uBtDiscoveryMode_t discovery_mode, uBtOutputEvents_t output_events);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_bluetooth_BgDiscoveryStop(IntPtr instance);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_bluetooth_GetRssi(IntPtr instance, int conn_handle, out int pRssi);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void ucx_bluetooth_ListConnectionsBegin(IntPtr instance);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern bool ucx_bluetooth_ListConnectionsGetNext(IntPtr instance, out uCxBtListConnections_t pBtListConnectionsRsp);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void ucx_bluetooth_ListConnectionStatusBegin(IntPtr instance, int conn_handle);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern bool ucx_bluetooth_ListConnectionStatusGetNext(IntPtr instance, out uCxBtListConnectionStatus_t pBtListConnectionStatusRsp);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_bluetooth_GetConnectionStatus(IntPtr instance, int conn_handle, uBtPropId_t prop_id, out int pStatusVal);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_bluetooth_GetAdvertiseInformation(IntPtr instance, out uCxBtGetAdvertiseInformation_t pBtGetAdvertiseInformationRsp);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_bluetooth_SetLegacyAdvertiseData(IntPtr instance, IntPtr adv_data, int adv_data_len);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern bool ucx_bluetooth_GetLegacyAdvertiseDataBegin(IntPtr instance, out uByteArray_t pAdvData);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_bluetooth_ClearLegacyAdvertiseData(IntPtr instance);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_bluetooth_SetScanResponseData(IntPtr instance, IntPtr scan_rsp_data, int scan_rsp_data_len);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern bool ucx_bluetooth_GetScanResponseDataBegin(IntPtr instance, out uByteArray_t pScanRspData);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_bluetooth_ClearScanResponseData(IntPtr instance);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_bluetooth_LegacyAdvertisementStart(IntPtr instance);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_bluetooth_LegacyAdvertisementStop(IntPtr instance);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_bluetooth_DirectedAdvertisementStart1(IntPtr instance, out uBtLeAddress_t bd_addr);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_bluetooth_DirectedAdvertisementStart2(IntPtr instance, out uBtLeAddress_t bd_addr, int timeout);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_bluetooth_DirectedAdvertisementStop(IntPtr instance);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_bluetooth_SetConnectionIntervalMin(IntPtr instance, int connection_interval_minimum);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_bluetooth_GetConnectionIntervalMin(IntPtr instance, out int pConnectionIntervalMinimum);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_bluetooth_SetConnectionIntervalMax(IntPtr instance, int connection_interval_maximum);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_bluetooth_GetConnectionIntervalMax(IntPtr instance, out int pConnectionIntervalMaximum);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_bluetooth_SetConnectionPeripheralLatency(IntPtr instance, int connection_peripheral_latency);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_bluetooth_GetConnectionPeripheralLatency(IntPtr instance, out int pConnectionPeripheralLatency);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_bluetooth_SetConnectionLinklossTimeout(IntPtr instance, int connection_linkloss_timeout);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_bluetooth_GetConnectionLinklossTimeout(IntPtr instance, out int pConnectionLinklossTimeout);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_bluetooth_SetPreferredTxPhy(IntPtr instance, int preferred_tx_phy);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_bluetooth_GetPreferredTxPhy(IntPtr instance, out int pPreferredTxPhy);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_bluetooth_SetPreferredRxPhy(IntPtr instance, int preferred_rx_phy);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_bluetooth_GetPreferredRxPhy(IntPtr instance, out int pPreferredRxPhy);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_bluetooth_SetLegacyAdvertisementConfig(IntPtr instance, int advertisement_interval_minimum, int advertisement_interval_maximum);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_bluetooth_GetLegacyAdvertisementConfig(IntPtr instance, out uCxBtGetLegacyAdvertisementConfig_t pBtGetLegacyAdvertisementConfigRsp);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_bluetooth_SetScanInterval(IntPtr instance, int scan_interval);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_bluetooth_GetScanInterval(IntPtr instance, out int pScanInterval);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_bluetooth_SetScanWindow(IntPtr instance, int scan_window);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_bluetooth_GetScanWindow(IntPtr instance, out int pScanWindow);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_bluetooth_SetConnectToDirectedAdv(IntPtr instance, int connect_to_directed_adv);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_bluetooth_GetConnectToDirectedAdv(IntPtr instance, out int pConnectToDirectedAdv);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_bluetooth_SetIoCapabilities(IntPtr instance, uBtIoCap_t io_cap);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_bluetooth_GetIoCapabilities(IntPtr instance, out uBtIoCap_t pIoCap);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_bluetooth_SetSecurityMode(IntPtr instance, uBtSecurityMode_t security_mode);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_bluetooth_GetSecurityMode(IntPtr instance, out uBtSecurityMode_t pSecurityMode);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_bluetooth_SetPairingMode(IntPtr instance, uBtPairingMode_t pairing_mode);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_bluetooth_GetPairingMode(IntPtr instance, out uBtPairingMode_t pPairingMode);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_bluetooth_UserConfirmation(IntPtr instance, out uBtLeAddress_t bd_addr, uBtConfirm_t confirm);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_bluetooth_UserPasskeyEntry2(IntPtr instance, out uBtLeAddress_t bd_addr, uBtConfirm_t confirm);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_bluetooth_UserPasskeyEntry3(IntPtr instance, out uBtLeAddress_t bd_addr, uBtConfirm_t confirm, int passkey);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_bluetooth_Bond(IntPtr instance, out uBtLeAddress_t bd_addr);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_bluetooth_Unbond(IntPtr instance, out uBtLeAddress_t bd_addr);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_bluetooth_UnbondAll(IntPtr instance);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void ucx_bluetooth_ListBondedDevicesBegin(IntPtr instance);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern bool ucx_bluetooth_ListBondedDevicesGetNext(IntPtr instance, out uBtLeAddress_t pBdAddr);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_bluetooth_SetDeviceInfoServiceChar(IntPtr instance, uBtCharId_t char_id, [MarshalAs(UnmanagedType.LPStr)] string char_value);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern bool ucx_bluetooth_GetDeviceInfoServiceCharBegin(IntPtr instance, uBtCharId_t char_id, [MarshalAs(UnmanagedType.LPStr)] string ppCharValue);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void ucx_bluetooth_ListDeviceInfoServiceCharsBegin(IntPtr instance);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern bool ucx_bluetooth_ListDeviceInfoServiceCharsGetNext(IntPtr instance, out uCxBtListDeviceInfoServiceChars_t pBtListDeviceInfoServiceCharsRsp);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_bluetooth_RequestPhy(IntPtr instance, int conn_handle, int tx_phy, int rx_phy);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_bluetooth_GetPhy(IntPtr instance, int conn_handle, out uCxBtGetPhy_t pBtGetPhyRsp);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void ucx_bluetooth_RegisterConnect(IntPtr instance, uUEBTC_t callback);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void ucx_bluetooth_RegisterDisconnect(IntPtr instance, uUEBTDC_t callback);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void ucx_bluetooth_RegisterBondStatus(IntPtr instance, uUEBTB_t callback);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void ucx_bluetooth_RegisterUserConfirmation(IntPtr instance, uUEBTUC_t callback);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void ucx_bluetooth_RegisterPasskeyEntry(IntPtr instance, uUEBTUPD_t callback);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void ucx_bluetooth_RegisterPasskeyRequest(IntPtr instance, uUEBTUPE_t callback);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void ucx_bluetooth_RegisterPhyUpdate(IntPtr instance, uUEBTPHYU_t callback);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void ucx_bluetooth_RegisterBackgroundDiscovery(IntPtr instance, uUEBTBGD_t callback);
 
         #endregion
 
         #region DIAGNOSTICS Functions
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int ucx_diagnostics_Ping1(IntPtr instance, ref byte destination);
+        public static extern int ucx_diagnostics_Ping1(IntPtr instance, [MarshalAs(UnmanagedType.LPStr)] string destination);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int ucx_diagnostics_Ping2(IntPtr instance, ref byte destination, int count);
+        public static extern int ucx_diagnostics_Ping2(IntPtr instance, [MarshalAs(UnmanagedType.LPStr)] string destination, int count);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern int ucx_diagnostics_PingStop(IntPtr instance);
@@ -63,19 +288,25 @@ namespace UcxAvaloniaApp.Services
         public static extern int ucx_diagnostics_Iperf5(IntPtr instance, uDiagIperfAction_t iperf_action, uDiagProtocolType_t protocol_type, uDiagRole_t role, int port, int report_interval);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int ucx_diagnostics_Iperf7(IntPtr instance, uDiagIperfAction_t iperf_action, uDiagProtocolType_t protocol_type, uDiagRole_t role, int port, int report_interval, int time_boundary, ref uSockIpAddress_t ip_addr);
+        public static extern int ucx_diagnostics_Iperf7(IntPtr instance, uDiagIperfAction_t iperf_action, uDiagProtocolType_t protocol_type, uDiagRole_t role, int port, int report_interval, int time_boundary, out uSockIpAddress_t ip_addr);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int ucx_diagnostics_Iperf8(IntPtr instance, uDiagIperfAction_t iperf_action, uDiagProtocolType_t protocol_type, uDiagRole_t role, int port, int report_interval, int time_boundary, ref uSockIpAddress_t ip_addr, int length);
+        public static extern int ucx_diagnostics_Iperf8(IntPtr instance, uDiagIperfAction_t iperf_action, uDiagProtocolType_t protocol_type, uDiagRole_t role, int port, int report_interval, int time_boundary, out uSockIpAddress_t ip_addr, int length);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int ucx_diagnostics_Iperf9(IntPtr instance, uDiagIperfAction_t iperf_action, uDiagProtocolType_t protocol_type, uDiagRole_t role, int port, int report_interval, int time_boundary, ref uSockIpAddress_t ip_addr, int length, int bandwidth);
+        public static extern int ucx_diagnostics_Iperf9(IntPtr instance, uDiagIperfAction_t iperf_action, uDiagProtocolType_t protocol_type, uDiagRole_t role, int port, int report_interval, int time_boundary, out uSockIpAddress_t ip_addr, int length, int bandwidth);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int ucx_diagnostics_Iperf10(IntPtr instance, uDiagIperfAction_t iperf_action, uDiagProtocolType_t protocol_type, uDiagRole_t role, int port, int report_interval, int time_boundary, ref uSockIpAddress_t ip_addr, int length, int bandwidth, uDiagBidirectional_t bidirectional);
+        public static extern int ucx_diagnostics_Iperf10(IntPtr instance, uDiagIperfAction_t iperf_action, uDiagProtocolType_t protocol_type, uDiagRole_t role, int port, int report_interval, int time_boundary, out uSockIpAddress_t ip_addr, int length, int bandwidth, uDiagBidirectional_t bidirectional);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void ucx_diagnostics_RegisterPingComplete(IntPtr instance, uUEDGPC_t callback);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void ucx_diagnostics_RegisterPingResponse(IntPtr instance, uUEDGP_t callback);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void ucx_diagnostics_RegisterIperfOutput(IntPtr instance, uUEDGI_t callback);
 
         #endregion
 
@@ -85,65 +316,107 @@ namespace UcxAvaloniaApp.Services
         public static extern void ucx_gatt_client_DiscoverPrimaryServicesBegin(IntPtr instance, int conn_handle);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern bool ucx_gatt_client_DiscoverPrimaryServicesGetNext(IntPtr instance, ref uCxGattClientDiscoverPrimaryServices_t pGattClientDiscoverPrimaryServicesRsp);
+        public static extern bool ucx_gatt_client_DiscoverPrimaryServicesGetNext(IntPtr instance, out uCxGattClientDiscoverPrimaryServices_t pGattClientDiscoverPrimaryServicesRsp);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void ucx_gatt_client_DiscoverPrimaryServicesByUuidBegin(IntPtr instance, int conn_handle, ref byte uuid, int uuid_len);
+        public static extern void ucx_gatt_client_DiscoverPrimaryServicesByUuidBegin(IntPtr instance, int conn_handle, IntPtr uuid, int uuid_len);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern bool ucx_gatt_client_DiscoverPrimaryServicesByUuidGetNext(IntPtr instance, ref uCxGattClientDiscoverPrimaryServicesByUuid_t pGattClientDiscoverPrimaryServicesByUuidRsp);
+        public static extern bool ucx_gatt_client_DiscoverPrimaryServicesByUuidGetNext(IntPtr instance, out uCxGattClientDiscoverPrimaryServicesByUuid_t pGattClientDiscoverPrimaryServicesByUuidRsp);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void ucx_gatt_client_DiscoverServiceCharsBegin(IntPtr instance, int conn_handle, int start, int end);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern bool ucx_gatt_client_DiscoverServiceCharsGetNext(IntPtr instance, ref uCxGattClientDiscoverServiceChars_t pGattClientDiscoverServiceCharsRsp);
+        public static extern bool ucx_gatt_client_DiscoverServiceCharsGetNext(IntPtr instance, out uCxGattClientDiscoverServiceChars_t pGattClientDiscoverServiceCharsRsp);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void ucx_gatt_client_DiscoverCharDescriptorsBegin(IntPtr instance, int conn_handle, int value_handle, int char_end_handle);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern bool ucx_gatt_client_DiscoverCharDescriptorsGetNext(IntPtr instance, ref uCxGattClientDiscoverCharDescriptors_t pGattClientDiscoverCharDescriptorsRsp);
+        public static extern bool ucx_gatt_client_DiscoverCharDescriptorsGetNext(IntPtr instance, out uCxGattClientDiscoverCharDescriptors_t pGattClientDiscoverCharDescriptorsRsp);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern bool ucx_gatt_client_ReadBegin(IntPtr instance, int conn_handle, int value_handle, ref uByteArray_t pHexData);
+        public static extern bool ucx_gatt_client_ReadBegin(IntPtr instance, int conn_handle, int value_handle, out uByteArray_t pHexData);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern bool ucx_gatt_client_ReadByUuidBegin(IntPtr instance, int conn_handle, int start, int end, ref byte uuid, int uuid_len, ref uCxGattClientReadByUuid_t pGattClientReadByUuidRsp);
+        public static extern bool ucx_gatt_client_ReadByUuidBegin(IntPtr instance, int conn_handle, int start, int end, IntPtr uuid, int uuid_len, out uCxGattClientReadByUuid_t pGattClientReadByUuidRsp);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_gatt_client_Write(IntPtr instance, int conn_handle, int value_handle, IntPtr hex_data, int hex_data_len);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_gatt_client_ConfigWrite(IntPtr instance, int conn_handle, int desc_handle, uGattClientConfig_t config);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_gatt_client_WriteNoRsp(IntPtr instance, int conn_handle, int value_handle, IntPtr hex_data, int hex_data_len);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_gatt_client_WriteLong(IntPtr instance, int conn_handle, int value_handle, IntPtr hex_data, int hex_data_len, uGattClientReliable_t reliable, uGattClientFlag_t flag, int offset);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void ucx_gatt_client_RegisterNotification(IntPtr instance, uUEBTGCN_t callback);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void ucx_gatt_client_RegisterIndication(IntPtr instance, uUEBTGCI_t callback);
 
         #endregion
 
         #region GATT_SERVER Functions
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int ucx_gatt_server_ServiceDefine(IntPtr instance, ref byte uuid, int uuid_len, ref int pSerHandle);
+        public static extern int ucx_gatt_server_ServiceDefine(IntPtr instance, IntPtr uuid, int uuid_len, out int pSerHandle);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int ucx_gatt_server_CharDefine5(IntPtr instance, ref byte uuid, int uuid_len, ref byte properties, int properties_len, uGattServerReadSecurity_t read_security, uGattServerWriteSecurity_t write_security, ref byte value, int value_len, ref uCxGattServerCharDefine_t pGattServerCharDefineRsp);
+        public static extern int ucx_gatt_server_CharDefine5(IntPtr instance, IntPtr uuid, int uuid_len, IntPtr properties, int properties_len, uGattServerReadSecurity_t read_security, uGattServerWriteSecurity_t write_security, IntPtr value, int value_len, out uCxGattServerCharDefine_t pGattServerCharDefineRsp);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int ucx_gatt_server_CharDefine6(IntPtr instance, ref byte uuid, int uuid_len, ref byte properties, int properties_len, uGattServerReadSecurity_t read_security, uGattServerWriteSecurity_t write_security, ref byte value, int value_len, int max_length, ref uCxGattServerCharDefine_t pGattServerCharDefineRsp);
+        public static extern int ucx_gatt_server_CharDefine6(IntPtr instance, IntPtr uuid, int uuid_len, IntPtr properties, int properties_len, uGattServerReadSecurity_t read_security, uGattServerWriteSecurity_t write_security, IntPtr value, int value_len, int max_length, out uCxGattServerCharDefine_t pGattServerCharDefineRsp);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int ucx_gatt_server_HostCharDefine(IntPtr instance, ref byte uuid, int uuid_len, ref byte properties, int properties_len, uGattServerReadSecurity_t read_security, uGattServerWriteSecurity_t write_security, ref uCxGattServerHostCharDefine_t pGattServerHostCharDefineRsp);
+        public static extern int ucx_gatt_server_HostCharDefine(IntPtr instance, IntPtr uuid, int uuid_len, IntPtr properties, int properties_len, uGattServerReadSecurity_t read_security, uGattServerWriteSecurity_t write_security, out uCxGattServerHostCharDefine_t pGattServerHostCharDefineRsp);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int ucx_gatt_server_DescriptorDefine4(IntPtr instance, ref byte uuid, int uuid_len, uGattServerReadSecurity_t read_security, uGattServerWriteSecurity_t write_security, ref byte value, int value_len, ref int pDescHandle);
+        public static extern int ucx_gatt_server_DescriptorDefine4(IntPtr instance, IntPtr uuid, int uuid_len, uGattServerReadSecurity_t read_security, uGattServerWriteSecurity_t write_security, IntPtr value, int value_len, out int pDescHandle);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int ucx_gatt_server_DescriptorDefine5(IntPtr instance, ref byte uuid, int uuid_len, uGattServerReadSecurity_t read_security, uGattServerWriteSecurity_t write_security, ref byte value, int value_len, int max_length, ref int pDescHandle);
+        public static extern int ucx_gatt_server_DescriptorDefine5(IntPtr instance, IntPtr uuid, int uuid_len, uGattServerReadSecurity_t read_security, uGattServerWriteSecurity_t write_security, IntPtr value, int value_len, int max_length, out int pDescHandle);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern int ucx_gatt_server_ServiceActivate(IntPtr instance);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int ucx_gatt_server_ReadReqResponse(IntPtr instance, int conn_handle, ref byte value, int value_len);
+        public static extern int ucx_gatt_server_ReadReqResponse(IntPtr instance, int conn_handle, IntPtr value, int value_len);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int ucx_gatt_server_SendNotification(IntPtr instance, int conn_handle, int char_handle, ref byte value, int value_len);
+        public static extern int ucx_gatt_server_SendNotification(IntPtr instance, int conn_handle, int char_handle, IntPtr value, int value_len);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int ucx_gatt_server_SendIndication(IntPtr instance, int conn_handle, int char_handle, ref byte value, int value_len);
+        public static extern int ucx_gatt_server_SendIndication(IntPtr instance, int conn_handle, int char_handle, IntPtr value, int value_len);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_gatt_server_SetAttrValue(IntPtr instance, int attr_handle, IntPtr value, int value_len);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_gatt_server_ReadReqError(IntPtr instance, int conn_handle, IntPtr error_code, int error_code_len);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_gatt_server_WriteReqError(IntPtr instance, int conn_handle, IntPtr error_code, int error_code_len);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_gatt_server_WriteReqResponse(IntPtr instance, int conn_handle);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_gatt_server_SendServiceChangedInd(IntPtr instance, int conn_handle, int start_handle, int end_handle);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void ucx_gatt_server_RegisterNotification(IntPtr instance, uUEBTGCW_t callback);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void ucx_gatt_server_RegisterReadAttribute(IntPtr instance, uUEBTGRR_t callback);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void ucx_gatt_server_RegisterIndicationAck(IntPtr instance, uUEBTGIC_t callback);
 
         #endregion
 
@@ -153,84 +426,135 @@ namespace UcxAvaloniaApp.Services
         public static extern int ucx_general_Attention(IntPtr instance);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern bool ucx_general_GetManufacturerIdentificationBegin(IntPtr instance, ref byte ppManufacturer);
+        public static extern bool ucx_general_GetManufacturerIdentificationBegin(IntPtr instance, [MarshalAs(UnmanagedType.LPStr)] string ppManufacturer);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern bool ucx_general_GetDeviceModelIdentificationBegin(IntPtr instance, ref byte ppDeviceModel);
+        public static extern bool ucx_general_GetDeviceModelIdentificationBegin(IntPtr instance, [MarshalAs(UnmanagedType.LPStr)] string ppDeviceModel);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern bool ucx_general_GetSoftwareVersionBegin(IntPtr instance, ref byte ppVersion);
+        public static extern bool ucx_general_GetSoftwareVersionBegin(IntPtr instance, [MarshalAs(UnmanagedType.LPStr)] string ppVersion);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern bool ucx_general_GetSerialNumberBegin(IntPtr instance, ref byte ppSerialNumber);
+        public static extern bool ucx_general_GetSerialNumberBegin(IntPtr instance, [MarshalAs(UnmanagedType.LPStr)] string ppSerialNumber);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern bool ucx_general_GetIdentInfoBegin(IntPtr instance, ref uCxGeneralGetIdentInfo_t pGeneralGetIdentInfoRsp);
+        public static extern bool ucx_general_GetIdentInfoBegin(IntPtr instance, out uCxGeneralGetIdentInfo_t pGeneralGetIdentInfoRsp);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern bool ucx_general_GetTypeCodeBegin(IntPtr instance, ref byte ppTypeCode);
+        public static extern bool ucx_general_GetTypeCodeBegin(IntPtr instance, [MarshalAs(UnmanagedType.LPStr)] string ppTypeCode);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern int ucx_general_SetGreetingText1(IntPtr instance, uGeneralGreetingMode_t greeting_mode);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int ucx_general_SetGreetingText2(IntPtr instance, uGeneralGreetingMode_t greeting_mode, ref byte text);
+        public static extern int ucx_general_SetGreetingText2(IntPtr instance, uGeneralGreetingMode_t greeting_mode, [MarshalAs(UnmanagedType.LPStr)] string text);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern bool ucx_general_GetGreetingTextBegin(IntPtr instance, ref uCxGeneralGetGreetingText_t pGeneralGetGreetingTextRsp);
+        public static extern bool ucx_general_GetGreetingTextBegin(IntPtr instance, out uCxGeneralGetGreetingText_t pGeneralGetGreetingTextRsp);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void ucx_general_RegisterStartup(IntPtr instance, uSTARTUP_t callback);
 
         #endregion
 
         #region HTTP Functions
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int ucx_http_SetConnectionParams2(IntPtr instance, int session_id, ref byte host);
+        public static extern int ucx_http_SetConnectionParams2(IntPtr instance, int session_id, [MarshalAs(UnmanagedType.LPStr)] string host);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int ucx_http_SetConnectionParams3(IntPtr instance, int session_id, ref byte host, int port);
+        public static extern int ucx_http_SetConnectionParams3(IntPtr instance, int session_id, [MarshalAs(UnmanagedType.LPStr)] string host, int port);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern int ucx_http_SetTLS2(IntPtr instance, int session_id, uWifiTlsVersion_t tls_version);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int ucx_http_SetTLS3(IntPtr instance, int session_id, uWifiTlsVersion_t tls_version, ref byte ca_name);
+        public static extern int ucx_http_SetTLS3(IntPtr instance, int session_id, uWifiTlsVersion_t tls_version, [MarshalAs(UnmanagedType.LPStr)] string ca_name);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int ucx_http_SetTLS5(IntPtr instance, int session_id, uWifiTlsVersion_t tls_version, ref byte ca_name, ref byte client_cert_name, ref byte client_key_name);
+        public static extern int ucx_http_SetTLS5(IntPtr instance, int session_id, uWifiTlsVersion_t tls_version, [MarshalAs(UnmanagedType.LPStr)] string ca_name, [MarshalAs(UnmanagedType.LPStr)] string client_cert_name, [MarshalAs(UnmanagedType.LPStr)] string client_key_name);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern bool ucx_http_GetTLSBegin(IntPtr instance, int session_id, ref uCxHttpGetTLS_t pHttpGetTLSRsp);
+        public static extern bool ucx_http_GetTLSBegin(IntPtr instance, int session_id, out uCxHttpGetTLS_t pHttpGetTLSRsp);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern int ucx_http_Disconnect(IntPtr instance, int session_id);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern bool ucx_http_GetHeader1Begin(IntPtr instance, int session_id, ref uCxHttpGetHeader_t pHttpGetHeaderRsp);
+        public static extern bool ucx_http_GetHeader1Begin(IntPtr instance, int session_id, out uCxHttpGetHeader_t pHttpGetHeaderRsp);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern bool ucx_http_GetHeader2Begin(IntPtr instance, int session_id, int data_length, ref uCxHttpGetHeader_t pHttpGetHeaderRsp);
+        public static extern bool ucx_http_GetHeader2Begin(IntPtr instance, int session_id, int data_length, out uCxHttpGetHeader_t pHttpGetHeaderRsp);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int ucx_http_GetBody(IntPtr instance, int session_id, int data_length, ref byte pDataBuf, ref int pMoreToRead);
+        public static extern int ucx_http_GetBody(IntPtr instance, int session_id, int data_length, out byte pDataBuf, out int pMoreToRead);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_http_AddHeaderField(IntPtr instance, int session_id, [MarshalAs(UnmanagedType.LPStr)] string field_name, [MarshalAs(UnmanagedType.LPStr)] string field_value);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_http_SetCustomHeader(IntPtr instance, int session_id, [MarshalAs(UnmanagedType.LPStr)] string header_data);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_http_ClearHeaderCustom(IntPtr instance, int session_id);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_http_SetRequestPath(IntPtr instance, int session_id, [MarshalAs(UnmanagedType.LPStr)] string path);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern bool ucx_http_GetRequestPathBegin(IntPtr instance, int session_id, out uCxHttpGetRequestPath_t pHttpGetRequestPathRsp);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_http_GetRequest(IntPtr instance, int session_id);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern bool ucx_http_GetGetRequestHeaderBegin(IntPtr instance, int session_id, out uCxHttpGetGetRequestHeader_t pHttpGetGetRequestHeaderRsp);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_http_DeleteRequest1(IntPtr instance, int session_id);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_http_DeleteRequest2(IntPtr instance, int session_id, [MarshalAs(UnmanagedType.LPStr)] string byte_array_data, int byte_array_data_len);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern bool ucx_http_GetDeleteRequestHeaderBegin(IntPtr instance, int session_id, out uCxHttpGetDeleteRequestHeader_t pHttpGetDeleteRequestHeaderRsp);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_http_PostRequest(IntPtr instance, int session_id, IntPtr binary_data, int binary_data_len);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern bool ucx_http_GetPostRequestHeaderBegin(IntPtr instance, int session_id, out uCxHttpGetPostRequestHeader_t pHttpGetPostRequestHeaderRsp);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_http_PutRequest(IntPtr instance, int session_id, IntPtr binary_data, int binary_data_len);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern bool ucx_http_GetPutRequestHeaderBegin(IntPtr instance, int session_id, out uCxHttpGetPutRequestHeader_t pHttpGetPutRequestHeaderRsp);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void ucx_http_RegisterDisconnect(IntPtr instance, uUEHTCDC_t callback);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void ucx_http_RegisterRequestStatus(IntPtr instance, uUEHTCRS_t callback);
 
         #endregion
 
         #region MQTT Functions
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int ucx_mqtt_SetConnectionParams3(IntPtr instance, int mqtt_id, ref byte hostname, int port);
+        public static extern int ucx_mqtt_SetConnectionParams3(IntPtr instance, int mqtt_id, [MarshalAs(UnmanagedType.LPStr)] string hostname, int port);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int ucx_mqtt_SetConnectionParams4(IntPtr instance, int mqtt_id, ref byte hostname, int port, ref byte client_id);
+        public static extern int ucx_mqtt_SetConnectionParams4(IntPtr instance, int mqtt_id, [MarshalAs(UnmanagedType.LPStr)] string hostname, int port, [MarshalAs(UnmanagedType.LPStr)] string client_id);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int ucx_mqtt_SetConnectionParams5(IntPtr instance, int mqtt_id, ref byte hostname, int port, ref byte client_id, ref byte username);
+        public static extern int ucx_mqtt_SetConnectionParams5(IntPtr instance, int mqtt_id, [MarshalAs(UnmanagedType.LPStr)] string hostname, int port, [MarshalAs(UnmanagedType.LPStr)] string client_id, [MarshalAs(UnmanagedType.LPStr)] string username);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int ucx_mqtt_SetConnectionParams6(IntPtr instance, int mqtt_id, ref byte hostname, int port, ref byte client_id, ref byte username, ref byte password);
+        public static extern int ucx_mqtt_SetConnectionParams6(IntPtr instance, int mqtt_id, [MarshalAs(UnmanagedType.LPStr)] string hostname, int port, [MarshalAs(UnmanagedType.LPStr)] string client_id, [MarshalAs(UnmanagedType.LPStr)] string username, [MarshalAs(UnmanagedType.LPStr)] string password);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern bool ucx_mqtt_GetConnectionParamsBegin(IntPtr instance, int mqtt_id, ref uCxMqttGetConnectionParams_t pMqttGetConnectionParamsRsp);
+        public static extern bool ucx_mqtt_GetConnectionParamsBegin(IntPtr instance, int mqtt_id, out uCxMqttGetConnectionParams_t pMqttGetConnectionParamsRsp);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern int ucx_mqtt_Connect(IntPtr instance, int mqtt_id);
@@ -239,13 +563,64 @@ namespace UcxAvaloniaApp.Services
         public static extern int ucx_mqtt_SetKeepAlive(IntPtr instance, int mqtt_id, int keep_alive);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int ucx_mqtt_GetKeepAlive(IntPtr instance, int mqtt_id, ref int pKeepAlive);
+        public static extern int ucx_mqtt_GetKeepAlive(IntPtr instance, int mqtt_id, out int pKeepAlive);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int ucx_mqtt_SetLastWillAndTestament3(IntPtr instance, int mqtt_id, ref byte topic, ref byte will_msg);
+        public static extern int ucx_mqtt_SetLastWillAndTestament3(IntPtr instance, int mqtt_id, [MarshalAs(UnmanagedType.LPStr)] string topic, [MarshalAs(UnmanagedType.LPStr)] string will_msg);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int ucx_mqtt_SetLastWillAndTestament4(IntPtr instance, int mqtt_id, ref byte topic, ref byte will_msg, uMqttQos_t qos);
+        public static extern int ucx_mqtt_SetLastWillAndTestament4(IntPtr instance, int mqtt_id, [MarshalAs(UnmanagedType.LPStr)] string topic, [MarshalAs(UnmanagedType.LPStr)] string will_msg, uMqttQos_t qos);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_mqtt_SetLastWillAndTestament5(IntPtr instance, int mqtt_id, [MarshalAs(UnmanagedType.LPStr)] string topic, [MarshalAs(UnmanagedType.LPStr)] string will_msg, uMqttQos_t qos, uMqttRetain_t retain);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern bool ucx_mqtt_GetLastWillAndTestamentBegin(IntPtr instance, int mqtt_id, out uCxMqttGetLastWillAndTestament_t pMqttGetLastWillAndTestamentRsp);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_mqtt_SetTLS2(IntPtr instance, int mqtt_id, uWifiTlsVersion_t tls_version);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_mqtt_SetTLS3(IntPtr instance, int mqtt_id, uWifiTlsVersion_t tls_version, [MarshalAs(UnmanagedType.LPStr)] string ca_name);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_mqtt_SetTLS5(IntPtr instance, int mqtt_id, uWifiTlsVersion_t tls_version, [MarshalAs(UnmanagedType.LPStr)] string ca_name, [MarshalAs(UnmanagedType.LPStr)] string client_cert_name, [MarshalAs(UnmanagedType.LPStr)] string client_key_name);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern bool ucx_mqtt_GetTLSBegin(IntPtr instance, int mqtt_id, out uCxMqttGetTLS_t pMqttGetTLSRsp);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_mqtt_Disconnect(IntPtr instance, int mqtt_id);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_mqtt_Publish(IntPtr instance, int mqtt_id, uMqttQos_t qos, uMqttRetain_t retain, [MarshalAs(UnmanagedType.LPStr)] string topic, IntPtr binary_data, int binary_data_len);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_mqtt_Subscribe3(IntPtr instance, int mqtt_id, uMqttSubscribeAction_t subscribe_action, [MarshalAs(UnmanagedType.LPStr)] string topic);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_mqtt_Subscribe4(IntPtr instance, int mqtt_id, uMqttSubscribeAction_t subscribe_action, [MarshalAs(UnmanagedType.LPStr)] string topic, uMqttQos_t qos);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_mqtt_ReadBegin(IntPtr instance, int mqtt_id, out byte pDataBuf, ushort dataBufLength, [MarshalAs(UnmanagedType.LPStr)] string ppTopic);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void ucx_mqtt_RegisterConnect(IntPtr instance, uUEMQC_t callback);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void ucx_mqtt_RegisterDisconnect(IntPtr instance, uUEMQDC_t callback);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void ucx_mqtt_RegisterDataAvailable(IntPtr instance, uUEMQDA_t callback);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void ucx_mqtt_RegisterDataDropped(IntPtr instance, uUEMQDD_t callback);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void ucx_mqtt_RegisterPublishCompleted(IntPtr instance, uUEMQPC_t callback);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void ucx_mqtt_RegisterSubscribeCompleted(IntPtr instance, uUEMQSC_t callback);
 
         #endregion
 
@@ -255,13 +630,13 @@ namespace UcxAvaloniaApp.Services
         public static extern int ucx_network_time_SetClientEnabled(IntPtr instance, uNtpClientStatus_t client_status);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int ucx_network_time_GetClientEnabled(IntPtr instance, ref uNtpClientStatus_t pClientStatus);
+        public static extern int ucx_network_time_GetClientEnabled(IntPtr instance, out uNtpClientStatus_t pClientStatus);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int ucx_network_time_SetNtpServer(IntPtr instance, int ntp_server_id, ref byte ntp_server_address);
+        public static extern int ucx_network_time_SetNtpServer(IntPtr instance, int ntp_server_id, [MarshalAs(UnmanagedType.LPStr)] string ntp_server_address);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern bool ucx_network_time_GetNtpServerBegin(IntPtr instance, ref uCxNtpGetNtpServer_t pNtpGetNtpServerRsp);
+        public static extern bool ucx_network_time_GetNtpServerBegin(IntPtr instance, out uCxNtpGetNtpServer_t pNtpGetNtpServerRsp);
 
         #endregion
 
@@ -277,7 +652,7 @@ namespace UcxAvaloniaApp.Services
         public static extern int ucx_power_SetPowerSaveLevel(IntPtr instance, int level);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int ucx_power_GetPowerSaveLevel(IntPtr instance, ref int pLevel);
+        public static extern int ucx_power_GetPowerSaveLevel(IntPtr instance, out int pLevel);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern int ucx_power_SetPowerSaveTimeout(IntPtr instance, int timeoutMs);
@@ -287,68 +662,134 @@ namespace UcxAvaloniaApp.Services
         #region SECURITY Functions
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int ucx_security_CertificateRemove(IntPtr instance, uSecCertType_t cert_type, ref byte name);
+        public static extern int ucx_security_CertificateRemove(IntPtr instance, uSecCertType_t cert_type, [MarshalAs(UnmanagedType.LPStr)] string name);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern int ucx_security_CertificateRemoveAll(IntPtr instance);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int ucx_security_CertificateUpload(IntPtr instance, uSecCertType_t cert_type, ref byte name, ref byte binary_data, int binary_data_len);
+        public static extern int ucx_security_CertificateUpload(IntPtr instance, uSecCertType_t cert_type, [MarshalAs(UnmanagedType.LPStr)] string name, IntPtr binary_data, int binary_data_len);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int ucx_security_CertificateUploadPW(IntPtr instance, uSecCertType_t cert_type, ref byte name, ref byte password, ref byte binary_data, int binary_data_len);
+        public static extern int ucx_security_CertificateUploadPW(IntPtr instance, uSecCertType_t cert_type, [MarshalAs(UnmanagedType.LPStr)] string name, [MarshalAs(UnmanagedType.LPStr)] string password, IntPtr binary_data, int binary_data_len);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void ucx_security_ListCertificatesBegin(IntPtr instance);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern bool ucx_security_ListCertificatesGetNext(IntPtr instance, ref uCxSecListCertificates_t pSecListCertificatesRsp);
+        public static extern bool ucx_security_ListCertificatesGetNext(IntPtr instance, out uCxSecListCertificates_t pSecListCertificatesRsp);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern bool ucx_security_ReadAllCertificatesDetailsBegin(IntPtr instance, ref byte name, ref uCxSecReadAllCertificatesDetails_t pSecReadAllCertificatesDetailsRsp);
+        public static extern bool ucx_security_ReadAllCertificatesDetailsBegin(IntPtr instance, [MarshalAs(UnmanagedType.LPStr)] string name, out uCxSecReadAllCertificatesDetails_t pSecReadAllCertificatesDetailsRsp);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern bool ucx_security_ReadCertificatesDetailsBegin(IntPtr instance, ref byte name, uSecCertDetailId_t cert_detail_id, ref uCxSecReadCertificatesDetails_t pSecReadCertificatesDetailsRsp);
+        public static extern bool ucx_security_ReadCertificatesDetailsBegin(IntPtr instance, [MarshalAs(UnmanagedType.LPStr)] string name, uSecCertDetailId_t cert_detail_id, out uCxSecReadCertificatesDetails_t pSecReadCertificatesDetailsRsp);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void ucx_security_ListTlsExtensionsBegin(IntPtr instance);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern bool ucx_security_ListTlsExtensionsGetNext(IntPtr instance, ref uCxSecListTlsExtensions_t pSecListTlsExtensionsRsp);
+        public static extern bool ucx_security_ListTlsExtensionsGetNext(IntPtr instance, out uCxSecListTlsExtensions_t pSecListTlsExtensionsRsp);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_security_SetTlsServerNameIndication(IntPtr instance, uEnabled_t enabled);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_security_GetTlsServerNameIndication(IntPtr instance, out uEnabled_t pEnabled);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_security_SetTlsHandshakeFrag(IntPtr instance, uEnabled_t enabled);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_security_GetTlsHandshakeFrag(IntPtr instance, out uEnabled_t pEnabled);
 
         #endregion
 
         #region SOCKET Functions
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int ucx_socket_Create1(IntPtr instance, uSocketProtocol_t protocol, ref int pSocketHandle);
+        public static extern int ucx_socket_Create1(IntPtr instance, uSocketProtocol_t protocol, out int pSocketHandle);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int ucx_socket_Create2(IntPtr instance, uSocketProtocol_t protocol, uSocketPrefIpVer_t pref_ip_ver, ref int pSocketHandle);
+        public static extern int ucx_socket_Create2(IntPtr instance, uSocketProtocol_t protocol, uSocketPrefIpVer_t pref_ip_ver, out int pSocketHandle);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern int ucx_socket_SetTLS2(IntPtr instance, int socket_handle, uWifiTlsVersion_t tls_version);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int ucx_socket_SetTLS3(IntPtr instance, int socket_handle, uWifiTlsVersion_t tls_version, ref byte ca_name);
+        public static extern int ucx_socket_SetTLS3(IntPtr instance, int socket_handle, uWifiTlsVersion_t tls_version, [MarshalAs(UnmanagedType.LPStr)] string ca_name);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int ucx_socket_SetTLS5(IntPtr instance, int socket_handle, uWifiTlsVersion_t tls_version, ref byte ca_name, ref byte client_cert_name, ref byte client_key_name);
+        public static extern int ucx_socket_SetTLS5(IntPtr instance, int socket_handle, uWifiTlsVersion_t tls_version, [MarshalAs(UnmanagedType.LPStr)] string ca_name, [MarshalAs(UnmanagedType.LPStr)] string client_cert_name, [MarshalAs(UnmanagedType.LPStr)] string client_key_name);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern bool ucx_socket_GetTLSBegin(IntPtr instance, int socket_handle, ref uCxSocketGetTLS_t pSocketGetTLSRsp);
+        public static extern bool ucx_socket_GetTLSBegin(IntPtr instance, int socket_handle, out uCxSocketGetTLS_t pSocketGetTLSRsp);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int ucx_socket_Connect(IntPtr instance, int socket_handle, ref byte host_address, int remote_port);
+        public static extern int ucx_socket_Connect(IntPtr instance, int socket_handle, [MarshalAs(UnmanagedType.LPStr)] string host_address, int remote_port);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern int ucx_socket_SetReadMode(IntPtr instance, uReadMode_t read_mode);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int ucx_socket_GetReadMode(IntPtr instance, ref uReadMode_t pReadMode);
+        public static extern int ucx_socket_GetReadMode(IntPtr instance, out uReadMode_t pReadMode);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int ucx_socket_Write(IntPtr instance, int socket_handle, ref byte binary_data, int binary_data_len);
+        public static extern int ucx_socket_Write(IntPtr instance, int socket_handle, IntPtr binary_data, int binary_data_len);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_socket_Close(IntPtr instance, int socket_handle);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_socket_Read(IntPtr instance, int socket_handle, int length, out byte pDataBuf);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_socket_GetLastError(IntPtr instance, out int pErrorCode);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_socket_Bind(IntPtr instance, int socket_handle, int local_port);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_socket_Listen1(IntPtr instance, int socket_handle);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_socket_Listen2(IntPtr instance, int socket_handle, int port);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_socket_ReceiveFrom(IntPtr instance, int socket_handle, int length, out byte pDataBuf, out uCxSocketReceiveFrom_t pSocketReceiveFromRsp);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_socket_GetPeerAddress(IntPtr instance, int socket_handle, out uCxSocketGetPeerAddress_t pSocketGetPeerAddressRsp);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void ucx_socket_ListStatusBegin(IntPtr instance);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern bool ucx_socket_ListStatusGetNext(IntPtr instance, out uCxSocketListStatus_t pSocketListStatusRsp);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_socket_GetStatus(IntPtr instance, int socket_handle, out uCxSocketGetStatus_t pSocketGetStatusRsp);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_socket_SetOption(IntPtr instance, int socket_handle, uSocketOption_t option, int value);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_socket_GetOption(IntPtr instance, int socket_handle, uSocketOption_t option, out int pValue);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_socket_GetHostByName(IntPtr instance, [MarshalAs(UnmanagedType.LPStr)] string host_name, out uSockIpAddress_t pHostIp);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void ucx_socket_RegisterConnect(IntPtr instance, uUESOC_t callback);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void ucx_socket_RegisterDataAvailable(IntPtr instance, uUESODA_t callback);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void ucx_socket_RegisterClosed(IntPtr instance, uUESOCL_t callback);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void ucx_socket_RegisterIncomingConnection(IntPtr instance, uUESOIC_t callback);
 
         #endregion
 
@@ -364,25 +805,28 @@ namespace UcxAvaloniaApp.Services
         public static extern int ucx_sps_SetServiceEnable(IntPtr instance, uSpsServiceOption_t service_option);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int ucx_sps_GetServiceEnable(IntPtr instance, ref uSpsServiceOption_t pServiceOption);
+        public static extern int ucx_sps_GetServiceEnable(IntPtr instance, out uSpsServiceOption_t pServiceOption);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int ucx_sps_Write(IntPtr instance, int conn_handle, ref byte binary_data, int binary_data_len);
+        public static extern int ucx_sps_Write(IntPtr instance, int conn_handle, IntPtr binary_data, int binary_data_len);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern int ucx_sps_SetDataMode(IntPtr instance, uReadMode_t read_mode);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int ucx_sps_GetDataMode(IntPtr instance, ref uReadMode_t pReadMode);
+        public static extern int ucx_sps_GetDataMode(IntPtr instance, out uReadMode_t pReadMode);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int ucx_sps_Read(IntPtr instance, int conn_handle, int length, ref byte pDataBuf);
+        public static extern int ucx_sps_Read(IntPtr instance, int conn_handle, int length, out byte pDataBuf);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void ucx_sps_RegisterConnect(IntPtr instance, uUESPSC_t callback);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void ucx_sps_RegisterDisconnect(IntPtr instance, uUESPSDC_t callback);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void ucx_sps_RegisterDataAvailable(IntPtr instance, uUESPSDA_t callback);
 
         #endregion
 
@@ -413,44 +857,308 @@ namespace UcxAvaloniaApp.Services
         public static extern int ucx_system_StoreConfiguration(IntPtr instance);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int ucx_system_GetLocalAddress(IntPtr instance, uInterfaceId_t interface_id, ref uMacAddress_t pAddress);
+        public static extern int ucx_system_GetLocalAddress(IntPtr instance, uInterfaceId_t interface_id, out uMacAddress_t pAddress);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int ucx_system_SetLocalAddress(IntPtr instance, uInterfaceId_t interface_id, ref uMacAddress_t address);
+        public static extern int ucx_system_SetLocalAddress(IntPtr instance, uInterfaceId_t interface_id, out uMacAddress_t address);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_system_FactoryReset(IntPtr instance);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_system_DefaultSettings(IntPtr instance);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_system_SetUartSettings1(IntPtr instance, int baud_rate);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_system_SetUartSettings2(IntPtr instance, int baud_rate, int flow_control);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_system_SetUartSettings3(IntPtr instance, int baud_rate, int flow_control, int change_after_confirm);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_system_GetUartSettings(IntPtr instance, out uCxSysGetUartSettings_t pSysGetUartSettingsRsp);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_system_GetLastErrorCode(IntPtr instance, out int pErrorCode);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_system_SetExtendedError(IntPtr instance, uSysExtendedErrors_t extended_errors);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_system_GetExtendedError(IntPtr instance, out uSysExtendedErrors_t pExtendedErrors);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_system_SetUnixTime(IntPtr instance, IntPtr unix_time, int unix_time_len);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern bool ucx_system_GetUnixTimeBegin(IntPtr instance, out uByteArray_t pUnixTime);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_system_SetEchoOff(IntPtr instance);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_system_SetEchoOn(IntPtr instance);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_system_GetEcho(IntPtr instance, out uSysEchoOn_t pEchoOn);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_system_SetEscSequenceChar(IntPtr instance, int escape_char);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_system_GetEscSequenceChar(IntPtr instance, out int pEscapeChar);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_system_SetLineTermChar(IntPtr instance, int line_term);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_system_GetLineTermChar(IntPtr instance, out int pLineTerm);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_system_SetRspFormatChar(IntPtr instance, int resp_format);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_system_GetRspFormatChar(IntPtr instance, out int pRespFormat);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_system_SetBackspaceChar(IntPtr instance, int backspace);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_system_GetBackspaceChar(IntPtr instance, out int pBackspace);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_system_SetEscSequenceSettings(IntPtr instance, int pre_timeout, int post_timeout, int escape_timeout);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_system_GetEscSequenceSettings(IntPtr instance, out uCxSysGetEscSequenceSettings_t pSysGetEscSequenceSettingsRsp);
 
         #endregion
 
         #region WIFI Functions
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int ucx_wifi_SetHostname(IntPtr instance, ref byte host_name);
+        public static extern int ucx_wifi_SetHostname(IntPtr instance, [MarshalAs(UnmanagedType.LPStr)] string host_name);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern bool ucx_wifi_GetHostnameBegin(IntPtr instance, ref byte ppHostName);
+        public static extern bool ucx_wifi_GetHostnameBegin(IntPtr instance, [MarshalAs(UnmanagedType.LPStr)] string ppHostName);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int ucx_wifi_StationSetSecurityEnterprise5(IntPtr instance, int wlan_handle, uWifiTlsVersion_t tls_version, ref byte ca_name, ref byte client_cert_name, ref byte client_key_name);
+        public static extern int ucx_wifi_StationSetSecurityEnterprise5(IntPtr instance, int wlan_handle, uWifiTlsVersion_t tls_version, [MarshalAs(UnmanagedType.LPStr)] string ca_name, [MarshalAs(UnmanagedType.LPStr)] string client_cert_name, [MarshalAs(UnmanagedType.LPStr)] string client_key_name);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int ucx_wifi_StationSetSecurityEnterprise6(IntPtr instance, int wlan_handle, uWifiTlsVersion_t tls_version, ref byte ca_name, ref byte client_cert_name, ref byte client_key_name, ref byte identity);
+        public static extern int ucx_wifi_StationSetSecurityEnterprise6(IntPtr instance, int wlan_handle, uWifiTlsVersion_t tls_version, [MarshalAs(UnmanagedType.LPStr)] string ca_name, [MarshalAs(UnmanagedType.LPStr)] string client_cert_name, [MarshalAs(UnmanagedType.LPStr)] string client_key_name, [MarshalAs(UnmanagedType.LPStr)] string identity);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern bool ucx_wifi_StationGetSecurityBegin(IntPtr instance, int wlan_handle, ref uCxWifiStationGetSecurity_t pWifiStationGetSecurityRsp);
+        public static extern bool ucx_wifi_StationGetSecurityBegin(IntPtr instance, int wlan_handle, out uCxWifiStationGetSecurity_t pWifiStationGetSecurityRsp);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int ucx_wifi_StationSetSecurityPeap4(IntPtr instance, int wlan_handle, uWifiTlsVersion_t tls_version, ref byte peap_user, ref byte peap_password);
+        public static extern int ucx_wifi_StationSetSecurityPeap4(IntPtr instance, int wlan_handle, uWifiTlsVersion_t tls_version, [MarshalAs(UnmanagedType.LPStr)] string peap_user, [MarshalAs(UnmanagedType.LPStr)] string peap_password);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int ucx_wifi_StationSetSecurityPeap5(IntPtr instance, int wlan_handle, uWifiTlsVersion_t tls_version, ref byte peap_user, ref byte peap_password, ref byte ca_name);
+        public static extern int ucx_wifi_StationSetSecurityPeap5(IntPtr instance, int wlan_handle, uWifiTlsVersion_t tls_version, [MarshalAs(UnmanagedType.LPStr)] string peap_user, [MarshalAs(UnmanagedType.LPStr)] string peap_password, [MarshalAs(UnmanagedType.LPStr)] string ca_name);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int ucx_wifi_StationSetSecurityWpa(IntPtr instance, int wlan_handle, ref byte passphrase, uWifiWpaThreshold_t wpa_threshold);
+        public static extern int ucx_wifi_StationSetSecurityWpa(IntPtr instance, int wlan_handle, [MarshalAs(UnmanagedType.LPStr)] string passphrase, uWifiWpaThreshold_t wpa_threshold);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern int ucx_wifi_StationSetSecurityOpen(IntPtr instance, int wlan_handle);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int ucx_wifi_StationSetConnectionParams(IntPtr instance, int wlan_handle, ref byte ssid);
+        public static extern int ucx_wifi_StationSetConnectionParams(IntPtr instance, int wlan_handle, [MarshalAs(UnmanagedType.LPStr)] string ssid);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern bool ucx_wifi_StationGetConnectionParamsBegin(IntPtr instance, int wlan_handle, [MarshalAs(UnmanagedType.LPStr)] string ppSsid);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_wifi_StationSetIpConfigStatic4(IntPtr instance, int wlan_handle, out uSockIpAddress_t ip_addr, out uSockIpAddress_t subnet_mask, out uSockIpAddress_t gateway);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_wifi_StationSetIpConfigStatic5(IntPtr instance, int wlan_handle, out uSockIpAddress_t ip_addr, out uSockIpAddress_t subnet_mask, out uSockIpAddress_t gateway, out uSockIpAddress_t prim_dns);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_wifi_StationSetIpConfigStatic6(IntPtr instance, int wlan_handle, out uSockIpAddress_t ip_addr, out uSockIpAddress_t subnet_mask, out uSockIpAddress_t gateway, out uSockIpAddress_t prim_dns, out uSockIpAddress_t sec_dns);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_wifi_StationSetIpConfigDhcp(IntPtr instance, int wlan_handle);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_wifi_StationGetIpConfig(IntPtr instance, int wlan_handle, out uCxWifiStationGetIpConfig_t pWifiStationGetIpConfigRsp);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_wifi_StationConnect(IntPtr instance, int wlan_handle);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_wifi_StationDisconnect(IntPtr instance);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_wifi_StationGetNetworkStatus(IntPtr instance, uWifiNetStatusId_t net_status_id, out uSockIpAddress_t pNetStatusVal);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void ucx_wifi_StationListNetworkStatusBegin(IntPtr instance);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern bool ucx_wifi_StationListNetworkStatusGetNext(IntPtr instance, out uCxWifiStationListNetworkStatus_t pWifiStationListNetworkStatusRsp);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_wifi_SetRegulatoryDomain(IntPtr instance, uWifiRegDomain_t reg_domain);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_wifi_GetRegulatoryDomain(IntPtr instance, out uWifiRegDomain_t pRegDomain);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_wifi_SetChannelList(IntPtr instance, IntPtr channel_list, int channel_list_len);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_wifi_GetChannelList(IntPtr instance, out uIntList_t pChannelList);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_wifi_GetActiveChannels(IntPtr instance, out uIntList_t pChannelList);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void ucx_wifi_StationScanDefaultBegin(IntPtr instance);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern bool ucx_wifi_StationScanDefaultGetNext(IntPtr instance, out uCxWifiStationScanDefault_t pWifiStationScanDefaultRsp);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void ucx_wifi_StationScan1Begin(IntPtr instance, uWifiScanMode_t scan_mode);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern bool ucx_wifi_StationScan1GetNext(IntPtr instance, out uCxWifiStationScan_t pWifiStationScanRsp);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void ucx_wifi_StationScan2Begin(IntPtr instance, uWifiScanMode_t scan_mode, [MarshalAs(UnmanagedType.LPStr)] string ssid);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern bool ucx_wifi_StationScan2GetNext(IntPtr instance, out uCxWifiStationScan_t pWifiStationScanRsp);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern bool ucx_wifi_StationStatusBegin(IntPtr instance, uWifiStatusId_t status_id, out uCxWifiStationStatus_t pWifiStationStatusRsp);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_wifi_ApActivate(IntPtr instance);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_wifi_ApDeactivate(IntPtr instance);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_wifi_ApSetConnectionParams1(IntPtr instance, [MarshalAs(UnmanagedType.LPStr)] string ssid);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_wifi_ApSetConnectionParams2(IntPtr instance, [MarshalAs(UnmanagedType.LPStr)] string ssid, uWifiChannel_t channel);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern bool ucx_wifi_ApGetConnectionParamsBegin(IntPtr instance, out uCxWifiApGetConnectionParams_t pWifiApGetConnectionParamsRsp);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_wifi_ApSetSecurityWpa1(IntPtr instance, [MarshalAs(UnmanagedType.LPStr)] string passphrase);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_wifi_ApSetSecurityWpa2(IntPtr instance, [MarshalAs(UnmanagedType.LPStr)] string passphrase, uWifiWpaVersion_t wpa_version);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_wifi_ApSetSecurityOpen(IntPtr instance);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_wifi_ApGetSecurity(IntPtr instance, out uCxWifiApGetSecurity_t pWifiApGetSecurityRsp);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void ucx_wifi_ApListStationsBegin(IntPtr instance);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern bool ucx_wifi_ApListStationsGetNext(IntPtr instance, out uMacAddress_t pMac);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_wifi_ApGetNetworkStatus(IntPtr instance, uWifiNetStatusId_t net_status_id, out uSockIpAddress_t pNetStatusVal);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void ucx_wifi_ApListNetworkStatusBegin(IntPtr instance);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern bool ucx_wifi_ApListNetworkStatusGetNext(IntPtr instance, out uCxWifiApListNetworkStatus_t pWifiApListNetworkStatusRsp);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_wifi_SetWifiRoaming(IntPtr instance, uWifiRoaming_t roaming);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_wifi_GetWifiRoaming(IntPtr instance, out uWifiRoaming_t pRoaming);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_wifi_StationSetRoamingBGScanThreshold(IntPtr instance, int roaming_scanning_threshold);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_wifi_StationGetRoamingBGScanThreshold(IntPtr instance, out int pRoamingScanningThreshold);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_wifi_StationSetRoamingSwitchLimit(IntPtr instance, int roaming_switch_limit);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_wifi_StationGetRoamingSwitchLimit(IntPtr instance, out int pRoamingSwitchLimit);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_wifi_StationSetRoamingScanInterval(IntPtr instance, int roaming_scan_interval);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_wifi_StationGetRoamingScanInterval(IntPtr instance, out int pRoamingScanInterval);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_wifi_StationSetAggressiveRoaming(IntPtr instance, uWifiRoamingAggressive_t roaming_aggressive);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_wifi_StationGetAggressiveRoaming(IntPtr instance, out uWifiRoamingAggressive_t pRoamingAggressive);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_wifi_StationSetRoamingDelayMs(IntPtr instance, int roaming_delay_time);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_wifi_StationGetRoamingDelayMs(IntPtr instance, out int pRoamingDelayTime);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_wifi_StationSetRoamingAllChannels(IntPtr instance, uWifiRoamingChannels_t roaming_channels);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ucx_wifi_StationGetRoamingAllChannels(IntPtr instance, out uWifiRoamingChannels_t pRoamingChannels);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void ucx_wifi_RegisterLinkUp(IntPtr instance, uUEWLU_t callback);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void ucx_wifi_RegisterLinkDown(IntPtr instance, uUEWLD_t callback);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void ucx_wifi_RegisterStationNetworkUp(IntPtr instance, uUEWSNU_t callback);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void ucx_wifi_RegisterStationNetworkDown(IntPtr instance, uUEWSND_t callback);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void ucx_wifi_RegisterStationRoamingSwitchInitiated(IntPtr instance, uUEWSRSI_t callback);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void ucx_wifi_RegisterStationRoamingSwitchFailed(IntPtr instance, uUEWSRSF_t callback);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void ucx_wifi_RegisterStationRoamingSwitchCompleted(IntPtr instance, uUEWSRSC_t callback);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void ucx_wifi_RegisterApNetworkUp(IntPtr instance, uUEWAPNU_t callback);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void ucx_wifi_RegisterApNetworkDown(IntPtr instance, uUEWAPND_t callback);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void ucx_wifi_RegisterApUp(IntPtr instance, uUEWAPU_t callback);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void ucx_wifi_RegisterApDown(IntPtr instance, uUEWAPD_t callback);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void ucx_wifi_RegisterApStationAssociated(IntPtr instance, uUEWAPSA_t callback);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void ucx_wifi_RegisterApStationDisassociated(IntPtr instance, uUEWAPSDA_t callback);
 
         #endregion
 

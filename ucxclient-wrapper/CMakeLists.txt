@@ -36,6 +36,8 @@ endif()
 add_library(ucxclient_wrapper SHARED
     ucxclient_wrapper.c
     ucxclient_wrapper.h
+    ucxclient_wrapper_generated.c
+    ucxclient_wrapper_generated.h
     ucx_wrapper_config.h
     ${UCXCLIENT_UCX_API_SRC}
     ${UCXCLIENT_AT_API_SRC}

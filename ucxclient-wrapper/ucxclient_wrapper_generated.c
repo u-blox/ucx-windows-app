@@ -33,7 +33,7 @@ int32_t ucx_bluetooth_SetMode(ucx_instance_t *inst, uBtMode_t mode)
     return result;
 }
 
-int32_t ucx_bluetooth_GetMode(ucx_instance_t *inst, uBtMode_t * * pMode)
+int32_t ucx_bluetooth_GetMode(ucx_instance_t *inst, uBtMode_t * pMode)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -44,7 +44,7 @@ int32_t ucx_bluetooth_GetMode(ucx_instance_t *inst, uBtMode_t * * pMode)
     return result;
 }
 
-int32_t ucx_bluetooth_Connect(ucx_instance_t *inst, uBtLeAddress_t * * bd_addr)
+int32_t ucx_bluetooth_Connect(ucx_instance_t *inst, uBtLeAddress_t * bd_addr)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -66,7 +66,7 @@ int32_t ucx_bluetooth_Disconnect(ucx_instance_t *inst, int32_t conn_handle)
     return result;
 }
 
-bool ucx_bluetooth_GetLocalNameBegin(ucx_instance_t *inst, const char ** ** ppDeviceName)
+bool ucx_bluetooth_GetLocalNameBegin(ucx_instance_t *inst, const char * * ppDeviceName)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -77,7 +77,7 @@ bool ucx_bluetooth_GetLocalNameBegin(ucx_instance_t *inst, const char ** ** ppDe
     return result;
 }
 
-int32_t ucx_bluetooth_SetLocalName(ucx_instance_t *inst, const char * * device_name)
+int32_t ucx_bluetooth_SetLocalName(ucx_instance_t *inst, const char * device_name)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -99,7 +99,7 @@ void ucx_bluetooth_DiscoveryDefaultBegin(ucx_instance_t *inst)
     return;
 }
 
-bool ucx_bluetooth_DiscoveryDefaultGetNext(ucx_instance_t *inst, uCxBtDiscoveryDefault_t * * pBtDiscoveryDefaultRsp)
+bool ucx_bluetooth_DiscoveryDefaultGetNext(ucx_instance_t *inst, uCxBtDiscoveryDefault_t * pBtDiscoveryDefaultRsp)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -121,7 +121,7 @@ void ucx_bluetooth_Discovery1Begin(ucx_instance_t *inst, uBtDiscoveryType_t disc
     return;
 }
 
-bool ucx_bluetooth_Discovery1GetNext(ucx_instance_t *inst, uCxBtDiscovery_t * * pBtDiscoveryRsp)
+bool ucx_bluetooth_Discovery1GetNext(ucx_instance_t *inst, uCxBtDiscovery_t * pBtDiscoveryRsp)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -143,7 +143,7 @@ void ucx_bluetooth_Discovery2Begin(ucx_instance_t *inst, uBtDiscoveryType_t disc
     return;
 }
 
-bool ucx_bluetooth_Discovery2GetNext(ucx_instance_t *inst, uCxBtDiscovery_t * * pBtDiscoveryRsp)
+bool ucx_bluetooth_Discovery2GetNext(ucx_instance_t *inst, uCxBtDiscovery_t * pBtDiscoveryRsp)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -165,7 +165,7 @@ void ucx_bluetooth_Discovery3Begin(ucx_instance_t *inst, uBtDiscoveryType_t disc
     return;
 }
 
-bool ucx_bluetooth_Discovery3GetNext(ucx_instance_t *inst, uCxBtDiscovery_t * * pBtDiscoveryRsp)
+bool ucx_bluetooth_Discovery3GetNext(ucx_instance_t *inst, uCxBtDiscovery_t * pBtDiscoveryRsp)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -231,7 +231,7 @@ int32_t ucx_bluetooth_BgDiscoveryStop(ucx_instance_t *inst)
     return result;
 }
 
-int32_t ucx_bluetooth_GetRssi(ucx_instance_t *inst, int32_t conn_handle, int32_t * * pRssi)
+int32_t ucx_bluetooth_GetRssi(ucx_instance_t *inst, int32_t conn_handle, int32_t * pRssi)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -253,7 +253,7 @@ void ucx_bluetooth_ListConnectionsBegin(ucx_instance_t *inst)
     return;
 }
 
-bool ucx_bluetooth_ListConnectionsGetNext(ucx_instance_t *inst, uCxBtListConnections_t * * pBtListConnectionsRsp)
+bool ucx_bluetooth_ListConnectionsGetNext(ucx_instance_t *inst, uCxBtListConnections_t * pBtListConnectionsRsp)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -275,7 +275,7 @@ void ucx_bluetooth_ListConnectionStatusBegin(ucx_instance_t *inst, int32_t conn_
     return;
 }
 
-bool ucx_bluetooth_ListConnectionStatusGetNext(ucx_instance_t *inst, uCxBtListConnectionStatus_t * * pBtListConnectionStatusRsp)
+bool ucx_bluetooth_ListConnectionStatusGetNext(ucx_instance_t *inst, uCxBtListConnectionStatus_t * pBtListConnectionStatusRsp)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -286,7 +286,7 @@ bool ucx_bluetooth_ListConnectionStatusGetNext(ucx_instance_t *inst, uCxBtListCo
     return result;
 }
 
-int32_t ucx_bluetooth_GetConnectionStatus(ucx_instance_t *inst, int32_t conn_handle, uBtPropId_t prop_id, int32_t * * pStatusVal)
+int32_t ucx_bluetooth_GetConnectionStatus(ucx_instance_t *inst, int32_t conn_handle, uBtPropId_t prop_id, int32_t * pStatusVal)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -297,7 +297,7 @@ int32_t ucx_bluetooth_GetConnectionStatus(ucx_instance_t *inst, int32_t conn_han
     return result;
 }
 
-int32_t ucx_bluetooth_GetAdvertiseInformation(ucx_instance_t *inst, uCxBtGetAdvertiseInformation_t * * pBtGetAdvertiseInformationRsp)
+int32_t ucx_bluetooth_GetAdvertiseInformation(ucx_instance_t *inst, uCxBtGetAdvertiseInformation_t * pBtGetAdvertiseInformationRsp)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -308,7 +308,7 @@ int32_t ucx_bluetooth_GetAdvertiseInformation(ucx_instance_t *inst, uCxBtGetAdve
     return result;
 }
 
-int32_t ucx_bluetooth_SetLegacyAdvertiseData(ucx_instance_t *inst, const uint8_t * * adv_data, int32_t adv_data_len)
+int32_t ucx_bluetooth_SetLegacyAdvertiseData(ucx_instance_t *inst, const uint8_t * adv_data, int32_t adv_data_len)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -319,7 +319,7 @@ int32_t ucx_bluetooth_SetLegacyAdvertiseData(ucx_instance_t *inst, const uint8_t
     return result;
 }
 
-bool ucx_bluetooth_GetLegacyAdvertiseDataBegin(ucx_instance_t *inst, uByteArray_t * * pAdvData)
+bool ucx_bluetooth_GetLegacyAdvertiseDataBegin(ucx_instance_t *inst, uByteArray_t * pAdvData)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -341,7 +341,7 @@ int32_t ucx_bluetooth_ClearLegacyAdvertiseData(ucx_instance_t *inst)
     return result;
 }
 
-int32_t ucx_bluetooth_SetScanResponseData(ucx_instance_t *inst, const uint8_t * * scan_rsp_data, int32_t scan_rsp_data_len)
+int32_t ucx_bluetooth_SetScanResponseData(ucx_instance_t *inst, const uint8_t * scan_rsp_data, int32_t scan_rsp_data_len)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -352,7 +352,7 @@ int32_t ucx_bluetooth_SetScanResponseData(ucx_instance_t *inst, const uint8_t * 
     return result;
 }
 
-bool ucx_bluetooth_GetScanResponseDataBegin(ucx_instance_t *inst, uByteArray_t * * pScanRspData)
+bool ucx_bluetooth_GetScanResponseDataBegin(ucx_instance_t *inst, uByteArray_t * pScanRspData)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -396,7 +396,7 @@ int32_t ucx_bluetooth_LegacyAdvertisementStop(ucx_instance_t *inst)
     return result;
 }
 
-int32_t ucx_bluetooth_DirectedAdvertisementStart1(ucx_instance_t *inst, uBtLeAddress_t * * bd_addr)
+int32_t ucx_bluetooth_DirectedAdvertisementStart1(ucx_instance_t *inst, uBtLeAddress_t * bd_addr)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -407,7 +407,7 @@ int32_t ucx_bluetooth_DirectedAdvertisementStart1(ucx_instance_t *inst, uBtLeAdd
     return result;
 }
 
-int32_t ucx_bluetooth_DirectedAdvertisementStart2(ucx_instance_t *inst, uBtLeAddress_t * * bd_addr, int32_t timeout)
+int32_t ucx_bluetooth_DirectedAdvertisementStart2(ucx_instance_t *inst, uBtLeAddress_t * bd_addr, int32_t timeout)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -440,7 +440,7 @@ int32_t ucx_bluetooth_SetConnectionIntervalMin(ucx_instance_t *inst, int32_t con
     return result;
 }
 
-int32_t ucx_bluetooth_GetConnectionIntervalMin(ucx_instance_t *inst, int32_t * * pConnectionIntervalMinimum)
+int32_t ucx_bluetooth_GetConnectionIntervalMin(ucx_instance_t *inst, int32_t * pConnectionIntervalMinimum)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -462,7 +462,7 @@ int32_t ucx_bluetooth_SetConnectionIntervalMax(ucx_instance_t *inst, int32_t con
     return result;
 }
 
-int32_t ucx_bluetooth_GetConnectionIntervalMax(ucx_instance_t *inst, int32_t * * pConnectionIntervalMaximum)
+int32_t ucx_bluetooth_GetConnectionIntervalMax(ucx_instance_t *inst, int32_t * pConnectionIntervalMaximum)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -484,7 +484,7 @@ int32_t ucx_bluetooth_SetConnectionPeripheralLatency(ucx_instance_t *inst, int32
     return result;
 }
 
-int32_t ucx_bluetooth_GetConnectionPeripheralLatency(ucx_instance_t *inst, int32_t * * pConnectionPeripheralLatency)
+int32_t ucx_bluetooth_GetConnectionPeripheralLatency(ucx_instance_t *inst, int32_t * pConnectionPeripheralLatency)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -506,7 +506,7 @@ int32_t ucx_bluetooth_SetConnectionLinklossTimeout(ucx_instance_t *inst, int32_t
     return result;
 }
 
-int32_t ucx_bluetooth_GetConnectionLinklossTimeout(ucx_instance_t *inst, int32_t * * pConnectionLinklossTimeout)
+int32_t ucx_bluetooth_GetConnectionLinklossTimeout(ucx_instance_t *inst, int32_t * pConnectionLinklossTimeout)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -528,7 +528,7 @@ int32_t ucx_bluetooth_SetPreferredTxPhy(ucx_instance_t *inst, int32_t preferred_
     return result;
 }
 
-int32_t ucx_bluetooth_GetPreferredTxPhy(ucx_instance_t *inst, int32_t * * pPreferredTxPhy)
+int32_t ucx_bluetooth_GetPreferredTxPhy(ucx_instance_t *inst, int32_t * pPreferredTxPhy)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -550,7 +550,7 @@ int32_t ucx_bluetooth_SetPreferredRxPhy(ucx_instance_t *inst, int32_t preferred_
     return result;
 }
 
-int32_t ucx_bluetooth_GetPreferredRxPhy(ucx_instance_t *inst, int32_t * * pPreferredRxPhy)
+int32_t ucx_bluetooth_GetPreferredRxPhy(ucx_instance_t *inst, int32_t * pPreferredRxPhy)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -572,7 +572,7 @@ int32_t ucx_bluetooth_SetLegacyAdvertisementConfig(ucx_instance_t *inst, int32_t
     return result;
 }
 
-int32_t ucx_bluetooth_GetLegacyAdvertisementConfig(ucx_instance_t *inst, uCxBtGetLegacyAdvertisementConfig_t * * pBtGetLegacyAdvertisementConfigRsp)
+int32_t ucx_bluetooth_GetLegacyAdvertisementConfig(ucx_instance_t *inst, uCxBtGetLegacyAdvertisementConfig_t * pBtGetLegacyAdvertisementConfigRsp)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -594,7 +594,7 @@ int32_t ucx_bluetooth_SetScanInterval(ucx_instance_t *inst, int32_t scan_interva
     return result;
 }
 
-int32_t ucx_bluetooth_GetScanInterval(ucx_instance_t *inst, int32_t * * pScanInterval)
+int32_t ucx_bluetooth_GetScanInterval(ucx_instance_t *inst, int32_t * pScanInterval)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -616,7 +616,7 @@ int32_t ucx_bluetooth_SetScanWindow(ucx_instance_t *inst, int32_t scan_window)
     return result;
 }
 
-int32_t ucx_bluetooth_GetScanWindow(ucx_instance_t *inst, int32_t * * pScanWindow)
+int32_t ucx_bluetooth_GetScanWindow(ucx_instance_t *inst, int32_t * pScanWindow)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -638,7 +638,7 @@ int32_t ucx_bluetooth_SetConnectToDirectedAdv(ucx_instance_t *inst, int32_t conn
     return result;
 }
 
-int32_t ucx_bluetooth_GetConnectToDirectedAdv(ucx_instance_t *inst, int32_t * * pConnectToDirectedAdv)
+int32_t ucx_bluetooth_GetConnectToDirectedAdv(ucx_instance_t *inst, int32_t * pConnectToDirectedAdv)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -660,7 +660,7 @@ int32_t ucx_bluetooth_SetIoCapabilities(ucx_instance_t *inst, uBtIoCap_t io_cap)
     return result;
 }
 
-int32_t ucx_bluetooth_GetIoCapabilities(ucx_instance_t *inst, uBtIoCap_t * * pIoCap)
+int32_t ucx_bluetooth_GetIoCapabilities(ucx_instance_t *inst, uBtIoCap_t * pIoCap)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -682,7 +682,7 @@ int32_t ucx_bluetooth_SetSecurityMode(ucx_instance_t *inst, uBtSecurityMode_t se
     return result;
 }
 
-int32_t ucx_bluetooth_GetSecurityMode(ucx_instance_t *inst, uBtSecurityMode_t * * pSecurityMode)
+int32_t ucx_bluetooth_GetSecurityMode(ucx_instance_t *inst, uBtSecurityMode_t * pSecurityMode)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -704,7 +704,7 @@ int32_t ucx_bluetooth_SetPairingMode(ucx_instance_t *inst, uBtPairingMode_t pair
     return result;
 }
 
-int32_t ucx_bluetooth_GetPairingMode(ucx_instance_t *inst, uBtPairingMode_t * * pPairingMode)
+int32_t ucx_bluetooth_GetPairingMode(ucx_instance_t *inst, uBtPairingMode_t * pPairingMode)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -715,7 +715,7 @@ int32_t ucx_bluetooth_GetPairingMode(ucx_instance_t *inst, uBtPairingMode_t * * 
     return result;
 }
 
-int32_t ucx_bluetooth_UserConfirmation(ucx_instance_t *inst, uBtLeAddress_t * * bd_addr, uBtConfirm_t confirm)
+int32_t ucx_bluetooth_UserConfirmation(ucx_instance_t *inst, uBtLeAddress_t * bd_addr, uBtConfirm_t confirm)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -726,7 +726,7 @@ int32_t ucx_bluetooth_UserConfirmation(ucx_instance_t *inst, uBtLeAddress_t * * 
     return result;
 }
 
-int32_t ucx_bluetooth_UserPasskeyEntry2(ucx_instance_t *inst, uBtLeAddress_t * * bd_addr, uBtConfirm_t confirm)
+int32_t ucx_bluetooth_UserPasskeyEntry2(ucx_instance_t *inst, uBtLeAddress_t * bd_addr, uBtConfirm_t confirm)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -737,7 +737,7 @@ int32_t ucx_bluetooth_UserPasskeyEntry2(ucx_instance_t *inst, uBtLeAddress_t * *
     return result;
 }
 
-int32_t ucx_bluetooth_UserPasskeyEntry3(ucx_instance_t *inst, uBtLeAddress_t * * bd_addr, uBtConfirm_t confirm, int32_t passkey)
+int32_t ucx_bluetooth_UserPasskeyEntry3(ucx_instance_t *inst, uBtLeAddress_t * bd_addr, uBtConfirm_t confirm, int32_t passkey)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -748,7 +748,7 @@ int32_t ucx_bluetooth_UserPasskeyEntry3(ucx_instance_t *inst, uBtLeAddress_t * *
     return result;
 }
 
-int32_t ucx_bluetooth_Bond(ucx_instance_t *inst, uBtLeAddress_t * * bd_addr)
+int32_t ucx_bluetooth_Bond(ucx_instance_t *inst, uBtLeAddress_t * bd_addr)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -759,7 +759,7 @@ int32_t ucx_bluetooth_Bond(ucx_instance_t *inst, uBtLeAddress_t * * bd_addr)
     return result;
 }
 
-int32_t ucx_bluetooth_Unbond(ucx_instance_t *inst, uBtLeAddress_t * * bd_addr)
+int32_t ucx_bluetooth_Unbond(ucx_instance_t *inst, uBtLeAddress_t * bd_addr)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -792,7 +792,7 @@ void ucx_bluetooth_ListBondedDevicesBegin(ucx_instance_t *inst)
     return;
 }
 
-bool ucx_bluetooth_ListBondedDevicesGetNext(ucx_instance_t *inst, uBtLeAddress_t * * pBdAddr)
+bool ucx_bluetooth_ListBondedDevicesGetNext(ucx_instance_t *inst, uBtLeAddress_t * pBdAddr)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -803,7 +803,7 @@ bool ucx_bluetooth_ListBondedDevicesGetNext(ucx_instance_t *inst, uBtLeAddress_t
     return result;
 }
 
-int32_t ucx_bluetooth_SetDeviceInfoServiceChar(ucx_instance_t *inst, uBtCharId_t char_id, const char * * char_value)
+int32_t ucx_bluetooth_SetDeviceInfoServiceChar(ucx_instance_t *inst, uBtCharId_t char_id, const char * char_value)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -814,7 +814,7 @@ int32_t ucx_bluetooth_SetDeviceInfoServiceChar(ucx_instance_t *inst, uBtCharId_t
     return result;
 }
 
-bool ucx_bluetooth_GetDeviceInfoServiceCharBegin(ucx_instance_t *inst, uBtCharId_t char_id, const char ** ** ppCharValue)
+bool ucx_bluetooth_GetDeviceInfoServiceCharBegin(ucx_instance_t *inst, uBtCharId_t char_id, const char * * ppCharValue)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -836,7 +836,7 @@ void ucx_bluetooth_ListDeviceInfoServiceCharsBegin(ucx_instance_t *inst)
     return;
 }
 
-bool ucx_bluetooth_ListDeviceInfoServiceCharsGetNext(ucx_instance_t *inst, uCxBtListDeviceInfoServiceChars_t * * pBtListDeviceInfoServiceCharsRsp)
+bool ucx_bluetooth_ListDeviceInfoServiceCharsGetNext(ucx_instance_t *inst, uCxBtListDeviceInfoServiceChars_t * pBtListDeviceInfoServiceCharsRsp)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -858,7 +858,7 @@ int32_t ucx_bluetooth_RequestPhy(ucx_instance_t *inst, int32_t conn_handle, int3
     return result;
 }
 
-int32_t ucx_bluetooth_GetPhy(ucx_instance_t *inst, int32_t conn_handle, uCxBtGetPhy_t * * pBtGetPhyRsp)
+int32_t ucx_bluetooth_GetPhy(ucx_instance_t *inst, int32_t conn_handle, uCxBtGetPhy_t * pBtGetPhyRsp)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -960,7 +960,7 @@ void ucx_bluetooth_RegisterBackgroundDiscovery(ucx_instance_t *inst, uUEBTBGD_t 
 
 /* ========== DIAGNOSTICS FUNCTIONS ========== */
 
-int32_t ucx_diagnostics_Ping1(ucx_instance_t *inst, const char * * destination)
+int32_t ucx_diagnostics_Ping1(ucx_instance_t *inst, const char * destination)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -971,7 +971,7 @@ int32_t ucx_diagnostics_Ping1(ucx_instance_t *inst, const char * * destination)
     return result;
 }
 
-int32_t ucx_diagnostics_Ping2(ucx_instance_t *inst, const char * * destination, int32_t count)
+int32_t ucx_diagnostics_Ping2(ucx_instance_t *inst, const char * destination, int32_t count)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -1015,7 +1015,7 @@ int32_t ucx_diagnostics_Iperf5(ucx_instance_t *inst, uDiagIperfAction_t iperf_ac
     return result;
 }
 
-int32_t ucx_diagnostics_Iperf7(ucx_instance_t *inst, uDiagIperfAction_t iperf_action, uDiagProtocolType_t protocol_type, uDiagRole_t role, int32_t port, int32_t report_interval, int32_t time_boundary, uSockIpAddress_t * * ip_addr)
+int32_t ucx_diagnostics_Iperf7(ucx_instance_t *inst, uDiagIperfAction_t iperf_action, uDiagProtocolType_t protocol_type, uDiagRole_t role, int32_t port, int32_t report_interval, int32_t time_boundary, uSockIpAddress_t * ip_addr)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -1026,7 +1026,7 @@ int32_t ucx_diagnostics_Iperf7(ucx_instance_t *inst, uDiagIperfAction_t iperf_ac
     return result;
 }
 
-int32_t ucx_diagnostics_Iperf8(ucx_instance_t *inst, uDiagIperfAction_t iperf_action, uDiagProtocolType_t protocol_type, uDiagRole_t role, int32_t port, int32_t report_interval, int32_t time_boundary, uSockIpAddress_t * * ip_addr, int32_t length)
+int32_t ucx_diagnostics_Iperf8(ucx_instance_t *inst, uDiagIperfAction_t iperf_action, uDiagProtocolType_t protocol_type, uDiagRole_t role, int32_t port, int32_t report_interval, int32_t time_boundary, uSockIpAddress_t * ip_addr, int32_t length)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -1037,7 +1037,7 @@ int32_t ucx_diagnostics_Iperf8(ucx_instance_t *inst, uDiagIperfAction_t iperf_ac
     return result;
 }
 
-int32_t ucx_diagnostics_Iperf9(ucx_instance_t *inst, uDiagIperfAction_t iperf_action, uDiagProtocolType_t protocol_type, uDiagRole_t role, int32_t port, int32_t report_interval, int32_t time_boundary, uSockIpAddress_t * * ip_addr, int32_t length, int32_t bandwidth)
+int32_t ucx_diagnostics_Iperf9(ucx_instance_t *inst, uDiagIperfAction_t iperf_action, uDiagProtocolType_t protocol_type, uDiagRole_t role, int32_t port, int32_t report_interval, int32_t time_boundary, uSockIpAddress_t * ip_addr, int32_t length, int32_t bandwidth)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -1048,7 +1048,7 @@ int32_t ucx_diagnostics_Iperf9(ucx_instance_t *inst, uDiagIperfAction_t iperf_ac
     return result;
 }
 
-int32_t ucx_diagnostics_Iperf10(ucx_instance_t *inst, uDiagIperfAction_t iperf_action, uDiagProtocolType_t protocol_type, uDiagRole_t role, int32_t port, int32_t report_interval, int32_t time_boundary, uSockIpAddress_t * * ip_addr, int32_t length, int32_t bandwidth, uDiagBidirectional_t bidirectional)
+int32_t ucx_diagnostics_Iperf10(ucx_instance_t *inst, uDiagIperfAction_t iperf_action, uDiagProtocolType_t protocol_type, uDiagRole_t role, int32_t port, int32_t report_interval, int32_t time_boundary, uSockIpAddress_t * ip_addr, int32_t length, int32_t bandwidth, uDiagBidirectional_t bidirectional)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -1106,7 +1106,7 @@ void ucx_gatt_client_DiscoverPrimaryServicesBegin(ucx_instance_t *inst, int32_t 
     return;
 }
 
-bool ucx_gatt_client_DiscoverPrimaryServicesGetNext(ucx_instance_t *inst, uCxGattClientDiscoverPrimaryServices_t * * pGattClientDiscoverPrimaryServicesRsp)
+bool ucx_gatt_client_DiscoverPrimaryServicesGetNext(ucx_instance_t *inst, uCxGattClientDiscoverPrimaryServices_t * pGattClientDiscoverPrimaryServicesRsp)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -1117,7 +1117,7 @@ bool ucx_gatt_client_DiscoverPrimaryServicesGetNext(ucx_instance_t *inst, uCxGat
     return result;
 }
 
-void ucx_gatt_client_DiscoverPrimaryServicesByUuidBegin(ucx_instance_t *inst, int32_t conn_handle, const uint8_t * * uuid, int32_t uuid_len)
+void ucx_gatt_client_DiscoverPrimaryServicesByUuidBegin(ucx_instance_t *inst, int32_t conn_handle, const uint8_t * uuid, int32_t uuid_len)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -1128,7 +1128,7 @@ void ucx_gatt_client_DiscoverPrimaryServicesByUuidBegin(ucx_instance_t *inst, in
     return;
 }
 
-bool ucx_gatt_client_DiscoverPrimaryServicesByUuidGetNext(ucx_instance_t *inst, uCxGattClientDiscoverPrimaryServicesByUuid_t * * pGattClientDiscoverPrimaryServicesByUuidRsp)
+bool ucx_gatt_client_DiscoverPrimaryServicesByUuidGetNext(ucx_instance_t *inst, uCxGattClientDiscoverPrimaryServicesByUuid_t * pGattClientDiscoverPrimaryServicesByUuidRsp)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -1150,7 +1150,7 @@ void ucx_gatt_client_DiscoverServiceCharsBegin(ucx_instance_t *inst, int32_t con
     return;
 }
 
-bool ucx_gatt_client_DiscoverServiceCharsGetNext(ucx_instance_t *inst, uCxGattClientDiscoverServiceChars_t * * pGattClientDiscoverServiceCharsRsp)
+bool ucx_gatt_client_DiscoverServiceCharsGetNext(ucx_instance_t *inst, uCxGattClientDiscoverServiceChars_t * pGattClientDiscoverServiceCharsRsp)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -1172,7 +1172,7 @@ void ucx_gatt_client_DiscoverCharDescriptorsBegin(ucx_instance_t *inst, int32_t 
     return;
 }
 
-bool ucx_gatt_client_DiscoverCharDescriptorsGetNext(ucx_instance_t *inst, uCxGattClientDiscoverCharDescriptors_t * * pGattClientDiscoverCharDescriptorsRsp)
+bool ucx_gatt_client_DiscoverCharDescriptorsGetNext(ucx_instance_t *inst, uCxGattClientDiscoverCharDescriptors_t * pGattClientDiscoverCharDescriptorsRsp)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -1183,7 +1183,7 @@ bool ucx_gatt_client_DiscoverCharDescriptorsGetNext(ucx_instance_t *inst, uCxGat
     return result;
 }
 
-bool ucx_gatt_client_ReadBegin(ucx_instance_t *inst, int32_t conn_handle, int32_t value_handle, uByteArray_t * * pHexData)
+bool ucx_gatt_client_ReadBegin(ucx_instance_t *inst, int32_t conn_handle, int32_t value_handle, uByteArray_t * pHexData)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -1194,7 +1194,7 @@ bool ucx_gatt_client_ReadBegin(ucx_instance_t *inst, int32_t conn_handle, int32_
     return result;
 }
 
-bool ucx_gatt_client_ReadByUuidBegin(ucx_instance_t *inst, int32_t conn_handle, int32_t start, int32_t end, const uint8_t * * uuid, int32_t uuid_len, uCxGattClientReadByUuid_t * * pGattClientReadByUuidRsp)
+bool ucx_gatt_client_ReadByUuidBegin(ucx_instance_t *inst, int32_t conn_handle, int32_t start, int32_t end, const uint8_t * uuid, int32_t uuid_len, uCxGattClientReadByUuid_t * pGattClientReadByUuidRsp)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -1205,7 +1205,7 @@ bool ucx_gatt_client_ReadByUuidBegin(ucx_instance_t *inst, int32_t conn_handle, 
     return result;
 }
 
-int32_t ucx_gatt_client_Write(ucx_instance_t *inst, int32_t conn_handle, int32_t value_handle, const uint8_t * * hex_data, int32_t hex_data_len)
+int32_t ucx_gatt_client_Write(ucx_instance_t *inst, int32_t conn_handle, int32_t value_handle, const uint8_t * hex_data, int32_t hex_data_len)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -1227,7 +1227,7 @@ int32_t ucx_gatt_client_ConfigWrite(ucx_instance_t *inst, int32_t conn_handle, i
     return result;
 }
 
-int32_t ucx_gatt_client_WriteNoRsp(ucx_instance_t *inst, int32_t conn_handle, int32_t value_handle, const uint8_t * * hex_data, int32_t hex_data_len)
+int32_t ucx_gatt_client_WriteNoRsp(ucx_instance_t *inst, int32_t conn_handle, int32_t value_handle, const uint8_t * hex_data, int32_t hex_data_len)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -1238,7 +1238,7 @@ int32_t ucx_gatt_client_WriteNoRsp(ucx_instance_t *inst, int32_t conn_handle, in
     return result;
 }
 
-int32_t ucx_gatt_client_WriteLong(ucx_instance_t *inst, int32_t conn_handle, int32_t value_handle, const uint8_t * * hex_data, int32_t hex_data_len, uGattClientReliable_t reliable, uGattClientFlag_t flag, int32_t offset)
+int32_t ucx_gatt_client_WriteLong(ucx_instance_t *inst, int32_t conn_handle, int32_t value_handle, const uint8_t * hex_data, int32_t hex_data_len, uGattClientReliable_t reliable, uGattClientFlag_t flag, int32_t offset)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -1274,7 +1274,7 @@ void ucx_gatt_client_RegisterIndication(ucx_instance_t *inst, uUEBTGCI_t callbac
 
 /* ========== GATT_SERVER FUNCTIONS ========== */
 
-int32_t ucx_gatt_server_ServiceDefine(ucx_instance_t *inst, const uint8_t * * uuid, int32_t uuid_len, int32_t * * pSerHandle)
+int32_t ucx_gatt_server_ServiceDefine(ucx_instance_t *inst, const uint8_t * uuid, int32_t uuid_len, int32_t * pSerHandle)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -1285,7 +1285,7 @@ int32_t ucx_gatt_server_ServiceDefine(ucx_instance_t *inst, const uint8_t * * uu
     return result;
 }
 
-int32_t ucx_gatt_server_CharDefine5(ucx_instance_t *inst, const uint8_t * * uuid, int32_t uuid_len, const uint8_t * * properties, int32_t properties_len, uGattServerReadSecurity_t read_security, uGattServerWriteSecurity_t write_security, const uint8_t * * value, int32_t value_len, uCxGattServerCharDefine_t * * pGattServerCharDefineRsp)
+int32_t ucx_gatt_server_CharDefine5(ucx_instance_t *inst, const uint8_t * uuid, int32_t uuid_len, const uint8_t * properties, int32_t properties_len, uGattServerReadSecurity_t read_security, uGattServerWriteSecurity_t write_security, const uint8_t * value, int32_t value_len, uCxGattServerCharDefine_t * pGattServerCharDefineRsp)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -1296,7 +1296,7 @@ int32_t ucx_gatt_server_CharDefine5(ucx_instance_t *inst, const uint8_t * * uuid
     return result;
 }
 
-int32_t ucx_gatt_server_CharDefine6(ucx_instance_t *inst, const uint8_t * * uuid, int32_t uuid_len, const uint8_t * * properties, int32_t properties_len, uGattServerReadSecurity_t read_security, uGattServerWriteSecurity_t write_security, const uint8_t * * value, int32_t value_len, int32_t max_length, uCxGattServerCharDefine_t * * pGattServerCharDefineRsp)
+int32_t ucx_gatt_server_CharDefine6(ucx_instance_t *inst, const uint8_t * uuid, int32_t uuid_len, const uint8_t * properties, int32_t properties_len, uGattServerReadSecurity_t read_security, uGattServerWriteSecurity_t write_security, const uint8_t * value, int32_t value_len, int32_t max_length, uCxGattServerCharDefine_t * pGattServerCharDefineRsp)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -1307,7 +1307,7 @@ int32_t ucx_gatt_server_CharDefine6(ucx_instance_t *inst, const uint8_t * * uuid
     return result;
 }
 
-int32_t ucx_gatt_server_HostCharDefine(ucx_instance_t *inst, const uint8_t * * uuid, int32_t uuid_len, const uint8_t * * properties, int32_t properties_len, uGattServerReadSecurity_t read_security, uGattServerWriteSecurity_t write_security, uCxGattServerHostCharDefine_t * * pGattServerHostCharDefineRsp)
+int32_t ucx_gatt_server_HostCharDefine(ucx_instance_t *inst, const uint8_t * uuid, int32_t uuid_len, const uint8_t * properties, int32_t properties_len, uGattServerReadSecurity_t read_security, uGattServerWriteSecurity_t write_security, uCxGattServerHostCharDefine_t * pGattServerHostCharDefineRsp)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -1318,7 +1318,7 @@ int32_t ucx_gatt_server_HostCharDefine(ucx_instance_t *inst, const uint8_t * * u
     return result;
 }
 
-int32_t ucx_gatt_server_DescriptorDefine4(ucx_instance_t *inst, const uint8_t * * uuid, int32_t uuid_len, uGattServerReadSecurity_t read_security, uGattServerWriteSecurity_t write_security, const uint8_t * * value, int32_t value_len, int32_t * * pDescHandle)
+int32_t ucx_gatt_server_DescriptorDefine4(ucx_instance_t *inst, const uint8_t * uuid, int32_t uuid_len, uGattServerReadSecurity_t read_security, uGattServerWriteSecurity_t write_security, const uint8_t * value, int32_t value_len, int32_t * pDescHandle)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -1329,7 +1329,7 @@ int32_t ucx_gatt_server_DescriptorDefine4(ucx_instance_t *inst, const uint8_t * 
     return result;
 }
 
-int32_t ucx_gatt_server_DescriptorDefine5(ucx_instance_t *inst, const uint8_t * * uuid, int32_t uuid_len, uGattServerReadSecurity_t read_security, uGattServerWriteSecurity_t write_security, const uint8_t * * value, int32_t value_len, int32_t max_length, int32_t * * pDescHandle)
+int32_t ucx_gatt_server_DescriptorDefine5(ucx_instance_t *inst, const uint8_t * uuid, int32_t uuid_len, uGattServerReadSecurity_t read_security, uGattServerWriteSecurity_t write_security, const uint8_t * value, int32_t value_len, int32_t max_length, int32_t * pDescHandle)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -1351,7 +1351,7 @@ int32_t ucx_gatt_server_ServiceActivate(ucx_instance_t *inst)
     return result;
 }
 
-int32_t ucx_gatt_server_ReadReqResponse(ucx_instance_t *inst, int32_t conn_handle, const uint8_t * * value, int32_t value_len)
+int32_t ucx_gatt_server_ReadReqResponse(ucx_instance_t *inst, int32_t conn_handle, const uint8_t * value, int32_t value_len)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -1362,7 +1362,7 @@ int32_t ucx_gatt_server_ReadReqResponse(ucx_instance_t *inst, int32_t conn_handl
     return result;
 }
 
-int32_t ucx_gatt_server_SendNotification(ucx_instance_t *inst, int32_t conn_handle, int32_t char_handle, const uint8_t * * value, int32_t value_len)
+int32_t ucx_gatt_server_SendNotification(ucx_instance_t *inst, int32_t conn_handle, int32_t char_handle, const uint8_t * value, int32_t value_len)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -1373,7 +1373,7 @@ int32_t ucx_gatt_server_SendNotification(ucx_instance_t *inst, int32_t conn_hand
     return result;
 }
 
-int32_t ucx_gatt_server_SendIndication(ucx_instance_t *inst, int32_t conn_handle, int32_t char_handle, const uint8_t * * value, int32_t value_len)
+int32_t ucx_gatt_server_SendIndication(ucx_instance_t *inst, int32_t conn_handle, int32_t char_handle, const uint8_t * value, int32_t value_len)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -1384,7 +1384,7 @@ int32_t ucx_gatt_server_SendIndication(ucx_instance_t *inst, int32_t conn_handle
     return result;
 }
 
-int32_t ucx_gatt_server_SetAttrValue(ucx_instance_t *inst, int32_t attr_handle, const uint8_t * * value, int32_t value_len)
+int32_t ucx_gatt_server_SetAttrValue(ucx_instance_t *inst, int32_t attr_handle, const uint8_t * value, int32_t value_len)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -1395,7 +1395,7 @@ int32_t ucx_gatt_server_SetAttrValue(ucx_instance_t *inst, int32_t attr_handle, 
     return result;
 }
 
-int32_t ucx_gatt_server_ReadReqError(ucx_instance_t *inst, int32_t conn_handle, const uint8_t * * error_code, int32_t error_code_len)
+int32_t ucx_gatt_server_ReadReqError(ucx_instance_t *inst, int32_t conn_handle, const uint8_t * error_code, int32_t error_code_len)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -1406,7 +1406,7 @@ int32_t ucx_gatt_server_ReadReqError(ucx_instance_t *inst, int32_t conn_handle, 
     return result;
 }
 
-int32_t ucx_gatt_server_WriteReqError(ucx_instance_t *inst, int32_t conn_handle, const uint8_t * * error_code, int32_t error_code_len)
+int32_t ucx_gatt_server_WriteReqError(ucx_instance_t *inst, int32_t conn_handle, const uint8_t * error_code, int32_t error_code_len)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -1486,7 +1486,7 @@ int32_t ucx_general_Attention(ucx_instance_t *inst)
     return result;
 }
 
-bool ucx_general_GetManufacturerIdentificationBegin(ucx_instance_t *inst, const char ** ** ppManufacturer)
+bool ucx_general_GetManufacturerIdentificationBegin(ucx_instance_t *inst, const char * * ppManufacturer)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -1497,7 +1497,7 @@ bool ucx_general_GetManufacturerIdentificationBegin(ucx_instance_t *inst, const 
     return result;
 }
 
-bool ucx_general_GetDeviceModelIdentificationBegin(ucx_instance_t *inst, const char ** ** ppDeviceModel)
+bool ucx_general_GetDeviceModelIdentificationBegin(ucx_instance_t *inst, const char * * ppDeviceModel)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -1508,7 +1508,7 @@ bool ucx_general_GetDeviceModelIdentificationBegin(ucx_instance_t *inst, const c
     return result;
 }
 
-bool ucx_general_GetSoftwareVersionBegin(ucx_instance_t *inst, const char ** ** ppVersion)
+bool ucx_general_GetSoftwareVersionBegin(ucx_instance_t *inst, const char * * ppVersion)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -1519,7 +1519,7 @@ bool ucx_general_GetSoftwareVersionBegin(ucx_instance_t *inst, const char ** ** 
     return result;
 }
 
-bool ucx_general_GetSerialNumberBegin(ucx_instance_t *inst, const char ** ** ppSerialNumber)
+bool ucx_general_GetSerialNumberBegin(ucx_instance_t *inst, const char * * ppSerialNumber)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -1530,7 +1530,7 @@ bool ucx_general_GetSerialNumberBegin(ucx_instance_t *inst, const char ** ** ppS
     return result;
 }
 
-bool ucx_general_GetIdentInfoBegin(ucx_instance_t *inst, uCxGeneralGetIdentInfo_t * * pGeneralGetIdentInfoRsp)
+bool ucx_general_GetIdentInfoBegin(ucx_instance_t *inst, uCxGeneralGetIdentInfo_t * pGeneralGetIdentInfoRsp)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -1541,7 +1541,7 @@ bool ucx_general_GetIdentInfoBegin(ucx_instance_t *inst, uCxGeneralGetIdentInfo_
     return result;
 }
 
-bool ucx_general_GetTypeCodeBegin(ucx_instance_t *inst, const char ** ** ppTypeCode)
+bool ucx_general_GetTypeCodeBegin(ucx_instance_t *inst, const char * * ppTypeCode)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -1563,7 +1563,7 @@ int32_t ucx_general_SetGreetingText1(ucx_instance_t *inst, uGeneralGreetingMode_
     return result;
 }
 
-int32_t ucx_general_SetGreetingText2(ucx_instance_t *inst, uGeneralGreetingMode_t greeting_mode, const char * * text)
+int32_t ucx_general_SetGreetingText2(ucx_instance_t *inst, uGeneralGreetingMode_t greeting_mode, const char * text)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -1574,7 +1574,7 @@ int32_t ucx_general_SetGreetingText2(ucx_instance_t *inst, uGeneralGreetingMode_
     return result;
 }
 
-bool ucx_general_GetGreetingTextBegin(ucx_instance_t *inst, uCxGeneralGetGreetingText_t * * pGeneralGetGreetingTextRsp)
+bool ucx_general_GetGreetingTextBegin(ucx_instance_t *inst, uCxGeneralGetGreetingText_t * pGeneralGetGreetingTextRsp)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -1599,7 +1599,7 @@ void ucx_general_RegisterStartup(ucx_instance_t *inst, uSTARTUP_t callback)
 
 /* ========== HTTP FUNCTIONS ========== */
 
-int32_t ucx_http_SetConnectionParams2(ucx_instance_t *inst, int32_t session_id, const char * * host)
+int32_t ucx_http_SetConnectionParams2(ucx_instance_t *inst, int32_t session_id, const char * host)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -1610,7 +1610,7 @@ int32_t ucx_http_SetConnectionParams2(ucx_instance_t *inst, int32_t session_id, 
     return result;
 }
 
-int32_t ucx_http_SetConnectionParams3(ucx_instance_t *inst, int32_t session_id, const char * * host, int32_t port)
+int32_t ucx_http_SetConnectionParams3(ucx_instance_t *inst, int32_t session_id, const char * host, int32_t port)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -1632,7 +1632,7 @@ int32_t ucx_http_SetTLS2(ucx_instance_t *inst, int32_t session_id, uWifiTlsVersi
     return result;
 }
 
-int32_t ucx_http_SetTLS3(ucx_instance_t *inst, int32_t session_id, uWifiTlsVersion_t tls_version, const char * * ca_name)
+int32_t ucx_http_SetTLS3(ucx_instance_t *inst, int32_t session_id, uWifiTlsVersion_t tls_version, const char * ca_name)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -1643,7 +1643,7 @@ int32_t ucx_http_SetTLS3(ucx_instance_t *inst, int32_t session_id, uWifiTlsVersi
     return result;
 }
 
-int32_t ucx_http_SetTLS5(ucx_instance_t *inst, int32_t session_id, uWifiTlsVersion_t tls_version, const char * * ca_name, const char * * client_cert_name, const char * * client_key_name)
+int32_t ucx_http_SetTLS5(ucx_instance_t *inst, int32_t session_id, uWifiTlsVersion_t tls_version, const char * ca_name, const char * client_cert_name, const char * client_key_name)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -1654,7 +1654,7 @@ int32_t ucx_http_SetTLS5(ucx_instance_t *inst, int32_t session_id, uWifiTlsVersi
     return result;
 }
 
-bool ucx_http_GetTLSBegin(ucx_instance_t *inst, int32_t session_id, uCxHttpGetTLS_t * * pHttpGetTLSRsp)
+bool ucx_http_GetTLSBegin(ucx_instance_t *inst, int32_t session_id, uCxHttpGetTLS_t * pHttpGetTLSRsp)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -1676,7 +1676,7 @@ int32_t ucx_http_Disconnect(ucx_instance_t *inst, int32_t session_id)
     return result;
 }
 
-bool ucx_http_GetHeader1Begin(ucx_instance_t *inst, int32_t session_id, uCxHttpGetHeader_t * * pHttpGetHeaderRsp)
+bool ucx_http_GetHeader1Begin(ucx_instance_t *inst, int32_t session_id, uCxHttpGetHeader_t * pHttpGetHeaderRsp)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -1687,7 +1687,7 @@ bool ucx_http_GetHeader1Begin(ucx_instance_t *inst, int32_t session_id, uCxHttpG
     return result;
 }
 
-bool ucx_http_GetHeader2Begin(ucx_instance_t *inst, int32_t session_id, int32_t data_length, uCxHttpGetHeader_t * * pHttpGetHeaderRsp)
+bool ucx_http_GetHeader2Begin(ucx_instance_t *inst, int32_t session_id, int32_t data_length, uCxHttpGetHeader_t * pHttpGetHeaderRsp)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -1698,7 +1698,7 @@ bool ucx_http_GetHeader2Begin(ucx_instance_t *inst, int32_t session_id, int32_t 
     return result;
 }
 
-int32_t ucx_http_GetBody(ucx_instance_t *inst, int32_t session_id, int32_t data_length, uint8_t * * pDataBuf, int32_t * * pMoreToRead)
+int32_t ucx_http_GetBody(ucx_instance_t *inst, int32_t session_id, int32_t data_length, uint8_t * pDataBuf, int32_t * pMoreToRead)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -1709,7 +1709,7 @@ int32_t ucx_http_GetBody(ucx_instance_t *inst, int32_t session_id, int32_t data_
     return result;
 }
 
-int32_t ucx_http_AddHeaderField(ucx_instance_t *inst, int32_t session_id, const char * * field_name, const char * * field_value)
+int32_t ucx_http_AddHeaderField(ucx_instance_t *inst, int32_t session_id, const char * field_name, const char * field_value)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -1720,7 +1720,7 @@ int32_t ucx_http_AddHeaderField(ucx_instance_t *inst, int32_t session_id, const 
     return result;
 }
 
-int32_t ucx_http_SetCustomHeader(ucx_instance_t *inst, int32_t session_id, const char * * header_data)
+int32_t ucx_http_SetCustomHeader(ucx_instance_t *inst, int32_t session_id, const char * header_data)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -1742,7 +1742,7 @@ int32_t ucx_http_ClearHeaderCustom(ucx_instance_t *inst, int32_t session_id)
     return result;
 }
 
-int32_t ucx_http_SetRequestPath(ucx_instance_t *inst, int32_t session_id, const char * * path)
+int32_t ucx_http_SetRequestPath(ucx_instance_t *inst, int32_t session_id, const char * path)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -1753,7 +1753,7 @@ int32_t ucx_http_SetRequestPath(ucx_instance_t *inst, int32_t session_id, const 
     return result;
 }
 
-bool ucx_http_GetRequestPathBegin(ucx_instance_t *inst, int32_t session_id, uCxHttpGetRequestPath_t * * pHttpGetRequestPathRsp)
+bool ucx_http_GetRequestPathBegin(ucx_instance_t *inst, int32_t session_id, uCxHttpGetRequestPath_t * pHttpGetRequestPathRsp)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -1775,7 +1775,7 @@ int32_t ucx_http_GetRequest(ucx_instance_t *inst, int32_t session_id)
     return result;
 }
 
-bool ucx_http_GetGetRequestHeaderBegin(ucx_instance_t *inst, int32_t session_id, uCxHttpGetGetRequestHeader_t * * pHttpGetGetRequestHeaderRsp)
+bool ucx_http_GetGetRequestHeaderBegin(ucx_instance_t *inst, int32_t session_id, uCxHttpGetGetRequestHeader_t * pHttpGetGetRequestHeaderRsp)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -1797,7 +1797,7 @@ int32_t ucx_http_DeleteRequest1(ucx_instance_t *inst, int32_t session_id)
     return result;
 }
 
-int32_t ucx_http_DeleteRequest2(ucx_instance_t *inst, int32_t session_id, const char * * byte_array_data, int32_t byte_array_data_len)
+int32_t ucx_http_DeleteRequest2(ucx_instance_t *inst, int32_t session_id, const char * byte_array_data, int32_t byte_array_data_len)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -1808,7 +1808,7 @@ int32_t ucx_http_DeleteRequest2(ucx_instance_t *inst, int32_t session_id, const 
     return result;
 }
 
-bool ucx_http_GetDeleteRequestHeaderBegin(ucx_instance_t *inst, int32_t session_id, uCxHttpGetDeleteRequestHeader_t * * pHttpGetDeleteRequestHeaderRsp)
+bool ucx_http_GetDeleteRequestHeaderBegin(ucx_instance_t *inst, int32_t session_id, uCxHttpGetDeleteRequestHeader_t * pHttpGetDeleteRequestHeaderRsp)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -1819,7 +1819,7 @@ bool ucx_http_GetDeleteRequestHeaderBegin(ucx_instance_t *inst, int32_t session_
     return result;
 }
 
-int32_t ucx_http_PostRequest(ucx_instance_t *inst, int32_t session_id, const uint8_t * * binary_data, int32_t binary_data_len)
+int32_t ucx_http_PostRequest(ucx_instance_t *inst, int32_t session_id, const uint8_t * binary_data, int32_t binary_data_len)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -1830,7 +1830,7 @@ int32_t ucx_http_PostRequest(ucx_instance_t *inst, int32_t session_id, const uin
     return result;
 }
 
-bool ucx_http_GetPostRequestHeaderBegin(ucx_instance_t *inst, int32_t session_id, uCxHttpGetPostRequestHeader_t * * pHttpGetPostRequestHeaderRsp)
+bool ucx_http_GetPostRequestHeaderBegin(ucx_instance_t *inst, int32_t session_id, uCxHttpGetPostRequestHeader_t * pHttpGetPostRequestHeaderRsp)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -1841,7 +1841,7 @@ bool ucx_http_GetPostRequestHeaderBegin(ucx_instance_t *inst, int32_t session_id
     return result;
 }
 
-int32_t ucx_http_PutRequest(ucx_instance_t *inst, int32_t session_id, const uint8_t * * binary_data, int32_t binary_data_len)
+int32_t ucx_http_PutRequest(ucx_instance_t *inst, int32_t session_id, const uint8_t * binary_data, int32_t binary_data_len)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -1852,7 +1852,7 @@ int32_t ucx_http_PutRequest(ucx_instance_t *inst, int32_t session_id, const uint
     return result;
 }
 
-bool ucx_http_GetPutRequestHeaderBegin(ucx_instance_t *inst, int32_t session_id, uCxHttpGetPutRequestHeader_t * * pHttpGetPutRequestHeaderRsp)
+bool ucx_http_GetPutRequestHeaderBegin(ucx_instance_t *inst, int32_t session_id, uCxHttpGetPutRequestHeader_t * pHttpGetPutRequestHeaderRsp)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -1888,7 +1888,7 @@ void ucx_http_RegisterRequestStatus(ucx_instance_t *inst, uUEHTCRS_t callback)
 
 /* ========== MQTT FUNCTIONS ========== */
 
-int32_t ucx_mqtt_SetConnectionParams3(ucx_instance_t *inst, int32_t mqtt_id, const char * * hostname, int32_t port)
+int32_t ucx_mqtt_SetConnectionParams3(ucx_instance_t *inst, int32_t mqtt_id, const char * hostname, int32_t port)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -1899,7 +1899,7 @@ int32_t ucx_mqtt_SetConnectionParams3(ucx_instance_t *inst, int32_t mqtt_id, con
     return result;
 }
 
-int32_t ucx_mqtt_SetConnectionParams4(ucx_instance_t *inst, int32_t mqtt_id, const char * * hostname, int32_t port, const char * * client_id)
+int32_t ucx_mqtt_SetConnectionParams4(ucx_instance_t *inst, int32_t mqtt_id, const char * hostname, int32_t port, const char * client_id)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -1910,7 +1910,7 @@ int32_t ucx_mqtt_SetConnectionParams4(ucx_instance_t *inst, int32_t mqtt_id, con
     return result;
 }
 
-int32_t ucx_mqtt_SetConnectionParams5(ucx_instance_t *inst, int32_t mqtt_id, const char * * hostname, int32_t port, const char * * client_id, const char * * username)
+int32_t ucx_mqtt_SetConnectionParams5(ucx_instance_t *inst, int32_t mqtt_id, const char * hostname, int32_t port, const char * client_id, const char * username)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -1921,7 +1921,7 @@ int32_t ucx_mqtt_SetConnectionParams5(ucx_instance_t *inst, int32_t mqtt_id, con
     return result;
 }
 
-int32_t ucx_mqtt_SetConnectionParams6(ucx_instance_t *inst, int32_t mqtt_id, const char * * hostname, int32_t port, const char * * client_id, const char * * username, const char * * password)
+int32_t ucx_mqtt_SetConnectionParams6(ucx_instance_t *inst, int32_t mqtt_id, const char * hostname, int32_t port, const char * client_id, const char * username, const char * password)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -1932,7 +1932,7 @@ int32_t ucx_mqtt_SetConnectionParams6(ucx_instance_t *inst, int32_t mqtt_id, con
     return result;
 }
 
-bool ucx_mqtt_GetConnectionParamsBegin(ucx_instance_t *inst, int32_t mqtt_id, uCxMqttGetConnectionParams_t * * pMqttGetConnectionParamsRsp)
+bool ucx_mqtt_GetConnectionParamsBegin(ucx_instance_t *inst, int32_t mqtt_id, uCxMqttGetConnectionParams_t * pMqttGetConnectionParamsRsp)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -1965,7 +1965,7 @@ int32_t ucx_mqtt_SetKeepAlive(ucx_instance_t *inst, int32_t mqtt_id, int32_t kee
     return result;
 }
 
-int32_t ucx_mqtt_GetKeepAlive(ucx_instance_t *inst, int32_t mqtt_id, int32_t * * pKeepAlive)
+int32_t ucx_mqtt_GetKeepAlive(ucx_instance_t *inst, int32_t mqtt_id, int32_t * pKeepAlive)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -1976,7 +1976,7 @@ int32_t ucx_mqtt_GetKeepAlive(ucx_instance_t *inst, int32_t mqtt_id, int32_t * *
     return result;
 }
 
-int32_t ucx_mqtt_SetLastWillAndTestament3(ucx_instance_t *inst, int32_t mqtt_id, const char * * topic, const char * * will_msg)
+int32_t ucx_mqtt_SetLastWillAndTestament3(ucx_instance_t *inst, int32_t mqtt_id, const char * topic, const char * will_msg)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -1987,7 +1987,7 @@ int32_t ucx_mqtt_SetLastWillAndTestament3(ucx_instance_t *inst, int32_t mqtt_id,
     return result;
 }
 
-int32_t ucx_mqtt_SetLastWillAndTestament4(ucx_instance_t *inst, int32_t mqtt_id, const char * * topic, const char * * will_msg, uMqttQos_t qos)
+int32_t ucx_mqtt_SetLastWillAndTestament4(ucx_instance_t *inst, int32_t mqtt_id, const char * topic, const char * will_msg, uMqttQos_t qos)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -1998,7 +1998,7 @@ int32_t ucx_mqtt_SetLastWillAndTestament4(ucx_instance_t *inst, int32_t mqtt_id,
     return result;
 }
 
-int32_t ucx_mqtt_SetLastWillAndTestament5(ucx_instance_t *inst, int32_t mqtt_id, const char * * topic, const char * * will_msg, uMqttQos_t qos, uMqttRetain_t retain)
+int32_t ucx_mqtt_SetLastWillAndTestament5(ucx_instance_t *inst, int32_t mqtt_id, const char * topic, const char * will_msg, uMqttQos_t qos, uMqttRetain_t retain)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -2009,7 +2009,7 @@ int32_t ucx_mqtt_SetLastWillAndTestament5(ucx_instance_t *inst, int32_t mqtt_id,
     return result;
 }
 
-bool ucx_mqtt_GetLastWillAndTestamentBegin(ucx_instance_t *inst, int32_t mqtt_id, uCxMqttGetLastWillAndTestament_t * * pMqttGetLastWillAndTestamentRsp)
+bool ucx_mqtt_GetLastWillAndTestamentBegin(ucx_instance_t *inst, int32_t mqtt_id, uCxMqttGetLastWillAndTestament_t * pMqttGetLastWillAndTestamentRsp)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -2031,7 +2031,7 @@ int32_t ucx_mqtt_SetTLS2(ucx_instance_t *inst, int32_t mqtt_id, uWifiTlsVersion_
     return result;
 }
 
-int32_t ucx_mqtt_SetTLS3(ucx_instance_t *inst, int32_t mqtt_id, uWifiTlsVersion_t tls_version, const char * * ca_name)
+int32_t ucx_mqtt_SetTLS3(ucx_instance_t *inst, int32_t mqtt_id, uWifiTlsVersion_t tls_version, const char * ca_name)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -2042,7 +2042,7 @@ int32_t ucx_mqtt_SetTLS3(ucx_instance_t *inst, int32_t mqtt_id, uWifiTlsVersion_
     return result;
 }
 
-int32_t ucx_mqtt_SetTLS5(ucx_instance_t *inst, int32_t mqtt_id, uWifiTlsVersion_t tls_version, const char * * ca_name, const char * * client_cert_name, const char * * client_key_name)
+int32_t ucx_mqtt_SetTLS5(ucx_instance_t *inst, int32_t mqtt_id, uWifiTlsVersion_t tls_version, const char * ca_name, const char * client_cert_name, const char * client_key_name)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -2053,7 +2053,7 @@ int32_t ucx_mqtt_SetTLS5(ucx_instance_t *inst, int32_t mqtt_id, uWifiTlsVersion_
     return result;
 }
 
-bool ucx_mqtt_GetTLSBegin(ucx_instance_t *inst, int32_t mqtt_id, uCxMqttGetTLS_t * * pMqttGetTLSRsp)
+bool ucx_mqtt_GetTLSBegin(ucx_instance_t *inst, int32_t mqtt_id, uCxMqttGetTLS_t * pMqttGetTLSRsp)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -2075,7 +2075,7 @@ int32_t ucx_mqtt_Disconnect(ucx_instance_t *inst, int32_t mqtt_id)
     return result;
 }
 
-int32_t ucx_mqtt_Publish(ucx_instance_t *inst, int32_t mqtt_id, uMqttQos_t qos, uMqttRetain_t retain, const char * * topic, const uint8_t * * binary_data, int32_t binary_data_len)
+int32_t ucx_mqtt_Publish(ucx_instance_t *inst, int32_t mqtt_id, uMqttQos_t qos, uMqttRetain_t retain, const char * topic, const uint8_t * binary_data, int32_t binary_data_len)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -2086,7 +2086,7 @@ int32_t ucx_mqtt_Publish(ucx_instance_t *inst, int32_t mqtt_id, uMqttQos_t qos, 
     return result;
 }
 
-int32_t ucx_mqtt_Subscribe3(ucx_instance_t *inst, int32_t mqtt_id, uMqttSubscribeAction_t subscribe_action, const char * * topic)
+int32_t ucx_mqtt_Subscribe3(ucx_instance_t *inst, int32_t mqtt_id, uMqttSubscribeAction_t subscribe_action, const char * topic)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -2097,7 +2097,7 @@ int32_t ucx_mqtt_Subscribe3(ucx_instance_t *inst, int32_t mqtt_id, uMqttSubscrib
     return result;
 }
 
-int32_t ucx_mqtt_Subscribe4(ucx_instance_t *inst, int32_t mqtt_id, uMqttSubscribeAction_t subscribe_action, const char * * topic, uMqttQos_t qos)
+int32_t ucx_mqtt_Subscribe4(ucx_instance_t *inst, int32_t mqtt_id, uMqttSubscribeAction_t subscribe_action, const char * topic, uMqttQos_t qos)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -2108,7 +2108,7 @@ int32_t ucx_mqtt_Subscribe4(ucx_instance_t *inst, int32_t mqtt_id, uMqttSubscrib
     return result;
 }
 
-int32_t ucx_mqtt_ReadBegin(ucx_instance_t *inst, int32_t mqtt_id, uint8_t * * pDataBuf, uint16_t dataBufLength, const char ** ** ppTopic)
+int32_t ucx_mqtt_ReadBegin(ucx_instance_t *inst, int32_t mqtt_id, uint8_t * pDataBuf, uint16_t dataBufLength, const char * * ppTopic)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -2199,7 +2199,7 @@ int32_t ucx_network_time_SetClientEnabled(ucx_instance_t *inst, uNtpClientStatus
     return result;
 }
 
-int32_t ucx_network_time_GetClientEnabled(ucx_instance_t *inst, uNtpClientStatus_t * * pClientStatus)
+int32_t ucx_network_time_GetClientEnabled(ucx_instance_t *inst, uNtpClientStatus_t * pClientStatus)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -2210,7 +2210,7 @@ int32_t ucx_network_time_GetClientEnabled(ucx_instance_t *inst, uNtpClientStatus
     return result;
 }
 
-int32_t ucx_network_time_SetNtpServer(ucx_instance_t *inst, int32_t ntp_server_id, const char * * ntp_server_address)
+int32_t ucx_network_time_SetNtpServer(ucx_instance_t *inst, int32_t ntp_server_id, const char * ntp_server_address)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -2221,7 +2221,7 @@ int32_t ucx_network_time_SetNtpServer(ucx_instance_t *inst, int32_t ntp_server_i
     return result;
 }
 
-bool ucx_network_time_GetNtpServerBegin(ucx_instance_t *inst, uCxNtpGetNtpServer_t * * pNtpGetNtpServerRsp)
+bool ucx_network_time_GetNtpServerBegin(ucx_instance_t *inst, uCxNtpGetNtpServer_t * pNtpGetNtpServerRsp)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -2268,7 +2268,7 @@ int32_t ucx_power_SetPowerSaveLevel(ucx_instance_t *inst, int32_t level)
     return result;
 }
 
-int32_t ucx_power_GetPowerSaveLevel(ucx_instance_t *inst, int32_t * * pLevel)
+int32_t ucx_power_GetPowerSaveLevel(ucx_instance_t *inst, int32_t * pLevel)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -2293,7 +2293,7 @@ int32_t ucx_power_SetPowerSaveTimeout(ucx_instance_t *inst, int32_t timeoutMs)
 
 /* ========== SECURITY FUNCTIONS ========== */
 
-int32_t ucx_security_CertificateRemove(ucx_instance_t *inst, uSecCertType_t cert_type, const char * * name)
+int32_t ucx_security_CertificateRemove(ucx_instance_t *inst, uSecCertType_t cert_type, const char * name)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -2315,7 +2315,7 @@ int32_t ucx_security_CertificateRemoveAll(ucx_instance_t *inst)
     return result;
 }
 
-int32_t ucx_security_CertificateUpload(ucx_instance_t *inst, uSecCertType_t cert_type, const char * * name, const uint8_t * * binary_data, int32_t binary_data_len)
+int32_t ucx_security_CertificateUpload(ucx_instance_t *inst, uSecCertType_t cert_type, const char * name, const uint8_t * binary_data, int32_t binary_data_len)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -2326,7 +2326,7 @@ int32_t ucx_security_CertificateUpload(ucx_instance_t *inst, uSecCertType_t cert
     return result;
 }
 
-int32_t ucx_security_CertificateUploadPW(ucx_instance_t *inst, uSecCertType_t cert_type, const char * * name, const char * * password, const uint8_t * * binary_data, int32_t binary_data_len)
+int32_t ucx_security_CertificateUploadPW(ucx_instance_t *inst, uSecCertType_t cert_type, const char * name, const char * password, const uint8_t * binary_data, int32_t binary_data_len)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -2348,7 +2348,7 @@ void ucx_security_ListCertificatesBegin(ucx_instance_t *inst)
     return;
 }
 
-bool ucx_security_ListCertificatesGetNext(ucx_instance_t *inst, uCxSecListCertificates_t * * pSecListCertificatesRsp)
+bool ucx_security_ListCertificatesGetNext(ucx_instance_t *inst, uCxSecListCertificates_t * pSecListCertificatesRsp)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -2359,7 +2359,7 @@ bool ucx_security_ListCertificatesGetNext(ucx_instance_t *inst, uCxSecListCertif
     return result;
 }
 
-bool ucx_security_ReadAllCertificatesDetailsBegin(ucx_instance_t *inst, const char * * name, uCxSecReadAllCertificatesDetails_t * * pSecReadAllCertificatesDetailsRsp)
+bool ucx_security_ReadAllCertificatesDetailsBegin(ucx_instance_t *inst, const char * name, uCxSecReadAllCertificatesDetails_t * pSecReadAllCertificatesDetailsRsp)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -2370,7 +2370,7 @@ bool ucx_security_ReadAllCertificatesDetailsBegin(ucx_instance_t *inst, const ch
     return result;
 }
 
-bool ucx_security_ReadCertificatesDetailsBegin(ucx_instance_t *inst, const char * * name, uSecCertDetailId_t cert_detail_id, uCxSecReadCertificatesDetails_t * * pSecReadCertificatesDetailsRsp)
+bool ucx_security_ReadCertificatesDetailsBegin(ucx_instance_t *inst, const char * name, uSecCertDetailId_t cert_detail_id, uCxSecReadCertificatesDetails_t * pSecReadCertificatesDetailsRsp)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -2392,7 +2392,7 @@ void ucx_security_ListTlsExtensionsBegin(ucx_instance_t *inst)
     return;
 }
 
-bool ucx_security_ListTlsExtensionsGetNext(ucx_instance_t *inst, uCxSecListTlsExtensions_t * * pSecListTlsExtensionsRsp)
+bool ucx_security_ListTlsExtensionsGetNext(ucx_instance_t *inst, uCxSecListTlsExtensions_t * pSecListTlsExtensionsRsp)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -2414,7 +2414,7 @@ int32_t ucx_security_SetTlsServerNameIndication(ucx_instance_t *inst, uEnabled_t
     return result;
 }
 
-int32_t ucx_security_GetTlsServerNameIndication(ucx_instance_t *inst, uEnabled_t * * pEnabled)
+int32_t ucx_security_GetTlsServerNameIndication(ucx_instance_t *inst, uEnabled_t * pEnabled)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -2436,7 +2436,7 @@ int32_t ucx_security_SetTlsHandshakeFrag(ucx_instance_t *inst, uEnabled_t enable
     return result;
 }
 
-int32_t ucx_security_GetTlsHandshakeFrag(ucx_instance_t *inst, uEnabled_t * * pEnabled)
+int32_t ucx_security_GetTlsHandshakeFrag(ucx_instance_t *inst, uEnabled_t * pEnabled)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -2450,7 +2450,7 @@ int32_t ucx_security_GetTlsHandshakeFrag(ucx_instance_t *inst, uEnabled_t * * pE
 
 /* ========== SOCKET FUNCTIONS ========== */
 
-int32_t ucx_socket_Create1(ucx_instance_t *inst, uSocketProtocol_t protocol, int32_t * * pSocketHandle)
+int32_t ucx_socket_Create1(ucx_instance_t *inst, uSocketProtocol_t protocol, int32_t * pSocketHandle)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -2461,7 +2461,7 @@ int32_t ucx_socket_Create1(ucx_instance_t *inst, uSocketProtocol_t protocol, int
     return result;
 }
 
-int32_t ucx_socket_Create2(ucx_instance_t *inst, uSocketProtocol_t protocol, uSocketPrefIpVer_t pref_ip_ver, int32_t * * pSocketHandle)
+int32_t ucx_socket_Create2(ucx_instance_t *inst, uSocketProtocol_t protocol, uSocketPrefIpVer_t pref_ip_ver, int32_t * pSocketHandle)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -2483,7 +2483,7 @@ int32_t ucx_socket_SetTLS2(ucx_instance_t *inst, int32_t socket_handle, uWifiTls
     return result;
 }
 
-int32_t ucx_socket_SetTLS3(ucx_instance_t *inst, int32_t socket_handle, uWifiTlsVersion_t tls_version, const char * * ca_name)
+int32_t ucx_socket_SetTLS3(ucx_instance_t *inst, int32_t socket_handle, uWifiTlsVersion_t tls_version, const char * ca_name)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -2494,7 +2494,7 @@ int32_t ucx_socket_SetTLS3(ucx_instance_t *inst, int32_t socket_handle, uWifiTls
     return result;
 }
 
-int32_t ucx_socket_SetTLS5(ucx_instance_t *inst, int32_t socket_handle, uWifiTlsVersion_t tls_version, const char * * ca_name, const char * * client_cert_name, const char * * client_key_name)
+int32_t ucx_socket_SetTLS5(ucx_instance_t *inst, int32_t socket_handle, uWifiTlsVersion_t tls_version, const char * ca_name, const char * client_cert_name, const char * client_key_name)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -2505,7 +2505,7 @@ int32_t ucx_socket_SetTLS5(ucx_instance_t *inst, int32_t socket_handle, uWifiTls
     return result;
 }
 
-bool ucx_socket_GetTLSBegin(ucx_instance_t *inst, int32_t socket_handle, uCxSocketGetTLS_t * * pSocketGetTLSRsp)
+bool ucx_socket_GetTLSBegin(ucx_instance_t *inst, int32_t socket_handle, uCxSocketGetTLS_t * pSocketGetTLSRsp)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -2516,7 +2516,7 @@ bool ucx_socket_GetTLSBegin(ucx_instance_t *inst, int32_t socket_handle, uCxSock
     return result;
 }
 
-int32_t ucx_socket_Connect(ucx_instance_t *inst, int32_t socket_handle, const char * * host_address, int32_t remote_port)
+int32_t ucx_socket_Connect(ucx_instance_t *inst, int32_t socket_handle, const char * host_address, int32_t remote_port)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -2538,7 +2538,7 @@ int32_t ucx_socket_SetReadMode(ucx_instance_t *inst, uReadMode_t read_mode)
     return result;
 }
 
-int32_t ucx_socket_GetReadMode(ucx_instance_t *inst, uReadMode_t * * pReadMode)
+int32_t ucx_socket_GetReadMode(ucx_instance_t *inst, uReadMode_t * pReadMode)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -2549,7 +2549,7 @@ int32_t ucx_socket_GetReadMode(ucx_instance_t *inst, uReadMode_t * * pReadMode)
     return result;
 }
 
-int32_t ucx_socket_Write(ucx_instance_t *inst, int32_t socket_handle, const uint8_t * * binary_data, int32_t binary_data_len)
+int32_t ucx_socket_Write(ucx_instance_t *inst, int32_t socket_handle, const uint8_t * binary_data, int32_t binary_data_len)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -2571,7 +2571,7 @@ int32_t ucx_socket_Close(ucx_instance_t *inst, int32_t socket_handle)
     return result;
 }
 
-int32_t ucx_socket_Read(ucx_instance_t *inst, int32_t socket_handle, int32_t length, uint8_t * * pDataBuf)
+int32_t ucx_socket_Read(ucx_instance_t *inst, int32_t socket_handle, int32_t length, uint8_t * pDataBuf)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -2582,7 +2582,7 @@ int32_t ucx_socket_Read(ucx_instance_t *inst, int32_t socket_handle, int32_t len
     return result;
 }
 
-int32_t ucx_socket_GetLastError(ucx_instance_t *inst, int32_t * * pErrorCode)
+int32_t ucx_socket_GetLastError(ucx_instance_t *inst, int32_t * pErrorCode)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -2626,7 +2626,7 @@ int32_t ucx_socket_Listen2(ucx_instance_t *inst, int32_t socket_handle, int32_t 
     return result;
 }
 
-int32_t ucx_socket_ReceiveFrom(ucx_instance_t *inst, int32_t socket_handle, int32_t length, uint8_t * * pDataBuf, uCxSocketReceiveFrom_t * * pSocketReceiveFromRsp)
+int32_t ucx_socket_ReceiveFrom(ucx_instance_t *inst, int32_t socket_handle, int32_t length, uint8_t * pDataBuf, uCxSocketReceiveFrom_t * pSocketReceiveFromRsp)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -2637,7 +2637,7 @@ int32_t ucx_socket_ReceiveFrom(ucx_instance_t *inst, int32_t socket_handle, int3
     return result;
 }
 
-int32_t ucx_socket_GetPeerAddress(ucx_instance_t *inst, int32_t socket_handle, uCxSocketGetPeerAddress_t * * pSocketGetPeerAddressRsp)
+int32_t ucx_socket_GetPeerAddress(ucx_instance_t *inst, int32_t socket_handle, uCxSocketGetPeerAddress_t * pSocketGetPeerAddressRsp)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -2659,7 +2659,7 @@ void ucx_socket_ListStatusBegin(ucx_instance_t *inst)
     return;
 }
 
-bool ucx_socket_ListStatusGetNext(ucx_instance_t *inst, uCxSocketListStatus_t * * pSocketListStatusRsp)
+bool ucx_socket_ListStatusGetNext(ucx_instance_t *inst, uCxSocketListStatus_t * pSocketListStatusRsp)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -2670,7 +2670,7 @@ bool ucx_socket_ListStatusGetNext(ucx_instance_t *inst, uCxSocketListStatus_t * 
     return result;
 }
 
-int32_t ucx_socket_GetStatus(ucx_instance_t *inst, int32_t socket_handle, uCxSocketGetStatus_t * * pSocketGetStatusRsp)
+int32_t ucx_socket_GetStatus(ucx_instance_t *inst, int32_t socket_handle, uCxSocketGetStatus_t * pSocketGetStatusRsp)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -2692,7 +2692,7 @@ int32_t ucx_socket_SetOption(ucx_instance_t *inst, int32_t socket_handle, uSocke
     return result;
 }
 
-int32_t ucx_socket_GetOption(ucx_instance_t *inst, int32_t socket_handle, uSocketOption_t option, int32_t * * pValue)
+int32_t ucx_socket_GetOption(ucx_instance_t *inst, int32_t socket_handle, uSocketOption_t option, int32_t * pValue)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -2703,7 +2703,7 @@ int32_t ucx_socket_GetOption(ucx_instance_t *inst, int32_t socket_handle, uSocke
     return result;
 }
 
-int32_t ucx_socket_GetHostByName(ucx_instance_t *inst, const char * * host_name, uSockIpAddress_t * * pHostIp)
+int32_t ucx_socket_GetHostByName(ucx_instance_t *inst, const char * host_name, uSockIpAddress_t * pHostIp)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -2794,7 +2794,7 @@ int32_t ucx_sps_SetServiceEnable(ucx_instance_t *inst, uSpsServiceOption_t servi
     return result;
 }
 
-int32_t ucx_sps_GetServiceEnable(ucx_instance_t *inst, uSpsServiceOption_t * * pServiceOption)
+int32_t ucx_sps_GetServiceEnable(ucx_instance_t *inst, uSpsServiceOption_t * pServiceOption)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -2805,7 +2805,7 @@ int32_t ucx_sps_GetServiceEnable(ucx_instance_t *inst, uSpsServiceOption_t * * p
     return result;
 }
 
-int32_t ucx_sps_Write(ucx_instance_t *inst, int32_t conn_handle, const uint8_t * * binary_data, int32_t binary_data_len)
+int32_t ucx_sps_Write(ucx_instance_t *inst, int32_t conn_handle, const uint8_t * binary_data, int32_t binary_data_len)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -2827,7 +2827,7 @@ int32_t ucx_sps_SetDataMode(ucx_instance_t *inst, uReadMode_t read_mode)
     return result;
 }
 
-int32_t ucx_sps_GetDataMode(ucx_instance_t *inst, uReadMode_t * * pReadMode)
+int32_t ucx_sps_GetDataMode(ucx_instance_t *inst, uReadMode_t * pReadMode)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -2838,7 +2838,7 @@ int32_t ucx_sps_GetDataMode(ucx_instance_t *inst, uReadMode_t * * pReadMode)
     return result;
 }
 
-int32_t ucx_sps_Read(ucx_instance_t *inst, int32_t conn_handle, int32_t length, uint8_t * * pDataBuf)
+int32_t ucx_sps_Read(ucx_instance_t *inst, int32_t conn_handle, int32_t length, uint8_t * pDataBuf)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -2973,7 +2973,7 @@ int32_t ucx_system_StoreConfiguration(ucx_instance_t *inst)
     return result;
 }
 
-int32_t ucx_system_GetLocalAddress(ucx_instance_t *inst, uInterfaceId_t interface_id, uMacAddress_t * * pAddress)
+int32_t ucx_system_GetLocalAddress(ucx_instance_t *inst, uInterfaceId_t interface_id, uMacAddress_t * pAddress)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -2984,7 +2984,7 @@ int32_t ucx_system_GetLocalAddress(ucx_instance_t *inst, uInterfaceId_t interfac
     return result;
 }
 
-int32_t ucx_system_SetLocalAddress(ucx_instance_t *inst, uInterfaceId_t interface_id, uMacAddress_t * * address)
+int32_t ucx_system_SetLocalAddress(ucx_instance_t *inst, uInterfaceId_t interface_id, uMacAddress_t * address)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -3050,7 +3050,7 @@ int32_t ucx_system_SetUartSettings3(ucx_instance_t *inst, int32_t baud_rate, int
     return result;
 }
 
-int32_t ucx_system_GetUartSettings(ucx_instance_t *inst, uCxSysGetUartSettings_t * * pSysGetUartSettingsRsp)
+int32_t ucx_system_GetUartSettings(ucx_instance_t *inst, uCxSysGetUartSettings_t * pSysGetUartSettingsRsp)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -3061,7 +3061,7 @@ int32_t ucx_system_GetUartSettings(ucx_instance_t *inst, uCxSysGetUartSettings_t
     return result;
 }
 
-int32_t ucx_system_GetLastErrorCode(ucx_instance_t *inst, int32_t * * pErrorCode)
+int32_t ucx_system_GetLastErrorCode(ucx_instance_t *inst, int32_t * pErrorCode)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -3083,7 +3083,7 @@ int32_t ucx_system_SetExtendedError(ucx_instance_t *inst, uSysExtendedErrors_t e
     return result;
 }
 
-int32_t ucx_system_GetExtendedError(ucx_instance_t *inst, uSysExtendedErrors_t * * pExtendedErrors)
+int32_t ucx_system_GetExtendedError(ucx_instance_t *inst, uSysExtendedErrors_t * pExtendedErrors)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -3094,7 +3094,7 @@ int32_t ucx_system_GetExtendedError(ucx_instance_t *inst, uSysExtendedErrors_t *
     return result;
 }
 
-int32_t ucx_system_SetUnixTime(ucx_instance_t *inst, const uint8_t * * unix_time, int32_t unix_time_len)
+int32_t ucx_system_SetUnixTime(ucx_instance_t *inst, const uint8_t * unix_time, int32_t unix_time_len)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -3105,7 +3105,7 @@ int32_t ucx_system_SetUnixTime(ucx_instance_t *inst, const uint8_t * * unix_time
     return result;
 }
 
-bool ucx_system_GetUnixTimeBegin(ucx_instance_t *inst, uByteArray_t * * pUnixTime)
+bool ucx_system_GetUnixTimeBegin(ucx_instance_t *inst, uByteArray_t * pUnixTime)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -3138,7 +3138,7 @@ int32_t ucx_system_SetEchoOn(ucx_instance_t *inst)
     return result;
 }
 
-int32_t ucx_system_GetEcho(ucx_instance_t *inst, uSysEchoOn_t * * pEchoOn)
+int32_t ucx_system_GetEcho(ucx_instance_t *inst, uSysEchoOn_t * pEchoOn)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -3160,7 +3160,7 @@ int32_t ucx_system_SetEscSequenceChar(ucx_instance_t *inst, int32_t escape_char)
     return result;
 }
 
-int32_t ucx_system_GetEscSequenceChar(ucx_instance_t *inst, int32_t * * pEscapeChar)
+int32_t ucx_system_GetEscSequenceChar(ucx_instance_t *inst, int32_t * pEscapeChar)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -3182,7 +3182,7 @@ int32_t ucx_system_SetLineTermChar(ucx_instance_t *inst, int32_t line_term)
     return result;
 }
 
-int32_t ucx_system_GetLineTermChar(ucx_instance_t *inst, int32_t * * pLineTerm)
+int32_t ucx_system_GetLineTermChar(ucx_instance_t *inst, int32_t * pLineTerm)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -3204,7 +3204,7 @@ int32_t ucx_system_SetRspFormatChar(ucx_instance_t *inst, int32_t resp_format)
     return result;
 }
 
-int32_t ucx_system_GetRspFormatChar(ucx_instance_t *inst, int32_t * * pRespFormat)
+int32_t ucx_system_GetRspFormatChar(ucx_instance_t *inst, int32_t * pRespFormat)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -3226,7 +3226,7 @@ int32_t ucx_system_SetBackspaceChar(ucx_instance_t *inst, int32_t backspace)
     return result;
 }
 
-int32_t ucx_system_GetBackspaceChar(ucx_instance_t *inst, int32_t * * pBackspace)
+int32_t ucx_system_GetBackspaceChar(ucx_instance_t *inst, int32_t * pBackspace)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -3248,7 +3248,7 @@ int32_t ucx_system_SetEscSequenceSettings(ucx_instance_t *inst, int32_t pre_time
     return result;
 }
 
-int32_t ucx_system_GetEscSequenceSettings(ucx_instance_t *inst, uCxSysGetEscSequenceSettings_t * * pSysGetEscSequenceSettingsRsp)
+int32_t ucx_system_GetEscSequenceSettings(ucx_instance_t *inst, uCxSysGetEscSequenceSettings_t * pSysGetEscSequenceSettingsRsp)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -3262,7 +3262,7 @@ int32_t ucx_system_GetEscSequenceSettings(ucx_instance_t *inst, uCxSysGetEscSequ
 
 /* ========== WIFI FUNCTIONS ========== */
 
-int32_t ucx_wifi_SetHostname(ucx_instance_t *inst, const char * * host_name)
+int32_t ucx_wifi_SetHostname(ucx_instance_t *inst, const char * host_name)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -3273,7 +3273,7 @@ int32_t ucx_wifi_SetHostname(ucx_instance_t *inst, const char * * host_name)
     return result;
 }
 
-bool ucx_wifi_GetHostnameBegin(ucx_instance_t *inst, const char ** ** ppHostName)
+bool ucx_wifi_GetHostnameBegin(ucx_instance_t *inst, const char * * ppHostName)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -3284,7 +3284,7 @@ bool ucx_wifi_GetHostnameBegin(ucx_instance_t *inst, const char ** ** ppHostName
     return result;
 }
 
-int32_t ucx_wifi_StationSetSecurityEnterprise5(ucx_instance_t *inst, int32_t wlan_handle, uWifiTlsVersion_t tls_version, const char * * ca_name, const char * * client_cert_name, const char * * client_key_name)
+int32_t ucx_wifi_StationSetSecurityEnterprise5(ucx_instance_t *inst, int32_t wlan_handle, uWifiTlsVersion_t tls_version, const char * ca_name, const char * client_cert_name, const char * client_key_name)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -3295,7 +3295,7 @@ int32_t ucx_wifi_StationSetSecurityEnterprise5(ucx_instance_t *inst, int32_t wla
     return result;
 }
 
-int32_t ucx_wifi_StationSetSecurityEnterprise6(ucx_instance_t *inst, int32_t wlan_handle, uWifiTlsVersion_t tls_version, const char * * ca_name, const char * * client_cert_name, const char * * client_key_name, const char * * identity)
+int32_t ucx_wifi_StationSetSecurityEnterprise6(ucx_instance_t *inst, int32_t wlan_handle, uWifiTlsVersion_t tls_version, const char * ca_name, const char * client_cert_name, const char * client_key_name, const char * identity)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -3306,7 +3306,7 @@ int32_t ucx_wifi_StationSetSecurityEnterprise6(ucx_instance_t *inst, int32_t wla
     return result;
 }
 
-bool ucx_wifi_StationGetSecurityBegin(ucx_instance_t *inst, int32_t wlan_handle, uCxWifiStationGetSecurity_t * * pWifiStationGetSecurityRsp)
+bool ucx_wifi_StationGetSecurityBegin(ucx_instance_t *inst, int32_t wlan_handle, uCxWifiStationGetSecurity_t * pWifiStationGetSecurityRsp)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -3317,7 +3317,7 @@ bool ucx_wifi_StationGetSecurityBegin(ucx_instance_t *inst, int32_t wlan_handle,
     return result;
 }
 
-int32_t ucx_wifi_StationSetSecurityPeap4(ucx_instance_t *inst, int32_t wlan_handle, uWifiTlsVersion_t tls_version, const char * * peap_user, const char * * peap_password)
+int32_t ucx_wifi_StationSetSecurityPeap4(ucx_instance_t *inst, int32_t wlan_handle, uWifiTlsVersion_t tls_version, const char * peap_user, const char * peap_password)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -3328,7 +3328,7 @@ int32_t ucx_wifi_StationSetSecurityPeap4(ucx_instance_t *inst, int32_t wlan_hand
     return result;
 }
 
-int32_t ucx_wifi_StationSetSecurityPeap5(ucx_instance_t *inst, int32_t wlan_handle, uWifiTlsVersion_t tls_version, const char * * peap_user, const char * * peap_password, const char * * ca_name)
+int32_t ucx_wifi_StationSetSecurityPeap5(ucx_instance_t *inst, int32_t wlan_handle, uWifiTlsVersion_t tls_version, const char * peap_user, const char * peap_password, const char * ca_name)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -3339,7 +3339,7 @@ int32_t ucx_wifi_StationSetSecurityPeap5(ucx_instance_t *inst, int32_t wlan_hand
     return result;
 }
 
-int32_t ucx_wifi_StationSetSecurityWpa(ucx_instance_t *inst, int32_t wlan_handle, const char * * passphrase, uWifiWpaThreshold_t wpa_threshold)
+int32_t ucx_wifi_StationSetSecurityWpa(ucx_instance_t *inst, int32_t wlan_handle, const char * passphrase, uWifiWpaThreshold_t wpa_threshold)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -3361,7 +3361,7 @@ int32_t ucx_wifi_StationSetSecurityOpen(ucx_instance_t *inst, int32_t wlan_handl
     return result;
 }
 
-int32_t ucx_wifi_StationSetConnectionParams(ucx_instance_t *inst, int32_t wlan_handle, const char * * ssid)
+int32_t ucx_wifi_StationSetConnectionParams(ucx_instance_t *inst, int32_t wlan_handle, const char * ssid)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -3372,7 +3372,7 @@ int32_t ucx_wifi_StationSetConnectionParams(ucx_instance_t *inst, int32_t wlan_h
     return result;
 }
 
-bool ucx_wifi_StationGetConnectionParamsBegin(ucx_instance_t *inst, int32_t wlan_handle, const char ** ** ppSsid)
+bool ucx_wifi_StationGetConnectionParamsBegin(ucx_instance_t *inst, int32_t wlan_handle, const char * * ppSsid)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -3383,7 +3383,7 @@ bool ucx_wifi_StationGetConnectionParamsBegin(ucx_instance_t *inst, int32_t wlan
     return result;
 }
 
-int32_t ucx_wifi_StationSetIpConfigStatic4(ucx_instance_t *inst, int32_t wlan_handle, uSockIpAddress_t * * ip_addr, uSockIpAddress_t * * subnet_mask, uSockIpAddress_t * * gateway)
+int32_t ucx_wifi_StationSetIpConfigStatic4(ucx_instance_t *inst, int32_t wlan_handle, uSockIpAddress_t * ip_addr, uSockIpAddress_t * subnet_mask, uSockIpAddress_t * gateway)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -3394,7 +3394,7 @@ int32_t ucx_wifi_StationSetIpConfigStatic4(ucx_instance_t *inst, int32_t wlan_ha
     return result;
 }
 
-int32_t ucx_wifi_StationSetIpConfigStatic5(ucx_instance_t *inst, int32_t wlan_handle, uSockIpAddress_t * * ip_addr, uSockIpAddress_t * * subnet_mask, uSockIpAddress_t * * gateway, uSockIpAddress_t * * prim_dns)
+int32_t ucx_wifi_StationSetIpConfigStatic5(ucx_instance_t *inst, int32_t wlan_handle, uSockIpAddress_t * ip_addr, uSockIpAddress_t * subnet_mask, uSockIpAddress_t * gateway, uSockIpAddress_t * prim_dns)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -3405,7 +3405,7 @@ int32_t ucx_wifi_StationSetIpConfigStatic5(ucx_instance_t *inst, int32_t wlan_ha
     return result;
 }
 
-int32_t ucx_wifi_StationSetIpConfigStatic6(ucx_instance_t *inst, int32_t wlan_handle, uSockIpAddress_t * * ip_addr, uSockIpAddress_t * * subnet_mask, uSockIpAddress_t * * gateway, uSockIpAddress_t * * prim_dns, uSockIpAddress_t * * sec_dns)
+int32_t ucx_wifi_StationSetIpConfigStatic6(ucx_instance_t *inst, int32_t wlan_handle, uSockIpAddress_t * ip_addr, uSockIpAddress_t * subnet_mask, uSockIpAddress_t * gateway, uSockIpAddress_t * prim_dns, uSockIpAddress_t * sec_dns)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -3427,7 +3427,7 @@ int32_t ucx_wifi_StationSetIpConfigDhcp(ucx_instance_t *inst, int32_t wlan_handl
     return result;
 }
 
-int32_t ucx_wifi_StationGetIpConfig(ucx_instance_t *inst, int32_t wlan_handle, uCxWifiStationGetIpConfig_t * * pWifiStationGetIpConfigRsp)
+int32_t ucx_wifi_StationGetIpConfig(ucx_instance_t *inst, int32_t wlan_handle, uCxWifiStationGetIpConfig_t * pWifiStationGetIpConfigRsp)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -3460,7 +3460,7 @@ int32_t ucx_wifi_StationDisconnect(ucx_instance_t *inst)
     return result;
 }
 
-int32_t ucx_wifi_StationGetNetworkStatus(ucx_instance_t *inst, uWifiNetStatusId_t net_status_id, uSockIpAddress_t * * pNetStatusVal)
+int32_t ucx_wifi_StationGetNetworkStatus(ucx_instance_t *inst, uWifiNetStatusId_t net_status_id, uSockIpAddress_t * pNetStatusVal)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -3482,7 +3482,7 @@ void ucx_wifi_StationListNetworkStatusBegin(ucx_instance_t *inst)
     return;
 }
 
-bool ucx_wifi_StationListNetworkStatusGetNext(ucx_instance_t *inst, uCxWifiStationListNetworkStatus_t * * pWifiStationListNetworkStatusRsp)
+bool ucx_wifi_StationListNetworkStatusGetNext(ucx_instance_t *inst, uCxWifiStationListNetworkStatus_t * pWifiStationListNetworkStatusRsp)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -3504,7 +3504,7 @@ int32_t ucx_wifi_SetRegulatoryDomain(ucx_instance_t *inst, uWifiRegDomain_t reg_
     return result;
 }
 
-int32_t ucx_wifi_GetRegulatoryDomain(ucx_instance_t *inst, uWifiRegDomain_t * * pRegDomain)
+int32_t ucx_wifi_GetRegulatoryDomain(ucx_instance_t *inst, uWifiRegDomain_t * pRegDomain)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -3515,7 +3515,7 @@ int32_t ucx_wifi_GetRegulatoryDomain(ucx_instance_t *inst, uWifiRegDomain_t * * 
     return result;
 }
 
-int32_t ucx_wifi_SetChannelList(ucx_instance_t *inst, const int16_t * * channel_list, int32_t channel_list_len)
+int32_t ucx_wifi_SetChannelList(ucx_instance_t *inst, const int16_t * channel_list, int32_t channel_list_len)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -3526,7 +3526,7 @@ int32_t ucx_wifi_SetChannelList(ucx_instance_t *inst, const int16_t * * channel_
     return result;
 }
 
-int32_t ucx_wifi_GetChannelList(ucx_instance_t *inst, uIntList_t * * pChannelList)
+int32_t ucx_wifi_GetChannelList(ucx_instance_t *inst, uIntList_t * pChannelList)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -3537,7 +3537,7 @@ int32_t ucx_wifi_GetChannelList(ucx_instance_t *inst, uIntList_t * * pChannelLis
     return result;
 }
 
-int32_t ucx_wifi_GetActiveChannels(ucx_instance_t *inst, uIntList_t * * pChannelList)
+int32_t ucx_wifi_GetActiveChannels(ucx_instance_t *inst, uIntList_t * pChannelList)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -3559,7 +3559,7 @@ void ucx_wifi_StationScanDefaultBegin(ucx_instance_t *inst)
     return;
 }
 
-bool ucx_wifi_StationScanDefaultGetNext(ucx_instance_t *inst, uCxWifiStationScanDefault_t * * pWifiStationScanDefaultRsp)
+bool ucx_wifi_StationScanDefaultGetNext(ucx_instance_t *inst, uCxWifiStationScanDefault_t * pWifiStationScanDefaultRsp)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -3581,7 +3581,7 @@ void ucx_wifi_StationScan1Begin(ucx_instance_t *inst, uWifiScanMode_t scan_mode)
     return;
 }
 
-bool ucx_wifi_StationScan1GetNext(ucx_instance_t *inst, uCxWifiStationScan_t * * pWifiStationScanRsp)
+bool ucx_wifi_StationScan1GetNext(ucx_instance_t *inst, uCxWifiStationScan_t * pWifiStationScanRsp)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -3592,7 +3592,7 @@ bool ucx_wifi_StationScan1GetNext(ucx_instance_t *inst, uCxWifiStationScan_t * *
     return result;
 }
 
-void ucx_wifi_StationScan2Begin(ucx_instance_t *inst, uWifiScanMode_t scan_mode, const char * * ssid)
+void ucx_wifi_StationScan2Begin(ucx_instance_t *inst, uWifiScanMode_t scan_mode, const char * ssid)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -3603,7 +3603,7 @@ void ucx_wifi_StationScan2Begin(ucx_instance_t *inst, uWifiScanMode_t scan_mode,
     return;
 }
 
-bool ucx_wifi_StationScan2GetNext(ucx_instance_t *inst, uCxWifiStationScan_t * * pWifiStationScanRsp)
+bool ucx_wifi_StationScan2GetNext(ucx_instance_t *inst, uCxWifiStationScan_t * pWifiStationScanRsp)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -3614,7 +3614,7 @@ bool ucx_wifi_StationScan2GetNext(ucx_instance_t *inst, uCxWifiStationScan_t * *
     return result;
 }
 
-bool ucx_wifi_StationStatusBegin(ucx_instance_t *inst, uWifiStatusId_t status_id, uCxWifiStationStatus_t * * pWifiStationStatusRsp)
+bool ucx_wifi_StationStatusBegin(ucx_instance_t *inst, uWifiStatusId_t status_id, uCxWifiStationStatus_t * pWifiStationStatusRsp)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -3647,7 +3647,7 @@ int32_t ucx_wifi_ApDeactivate(ucx_instance_t *inst)
     return result;
 }
 
-int32_t ucx_wifi_ApSetConnectionParams1(ucx_instance_t *inst, const char * * ssid)
+int32_t ucx_wifi_ApSetConnectionParams1(ucx_instance_t *inst, const char * ssid)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -3658,7 +3658,7 @@ int32_t ucx_wifi_ApSetConnectionParams1(ucx_instance_t *inst, const char * * ssi
     return result;
 }
 
-int32_t ucx_wifi_ApSetConnectionParams2(ucx_instance_t *inst, const char * * ssid, uWifiChannel_t channel)
+int32_t ucx_wifi_ApSetConnectionParams2(ucx_instance_t *inst, const char * ssid, uWifiChannel_t channel)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -3669,7 +3669,7 @@ int32_t ucx_wifi_ApSetConnectionParams2(ucx_instance_t *inst, const char * * ssi
     return result;
 }
 
-bool ucx_wifi_ApGetConnectionParamsBegin(ucx_instance_t *inst, uCxWifiApGetConnectionParams_t * * pWifiApGetConnectionParamsRsp)
+bool ucx_wifi_ApGetConnectionParamsBegin(ucx_instance_t *inst, uCxWifiApGetConnectionParams_t * pWifiApGetConnectionParamsRsp)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -3680,7 +3680,7 @@ bool ucx_wifi_ApGetConnectionParamsBegin(ucx_instance_t *inst, uCxWifiApGetConne
     return result;
 }
 
-int32_t ucx_wifi_ApSetSecurityWpa1(ucx_instance_t *inst, const char * * passphrase)
+int32_t ucx_wifi_ApSetSecurityWpa1(ucx_instance_t *inst, const char * passphrase)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -3691,7 +3691,7 @@ int32_t ucx_wifi_ApSetSecurityWpa1(ucx_instance_t *inst, const char * * passphra
     return result;
 }
 
-int32_t ucx_wifi_ApSetSecurityWpa2(ucx_instance_t *inst, const char * * passphrase, uWifiWpaVersion_t wpa_version)
+int32_t ucx_wifi_ApSetSecurityWpa2(ucx_instance_t *inst, const char * passphrase, uWifiWpaVersion_t wpa_version)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -3713,7 +3713,7 @@ int32_t ucx_wifi_ApSetSecurityOpen(ucx_instance_t *inst)
     return result;
 }
 
-int32_t ucx_wifi_ApGetSecurity(ucx_instance_t *inst, uCxWifiApGetSecurity_t * * pWifiApGetSecurityRsp)
+int32_t ucx_wifi_ApGetSecurity(ucx_instance_t *inst, uCxWifiApGetSecurity_t * pWifiApGetSecurityRsp)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -3735,7 +3735,7 @@ void ucx_wifi_ApListStationsBegin(ucx_instance_t *inst)
     return;
 }
 
-bool ucx_wifi_ApListStationsGetNext(ucx_instance_t *inst, uMacAddress_t * * pMac)
+bool ucx_wifi_ApListStationsGetNext(ucx_instance_t *inst, uMacAddress_t * pMac)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -3746,7 +3746,7 @@ bool ucx_wifi_ApListStationsGetNext(ucx_instance_t *inst, uMacAddress_t * * pMac
     return result;
 }
 
-int32_t ucx_wifi_ApGetNetworkStatus(ucx_instance_t *inst, uWifiNetStatusId_t net_status_id, uSockIpAddress_t * * pNetStatusVal)
+int32_t ucx_wifi_ApGetNetworkStatus(ucx_instance_t *inst, uWifiNetStatusId_t net_status_id, uSockIpAddress_t * pNetStatusVal)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -3768,7 +3768,7 @@ void ucx_wifi_ApListNetworkStatusBegin(ucx_instance_t *inst)
     return;
 }
 
-bool ucx_wifi_ApListNetworkStatusGetNext(ucx_instance_t *inst, uCxWifiApListNetworkStatus_t * * pWifiApListNetworkStatusRsp)
+bool ucx_wifi_ApListNetworkStatusGetNext(ucx_instance_t *inst, uCxWifiApListNetworkStatus_t * pWifiApListNetworkStatusRsp)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -3790,7 +3790,7 @@ int32_t ucx_wifi_SetWifiRoaming(ucx_instance_t *inst, uWifiRoaming_t roaming)
     return result;
 }
 
-int32_t ucx_wifi_GetWifiRoaming(ucx_instance_t *inst, uWifiRoaming_t * * pRoaming)
+int32_t ucx_wifi_GetWifiRoaming(ucx_instance_t *inst, uWifiRoaming_t * pRoaming)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -3812,7 +3812,7 @@ int32_t ucx_wifi_StationSetRoamingBGScanThreshold(ucx_instance_t *inst, int32_t 
     return result;
 }
 
-int32_t ucx_wifi_StationGetRoamingBGScanThreshold(ucx_instance_t *inst, int32_t * * pRoamingScanningThreshold)
+int32_t ucx_wifi_StationGetRoamingBGScanThreshold(ucx_instance_t *inst, int32_t * pRoamingScanningThreshold)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -3834,7 +3834,7 @@ int32_t ucx_wifi_StationSetRoamingSwitchLimit(ucx_instance_t *inst, int32_t roam
     return result;
 }
 
-int32_t ucx_wifi_StationGetRoamingSwitchLimit(ucx_instance_t *inst, int32_t * * pRoamingSwitchLimit)
+int32_t ucx_wifi_StationGetRoamingSwitchLimit(ucx_instance_t *inst, int32_t * pRoamingSwitchLimit)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -3856,7 +3856,7 @@ int32_t ucx_wifi_StationSetRoamingScanInterval(ucx_instance_t *inst, int32_t roa
     return result;
 }
 
-int32_t ucx_wifi_StationGetRoamingScanInterval(ucx_instance_t *inst, int32_t * * pRoamingScanInterval)
+int32_t ucx_wifi_StationGetRoamingScanInterval(ucx_instance_t *inst, int32_t * pRoamingScanInterval)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -3878,7 +3878,7 @@ int32_t ucx_wifi_StationSetAggressiveRoaming(ucx_instance_t *inst, uWifiRoamingA
     return result;
 }
 
-int32_t ucx_wifi_StationGetAggressiveRoaming(ucx_instance_t *inst, uWifiRoamingAggressive_t * * pRoamingAggressive)
+int32_t ucx_wifi_StationGetAggressiveRoaming(ucx_instance_t *inst, uWifiRoamingAggressive_t * pRoamingAggressive)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -3900,7 +3900,7 @@ int32_t ucx_wifi_StationSetRoamingDelayMs(ucx_instance_t *inst, int32_t roaming_
     return result;
 }
 
-int32_t ucx_wifi_StationGetRoamingDelayMs(ucx_instance_t *inst, int32_t * * pRoamingDelayTime)
+int32_t ucx_wifi_StationGetRoamingDelayMs(ucx_instance_t *inst, int32_t * pRoamingDelayTime)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
@@ -3922,7 +3922,7 @@ int32_t ucx_wifi_StationSetRoamingAllChannels(ucx_instance_t *inst, uWifiRoaming
     return result;
 }
 
-int32_t ucx_wifi_StationGetRoamingAllChannels(ucx_instance_t *inst, uWifiRoamingChannels_t * * pRoamingChannels)
+int32_t ucx_wifi_StationGetRoamingAllChannels(ucx_instance_t *inst, uWifiRoamingChannels_t * pRoamingChannels)
 {
     if (!inst) {
         ucx_wrapper_printf("[ERROR] NULL instance in %s\n", __func__);
