@@ -54,6 +54,39 @@ static ucx_instance_t* g_current_instance = NULL;
  * STATIC FUNCTIONS
  * -------------------------------------------------------------- */
 
+// WiFi URC handlers that forward to the generic URC callback
+static void wifi_link_up_urc(struct uCxHandle *puCxHandle)
+{
+    ucx_wrapper_printf("[WiFi-URC] Link Up (+UEWLU)\n");
+    if (g_current_instance && g_current_instance->urc_callback) {
+        g_current_instance->urc_callback("+UEWLU", g_current_instance->urc_user_data);
+    }
+}
+
+static void wifi_link_down_urc(struct uCxHandle *puCxHandle)
+{
+    ucx_wrapper_printf("[WiFi-URC] Link Down (+UEWLD)\n");
+    if (g_current_instance && g_current_instance->urc_callback) {
+        g_current_instance->urc_callback("+UEWLD", g_current_instance->urc_user_data);
+    }
+}
+
+static void wifi_network_up_urc(struct uCxHandle *puCxHandle)
+{
+    ucx_wrapper_printf("[WiFi-URC] *** Network Up (+UEWSNU) - IP ASSIGNED! ***\n");
+    if (g_current_instance && g_current_instance->urc_callback) {
+        g_current_instance->urc_callback("+UEWSNU", g_current_instance->urc_user_data);
+    }
+}
+
+static void wifi_network_down_urc(struct uCxHandle *puCxHandle)
+{
+    ucx_wrapper_printf("[WiFi-URC] Network Down (+UEWSND)\n");
+    if (g_current_instance && g_current_instance->urc_callback) {
+        g_current_instance->urc_callback("+UEWSND", g_current_instance->urc_user_data);
+    }
+}
+
 /* Custom printf implementation that forwards to C# log callback */
 int ucx_wrapper_printf(const char* format, ...)
 {
@@ -153,12 +186,14 @@ ucx_handle_t ucx_create(const char* port_name, int baud_rate)
     // Initialize uCX handle
     uCxInit(&inst->at_client, &inst->cx_handle);
     
-    // Register WiFi URC handlers (these will be forwarded via internal_urc_callback)
-    // This is necessary for the ucx_api to properly parse and forward WiFi events
-    uCxWifiRegisterLinkUp(&inst->cx_handle, NULL);
-    uCxWifiRegisterLinkDown(&inst->cx_handle, NULL);
-    uCxWifiRegisterStationNetworkUp(&inst->cx_handle, NULL);
-    uCxWifiRegisterStationNetworkDown(&inst->cx_handle, NULL);
+    // Register WiFi URC handlers with actual callbacks (not NULL)
+    // This tells ucx_api to enable WiFi URCs and call our handlers
+    ucx_wrapper_printf("Registering WiFi URC handlers...\n");
+    uCxWifiRegisterLinkUp(&inst->cx_handle, wifi_link_up_urc);
+    uCxWifiRegisterLinkDown(&inst->cx_handle, wifi_link_down_urc);
+    uCxWifiRegisterStationNetworkUp(&inst->cx_handle, wifi_network_up_urc);
+    uCxWifiRegisterStationNetworkDown(&inst->cx_handle, wifi_network_down_urc);
+    ucx_wrapper_printf("WiFi URC handlers registered successfully\n");
     
     inst->error_msg[0] = '\0';
     return (ucx_handle_t)inst;
