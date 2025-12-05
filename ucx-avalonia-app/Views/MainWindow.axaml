@@ -119,16 +119,10 @@
                     <Border Grid.Row="2" BorderBrush="LightGray" BorderThickness="1">
                         <DataGrid ItemsSource="{Binding WifiNetworks}"
                                   IsReadOnly="True"
-                                  AutoGenerateColumns="False"
+                                  AutoGenerateColumns="True"
                                   GridLinesVisibility="All"
-                                  BorderThickness="0">
-                            <DataGrid.Columns>
-                                <DataGridTextColumn Header="SSID" Binding="{Binding Ssid}" Width="*" MinWidth="150"/>
-                                <DataGridTextColumn Header="BSSID" Binding="{Binding BssidString}" Width="140"/>
-                                <DataGridTextColumn Header="Channel" Binding="{Binding Channel}" Width="80"/>
-                                <DataGridTextColumn Header="RSSI (dBm)" Binding="{Binding Rssi}" Width="100"/>
-                                <DataGridTextColumn Header="Security" Binding="{Binding SecurityString}" Width="120"/>
-                            </DataGrid.Columns>
+                                  BorderThickness="0"
+                                  Background="White">
                         </DataGrid>
                     </Border>
                 </Grid>
