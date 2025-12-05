@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -200,6 +201,8 @@ public partial class MainWindowViewModel : ViewModelBase
             WifiScanStatus = $"Scan complete - found {networks.Count} network(s)";
             AddLogMessage($"Found {networks.Count} network(s)");
             
+            // Convert all results to WifiNetwork objects
+            var networkList = new List<WifiNetwork>();
             int addedCount = 0;
             foreach (var result in networks.OrderByDescending(n => n.rssi))
             {
@@ -212,14 +215,16 @@ public partial class MainWindowViewModel : ViewModelBase
                 
                 AddLogMessage($"  Adding: {network.Ssid} - Channel {network.Channel}, RSSI {network.Rssi} dBm, {network.SecurityString}");
                 
-                // Add directly on current thread since we're already in async context
-                WifiNetworks.Add(network);
+                networkList.Add(network);
                 addedCount++;
-                System.Diagnostics.Debug.WriteLine($"[ViewModel] Added to collection. Count now: {WifiNetworks.Count}");
-                System.Console.WriteLine($"[ViewModel] Added to collection. Count now: {WifiNetworks.Count}");
             }
             
-            System.Diagnostics.Debug.WriteLine($"[ViewModel] Finished adding {addedCount} networks. Collection count: {WifiNetworks.Count}");
+            // Replace the entire collection instead of adding items individually
+            System.Console.WriteLine($"[ViewModel] Replacing collection with {networkList.Count} networks");
+            WifiNetworks = new ObservableCollection<WifiNetwork>(networkList);
+            
+            System.Diagnostics.Debug.WriteLine($"[ViewModel] Collection replaced. Count: {WifiNetworks.Count}");
+            System.Console.WriteLine($"[ViewModel] Collection replaced. Count: {WifiNetworks.Count}");
             AddLogMessage($"Total networks in collection: {WifiNetworks.Count}");
             
             if (networks.Count == 0)
