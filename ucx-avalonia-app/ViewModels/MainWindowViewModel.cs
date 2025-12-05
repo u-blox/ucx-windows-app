@@ -284,10 +284,14 @@ public partial class MainWindowViewModel : ViewModelBase
     [RelayCommand]
     private async Task WifiConnect()
     {
+        System.Console.WriteLine("[ViewModel] WifiConnect COMMAND STARTED");
+        System.Diagnostics.Debug.WriteLine("[ViewModel] WifiConnect COMMAND STARTED");
+        
         if (_ucxClient == null || !IsConnected)
         {
             WifiConnectStatus = "ERROR: Not connected";
             AddLogMessage("ERROR: Not connected");
+            System.Console.WriteLine("[ViewModel] ERROR: Not connected to module");
             return;
         }
 
@@ -295,31 +299,41 @@ public partial class MainWindowViewModel : ViewModelBase
         {
             WifiConnectStatus = "ERROR: No SSID entered";
             AddLogMessage("ERROR: No SSID entered");
+            System.Console.WriteLine("[ViewModel] ERROR: No SSID entered");
             return;
         }
 
         try
         {
+            System.Console.WriteLine($"[ViewModel] Setting IsConnecting = true");
             IsConnecting = true;
             WifiConnectStatus = $"Connecting to {SelectedSsid}...";
             AddLogMessage($"Connecting to WiFi: {SelectedSsid}");
             
+            System.Console.WriteLine($"[ViewModel] About to call ConnectWifiAsync for '{SelectedSsid}'");
             await _ucxClient.ConnectWifiAsync(SelectedSsid, string.IsNullOrWhiteSpace(WifiPassword) ? null : WifiPassword);
             
+            System.Console.WriteLine($"[ViewModel] ConnectWifiAsync returned successfully");
             WifiConnectStatus = $"Connected to {SelectedSsid}";
             AddLogMessage($"Successfully connected to {SelectedSsid}");
             
             // Clear password for security
             WifiPassword = "";
+            System.Console.WriteLine($"[ViewModel] WifiConnect COMPLETED SUCCESSFULLY");
         }
         catch (Exception ex)
         {
+            System.Console.WriteLine($"[ViewModel] WifiConnect EXCEPTION: {ex.GetType().Name}: {ex.Message}");
+            System.Console.WriteLine($"[ViewModel] Stack trace: {ex.StackTrace}");
+            System.Diagnostics.Debug.WriteLine($"[ViewModel] WifiConnect EXCEPTION: {ex}");
             WifiConnectStatus = $"Connection failed: {ex.Message}";
             AddLogMessage($"ERROR: WiFi connection failed - {ex.Message}");
         }
         finally
         {
+            System.Console.WriteLine($"[ViewModel] Setting IsConnecting = false");
             IsConnecting = false;
+            System.Console.WriteLine($"[ViewModel] WifiConnect COMMAND ENDED");
         }
     }
 

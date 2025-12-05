@@ -70,13 +70,17 @@ public class UcxClient : IDisposable
     {
         try
         {
+            System.Console.WriteLine($"[UcxClient-NativeCallback] URC received: {urcLine}");
             // URC callback is called from native thread - must not throw exceptions
             UrcReceived?.Invoke(this, new UrcEventArgs(urcLine));
+            System.Console.WriteLine($"[UcxClient-NativeCallback] URC event invoked successfully");
         }
         catch (Exception ex)
         {
             // Log error but don't let it propagate to native code
-            System.Diagnostics.Debug.WriteLine($"[UcxClient] URC callback exception: {ex.Message}");
+            System.Console.WriteLine($"[UcxClient-NativeCallback] URC callback EXCEPTION: {ex.GetType().Name}: {ex.Message}");
+            System.Console.WriteLine($"[UcxClient-NativeCallback] Stack trace: {ex.StackTrace}");
+            System.Diagnostics.Debug.WriteLine($"[UcxClient] URC callback exception: {ex}");
         }
     }
 
@@ -90,7 +94,8 @@ public class UcxClient : IDisposable
         catch (Exception ex)
         {
             // Log error but don't let it propagate to native code
-            System.Diagnostics.Debug.WriteLine($"[UcxClient] Log callback exception: {ex.Message}");
+            System.Console.WriteLine($"[UcxClient-NativeCallback] Log callback EXCEPTION: {ex.GetType().Name}: {ex.Message}");
+            System.Diagnostics.Debug.WriteLine($"[UcxClient] Log callback exception: {ex}");
         }
     }
 
@@ -173,18 +178,33 @@ public class UcxClient : IDisposable
     {
         await Task.Run(() =>
         {
+            System.Diagnostics.Debug.WriteLine($"[UcxClient] ConnectWifiAsync START - SSID: {ssid}");
+            System.Console.WriteLine($"[UcxClient] ConnectWifiAsync START - SSID: {ssid}");
+            
             if (_handle == IntPtr.Zero)
             {
+                System.Diagnostics.Debug.WriteLine("[UcxClient] ERROR: Handle is Zero");
                 throw new ObjectDisposedException(nameof(UcxClient));
             }
 
+            System.Diagnostics.Debug.WriteLine($"[UcxClient] Calling native ucx_wifi_connect...");
+            System.Console.WriteLine($"[UcxClient] Calling native ucx_wifi_connect...");
+            
             int result = UcxNative.ucx_wifi_connect(_handle, ssid, password, timeoutMs);
+            
+            System.Diagnostics.Debug.WriteLine($"[UcxClient] Native ucx_wifi_connect returned: {result}");
+            System.Console.WriteLine($"[UcxClient] Native ucx_wifi_connect returned: {result}");
 
             if (result < 0)
             {
                 string? error = UcxNative.ucx_get_last_error(_handle);
+                System.Diagnostics.Debug.WriteLine($"[UcxClient] Connect failed with error: {error}");
+                System.Console.WriteLine($"[UcxClient] Connect failed with error: {error}");
                 throw new InvalidOperationException($"WiFi connect failed: {error ?? "Unknown error"}");
             }
+            
+            System.Diagnostics.Debug.WriteLine("[UcxClient] ConnectWifiAsync COMPLETE");
+            System.Console.WriteLine("[UcxClient] ConnectWifiAsync COMPLETE");
         });
     }
 
