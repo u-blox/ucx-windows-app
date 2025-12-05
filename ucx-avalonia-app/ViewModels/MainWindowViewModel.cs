@@ -319,20 +319,6 @@ public partial class MainWindowViewModel : ViewModelBase
             WifiConnectStatus = $"Connecting to {SelectedSsid}...";
             AddLogMessage($"Connecting to WiFi: {SelectedSsid}");
             
-            // First, try to disconnect if already connected (to avoid issues)
-            System.Console.WriteLine($"[ViewModel] Disconnecting from any existing WiFi connection...");
-            try
-            {
-                await _ucxClient.DisconnectWifiAsync();
-                System.Console.WriteLine($"[ViewModel] Disconnect successful or not connected");
-                await Task.Delay(1000); // Give module time to fully disconnect
-            }
-            catch (Exception ex)
-            {
-                System.Console.WriteLine($"[ViewModel] Disconnect failed or not connected: {ex.Message}");
-                // Continue anyway - might not have been connected
-            }
-            
             System.Console.WriteLine($"[ViewModel] About to call ConnectWifiAsync for '{SelectedSsid}'");
             await _ucxClient.ConnectWifiAsync(SelectedSsid, string.IsNullOrWhiteSpace(WifiPassword) ? null : WifiPassword);
             
