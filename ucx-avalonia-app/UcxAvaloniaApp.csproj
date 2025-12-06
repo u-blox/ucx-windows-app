@@ -30,7 +30,8 @@
 
   <!-- Copy native DLL to output directory -->
   <ItemGroup>
-    <None Include="..\build\bin\ucxclient_wrapper.dll" Condition="Exists('..\build\bin\ucxclient_wrapper.dll')">
+    <None Include="..\ucxclient-wrapper\build\bin\Release\ucxclient_wrapper.dll" 
+          Condition="Exists('..\ucxclient-wrapper\build\bin\Release\ucxclient_wrapper.dll')">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

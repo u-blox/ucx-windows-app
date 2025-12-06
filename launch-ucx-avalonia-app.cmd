@@ -43,11 +43,30 @@ set DLL_SOURCE=ucxclient-wrapper\build\bin\Release\ucxclient_wrapper.dll
 
 echo.
 echo Copying DLL to output directories...
+
+REM Verify DLL exists before copying
+if not exist "%DLL_SOURCE%" (
+    echo [ERROR] DLL not found: %DLL_SOURCE%
+    echo Native build may have failed. Check error messages above.
+    pause
+    exit /b 1
+)
+
 if not exist "ucx-avalonia-app\bin\Debug\net9.0" mkdir "ucx-avalonia-app\bin\Debug\net9.0"
 copy /Y "%DLL_SOURCE%" "ucx-avalonia-app\bin\Debug\net9.0\ucxclient_wrapper.dll" >nul 2>&1
+if errorlevel 1 (
+    echo [ERROR] Failed to copy DLL to Debug folder
+    pause
+    exit /b 1
+)
 
 if not exist "ucx-avalonia-app\bin\Release\net9.0" mkdir "ucx-avalonia-app\bin\Release\net9.0"
 copy /Y "%DLL_SOURCE%" "ucx-avalonia-app\bin\Release\net9.0\ucxclient_wrapper.dll" >nul 2>&1
+if errorlevel 1 (
+    echo [ERROR] Failed to copy DLL to Release folder
+    pause
+    exit /b 1
+)
 
 REM Build the Avalonia app
 echo.

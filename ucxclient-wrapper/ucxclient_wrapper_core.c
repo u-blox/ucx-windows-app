@@ -26,7 +26,14 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdarg.h>
-#include <Windows.h>
+
+// Platform-specific includes and macros
+#ifdef _WIN32
+    #include <Windows.h>
+    #define DEBUG_OUTPUT(msg) OutputDebugStringA(msg)
+#else
+    #define DEBUG_OUTPUT(msg) fprintf(stderr, "%s", msg)
+#endif
 
 /* ----------------------------------------------------------------
  * TYPES
@@ -84,8 +91,8 @@ int ucx_wrapper_printf(const char* format, ...)
     int ret = vsnprintf(buffer, sizeof(buffer), format, args);
     va_end(args);
     
-    // Always output to debug console for Windows debugging
-    OutputDebugStringA(buffer);
+    // Output to debug console (platform-specific)
+    DEBUG_OUTPUT(buffer);
     
     // Forward to C# callback if set
     if (g_current_instance && g_current_instance->log_callback) {
