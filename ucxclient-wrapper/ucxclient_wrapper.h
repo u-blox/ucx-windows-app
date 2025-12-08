@@ -50,26 +50,6 @@ typedef void (*ucx_urc_callback_t)(const char* urc_line, void* user_data);
 /* Callback for log messages */
 typedef void (*ucx_log_callback_t)(int level, const char* message, void* user_data);
 
-/* WiFi scan result structure */
-typedef struct {
-    uint8_t bssid[6];           /* MAC address */
-    char ssid[33];              /* SSID (max 32 chars + null terminator) */
-    int32_t channel;            /* Channel */
-    int32_t rssi;               /* Signal strength */
-    int32_t auth_suites;        /* Authentication suites bitmask */
-    int32_t unicast_ciphers;    /* Unicast ciphers bitmask */
-    int32_t group_ciphers;      /* Group ciphers bitmask */
-} ucx_wifi_scan_result_t;
-
-/* WiFi connection info structure */
-typedef struct {
-    char ip_address[40];
-    char subnet_mask[40];
-    char gateway[40];
-    int32_t channel;
-    int32_t rssi;
-} ucx_wifi_connection_info_t;
-
 /* ----------------------------------------------------------------
  * PUBLIC FUNCTIONS
  * -------------------------------------------------------------- */
@@ -138,44 +118,29 @@ void ucx_set_log_callback(ucx_handle_t handle, ucx_log_callback_t callback, void
 const char* ucx_get_last_error(ucx_handle_t handle);
 
 /**
- * Perform WiFi scan and get results.
+ * End a Begin/GetNext sequence (e.g., after WiFi scan).
+ * Must be called after using Begin/GetNext functions to clean up.
  * 
- * @param handle        UCX handle
- * @param results       Array to store scan results
- * @param max_results   Maximum number of results to return
- * @param timeout_ms    Timeout in milliseconds
- * @return Number of networks found (>=0) on success, error code (<0) on failure
+ * @param handle  UCX handle
  */
-int ucx_wifi_scan(ucx_handle_t handle, ucx_wifi_scan_result_t* results, 
-                  int max_results, int timeout_ms);
+void ucx_End(ucx_handle_t handle);
 
-/**
- * Connect to a WiFi network.
+/* ----------------------------------------------------------------
+ * NOTE: ALL UCX API FUNCTIONS ARE AUTO-GENERATED!
  * 
- * @param handle        UCX handle
- * @param ssid          Network SSID
- * @param password      Network password (NULL for open networks)
- * @param timeout_ms    Timeout in milliseconds
- * @return UCX_OK on success, error code otherwise
- */
-int ucx_wifi_connect(ucx_handle_t handle, const char* ssid, const char* password, int timeout_ms);
-
-/**
- * Disconnect from WiFi network.
+ * WiFi, Bluetooth, HTTP, MQTT, Socket, etc. functions are in:
+ *   - ucxclient_wrapper_generated.h (C header)
+ *   - ucxclient_wrapper_generated.c (C implementation)
+ *   - UcxNativeGenerated.cs (C# P/Invoke declarations)
  * 
- * @param handle    UCX handle
- * @return UCX_OK on success, error code otherwise
- */
-int ucx_wifi_disconnect(ucx_handle_t handle);
-
-/**
- * Get WiFi connection information (IP address, gateway, channel, RSSI).
+ * To use WiFi functions from C#:
+ *   UcxNativeGenerated.ucx_wifi_StationConnect(...) 
+ *   UcxNativeGenerated.ucx_wifi_StationScan1Begin(...)
+ *   UcxNativeGenerated.ucx_wifi_StationScan1GetNext(...)
+ *   etc.
  * 
- * @param handle    UCX handle
- * @param info      Pointer to structure to fill with connection info
- * @return UCX_OK on success, error code otherwise
- */
-int ucx_wifi_get_connection_info(ucx_handle_t handle, ucx_wifi_connection_info_t* info);
+ * Total: 365+ auto-generated functions available!
+ * -------------------------------------------------------------- */
 
 #ifdef __cplusplus
 }

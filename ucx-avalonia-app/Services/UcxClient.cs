@@ -124,18 +124,57 @@ public class UcxClient : IDisposable
                 throw new ObjectDisposedException(nameof(UcxClient));
             }
 
-            System.Diagnostics.Debug.WriteLine($"[UcxClient] Starting WiFi scan using generated API...");
+            System.Diagnostics.Debug.WriteLine($"[UcxClient] Starting WiFi scan using direct UCX API calls...");
             
-            // Use generated API: StationScan1Begin(0) for passive scan
-            UcxNativeGenerated.ucx_wifi_StationScan1Begin(_handle, 0);
+            var scanResults = new List<WifiScanResult>();
             
-            var results = new List<WifiScanResult>();
-            
-            // Note: StationScan1GetNext requires proper struct handling
-            // For now, return empty list - full implementation needs UCX struct definitions
-            System.Diagnostics.Debug.WriteLine($"[UcxClient] Scan initiated (result parsing not yet implemented)");
-            
-            return results;
+            try
+            {
+                // Call the generated ucx_wifi_StationScan1Begin directly (0 = passive scan)
+                UcxNative.ucx_wifi_StationScan1Begin(_handle, 0);
+                
+                // Loop through all scan results
+                while (true)
+                {
+                    UcxNative.UcxWifiStationScan nativeResult;
+                    bool hasMore = UcxNative.ucx_wifi_StationScan1GetNext(_handle, out nativeResult);
+                    
+                    if (!hasMore)
+                    {
+                        break;
+                    }
+                    
+                    // Convert native struct to managed WifiScanResult
+                    var result = new WifiScanResult
+                    {
+                        bssid = nativeResult.bssid.address ?? new byte[6],
+                        ssid = Marshal.PtrToStringAnsi(nativeResult.ssid) ?? string.Empty,
+                        channel = nativeResult.channel,
+                        rssi = nativeResult.rssi,
+                        auth_suites = nativeResult.authentication_suites,
+                        unicast_ciphers = nativeResult.unicast_ciphers,
+                        group_ciphers = nativeResult.group_ciphers
+                    };
+                    
+                    scanResults.Add(result);
+                    
+                    System.Diagnostics.Debug.WriteLine(
+                        $"[UcxClient]   Found: {result.Ssid} (Ch:{result.Channel}, RSSI:{result.Rssi} dBm)");
+                }
+                
+                // Important: Call uCxEnd to complete the scan operation
+                UcxNative.ucx_End(_handle);
+                
+                System.Diagnostics.Debug.WriteLine($"[UcxClient] Scan complete - found {scanResults.Count} network(s)");
+                return scanResults;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[UcxClient] Scan failed: {ex.Message}");
+                // Try to clean up
+                try { UcxNative.ucx_End(_handle); } catch { }
+                throw;
+            }
         });
     }
 
@@ -160,7 +199,7 @@ public class UcxClient : IDisposable
             
             // Step 1: Set connection parameters (SSID) - MUST BE FIRST
             System.Console.WriteLine($"[UcxClient] Step 1: Setting connection parameters (SSID)...");
-            result = UcxNativeGenerated.ucx_wifi_StationSetConnectionParams(_handle, wlan_handle, ssid);
+            result = UcxNative.ucx_wifi_StationSetConnectionParams(_handle, wlan_handle, ssid);
             System.Console.WriteLine($"[UcxClient] StationSetConnectionParams returned: {result}");
             
             if (result != 0)
@@ -175,7 +214,7 @@ public class UcxClient : IDisposable
             {
                 System.Console.WriteLine($"[UcxClient] Step 2: Setting WPA security with password length: {password.Length}...");
                 // wpa_threshold: 0=WPA/WPA2, 1=WPA2 only, 2=WPA2/WPA3
-                result = UcxNativeGenerated.ucx_wifi_StationSetSecurityWpa(_handle, wlan_handle, password, 0);
+                result = UcxNative.ucx_wifi_StationSetSecurityWpa(_handle, wlan_handle, password, 0);
                 System.Console.WriteLine($"[UcxClient] StationSetSecurityWpa returned: {result}");
                 
                 if (result != 0)
@@ -188,7 +227,7 @@ public class UcxClient : IDisposable
             else
             {
                 System.Console.WriteLine($"[UcxClient] Step 2: Setting open security...");
-                result = UcxNativeGenerated.ucx_wifi_StationSetSecurityOpen(_handle, wlan_handle);
+                result = UcxNative.ucx_wifi_StationSetSecurityOpen(_handle, wlan_handle);
                 System.Console.WriteLine($"[UcxClient] StationSetSecurityOpen returned: {result}");
                 
                 if (result != 0)
@@ -200,7 +239,7 @@ public class UcxClient : IDisposable
             
             // Step 3: Connect
             System.Console.WriteLine($"[UcxClient] Step 3: Initiating connection...");
-            result = UcxNativeGenerated.ucx_wifi_StationConnect(_handle, wlan_handle);
+            result = UcxNative.ucx_wifi_StationConnect(_handle, wlan_handle);
             System.Console.WriteLine($"[UcxClient] StationConnect returned: {result}");
             
             if (result != 0)
@@ -222,7 +261,7 @@ public class UcxClient : IDisposable
                 throw new ObjectDisposedException(nameof(UcxClient));
             }
 
-            int result = UcxNativeGenerated.ucx_wifi_StationDisconnect(_handle);
+            int result = UcxNative.ucx_wifi_StationDisconnect(_handle);
 
             if (result != 0)
             {
@@ -231,7 +270,7 @@ public class UcxClient : IDisposable
         });
     }
 
-    public async Task<UcxNative.WifiConnectionInfo> GetWifiConnectionInfoAsync()
+    public async Task<(string IpAddress, string SubnetMask, string Gateway, int Channel, int Rssi)> GetWifiConnectionInfoAsync()
     {
         return await Task.Run(() =>
         {
@@ -240,16 +279,74 @@ public class UcxClient : IDisposable
                 throw new ObjectDisposedException(nameof(UcxClient));
             }
 
-            UcxNative.WifiConnectionInfo info;
-            int result = UcxNative.ucx_wifi_get_connection_info(_handle, out info);
+            System.Console.WriteLine("[UcxClient] Getting WiFi connection info using generated API...");
 
-            if (result < 0)
+            string ipAddress = "0.0.0.0";
+            string subnetMask = "0.0.0.0";
+            string gateway = "0.0.0.0";
+            int channel = 0;
+            int rssi = 0;
+
+            try
             {
-                string? error = UcxNative.ucx_get_last_error(_handle);
-                throw new InvalidOperationException($"Failed to get connection info: {error ?? "Unknown error"}");
+                // Get IPv4 address (U_WIFI_NET_STATUS_ID_IPV4 = 0)
+                UcxNative.USockIpAddress ipAddr;
+                System.Console.WriteLine("[UcxClient] Calling StationGetNetworkStatus for IP address...");
+                int result = UcxNative.ucx_wifi_StationGetNetworkStatus(_handle, 0, out ipAddr);
+                System.Console.WriteLine($"[UcxClient] StationGetNetworkStatus(IP) returned: {result}, type: {ipAddr.type}");
+                
+                if (result == 0 && ipAddr.type == UcxNative.USockAddressType.V4)
+                {
+                    uint ipv4 = ipAddr.ipv4;
+                    ipAddress = $"{(ipv4 >> 24) & 0xFF}.{(ipv4 >> 16) & 0xFF}.{(ipv4 >> 8) & 0xFF}.{ipv4 & 0xFF}";
+                    System.Console.WriteLine($"[UcxClient] IP Address: {ipAddress} (raw: 0x{ipv4:X8})");
+                }
+                else
+                {
+                    System.Console.WriteLine($"[UcxClient] Failed to get IP: result={result}");
+                    string? error = UcxNative.ucx_get_last_error(_handle);
+                    System.Console.WriteLine($"[UcxClient] Error: {error}");
+                }
+
+                // Get Subnet Mask (U_WIFI_NET_STATUS_ID_SUBNET = 1)
+                UcxNative.USockIpAddress subnetAddr;
+                System.Console.WriteLine("[UcxClient] Calling StationGetNetworkStatus for subnet...");
+                result = UcxNative.ucx_wifi_StationGetNetworkStatus(_handle, 1, out subnetAddr);
+                System.Console.WriteLine($"[UcxClient] StationGetNetworkStatus(Subnet) returned: {result}");
+                
+                if (result == 0 && subnetAddr.type == UcxNative.USockAddressType.V4)
+                {
+                    uint subnet = subnetAddr.ipv4;
+                    subnetMask = $"{(subnet >> 24) & 0xFF}.{(subnet >> 16) & 0xFF}.{(subnet >> 8) & 0xFF}.{subnet & 0xFF}";
+                    System.Console.WriteLine($"[UcxClient] Subnet Mask: {subnetMask}");
+                }
+
+                // Get Gateway (U_WIFI_NET_STATUS_ID_GATE_WAY = 2)
+                UcxNative.USockIpAddress gatewayAddr;
+                System.Console.WriteLine("[UcxClient] Calling StationGetNetworkStatus for gateway...");
+                result = UcxNative.ucx_wifi_StationGetNetworkStatus(_handle, 2, out gatewayAddr);
+                System.Console.WriteLine($"[UcxClient] StationGetNetworkStatus(Gateway) returned: {result}");
+                
+                if (result == 0 && gatewayAddr.type == UcxNative.USockAddressType.V4)
+                {
+                    uint gw = gatewayAddr.ipv4;
+                    gateway = $"{(gw >> 24) & 0xFF}.{(gw >> 16) & 0xFF}.{(gw >> 8) & 0xFF}.{gw & 0xFF}";
+                    System.Console.WriteLine($"[UcxClient] Gateway: {gateway}");
+                }
+
+                // TODO: Get Channel and RSSI using uCxWifiStationStatusBegin
+                // These require proper struct marshalling for uCxWifiStationStatus_t
+                // For now, returning 0 values
+
+            }
+            catch (Exception ex)
+            {
+                System.Console.WriteLine($"[UcxClient] Exception getting network status: {ex.GetType().Name}: {ex.Message}");
+                System.Console.WriteLine($"[UcxClient] Stack trace: {ex.StackTrace}");
             }
 
-            return info;
+            System.Console.WriteLine($"[UcxClient] Returning: IP={ipAddress}, Subnet={subnetMask}, Gateway={gateway}");
+            return (ipAddress, subnetMask, gateway, channel, rssi);
         });
     }
 

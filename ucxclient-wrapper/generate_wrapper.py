@@ -429,9 +429,12 @@ class CSharpPInvokeGenerator:
         code.append("using System.Text;\n")
         code.append("namespace UcxAvaloniaApp.Services")
         code.append("{")
-        code.append("    public static partial class UcxNativeGenerated")
+        code.append("    /// <summary>")
+        code.append("    /// Auto-generated P/Invoke declarations for all 365+ UCX API functions.")
+        code.append("    /// This is a partial class - struct definitions are in UcxNative.cs")
+        code.append("    /// </summary>")
+        code.append("    public static partial class UcxNative")
         code.append("    {")
-        code.append('        private const string DllName = "ucxclient_wrapper";\n')
         
         # Generate by module
         modules = sorted(set(f.module for f in self.parser.functions))
@@ -496,8 +499,11 @@ class CSharpPInvokeGenerator:
             elif param.param_type == ParamType.POINTER:
                 # Output parameter or struct pointer
                 cs_type = self.map_csharp_type(param.c_type, is_pointer=False)
-                # If it's a complex type (struct), use IntPtr
-                if cs_type not in ['int', 'uint', 'short', 'ushort', 'sbyte', 'byte', 'bool']:
+                # Known struct types get proper 'out' parameters, unknown ones use IntPtr
+                known_structs = ['USockIpAddress', 'UcxWifiStationScan', 'UcxMacAddress']
+                if cs_type in known_structs:
+                    params.append(f"out {cs_type} {param.name}")
+                elif cs_type not in ['int', 'uint', 'short', 'ushort', 'sbyte', 'byte', 'bool']:
                     params.append(f"IntPtr {param.name}")
                 else:
                     params.append(f"out {cs_type} {param.name}")
@@ -541,10 +547,20 @@ class CSharpPInvokeGenerator:
             'char': 'byte',
         }
         
+        # Known UCX struct types that we have C# definitions for
+        struct_type_map = {
+            'uSockIpAddress_t': 'USockIpAddress',
+            'uCxWifiStationScan_t': 'UcxWifiStationScan',
+            'uMacAddress_t': 'UcxMacAddress',
+        }
+        
         base_type = c_type.replace('const', '').replace('*', '').strip()
         
         if base_type in type_map:
             cs_type = type_map[base_type]
+        elif base_type in struct_type_map:
+            # Known struct type with C# definition
+            cs_type = struct_type_map[base_type]
         elif 'char' in base_type and is_pointer:
             return 'string' if 'const' in c_type else 'StringBuilder'
         else:

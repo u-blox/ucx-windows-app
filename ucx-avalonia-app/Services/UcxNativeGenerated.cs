@@ -7,10 +7,12 @@ using System.Text;
 
 namespace UcxAvaloniaApp.Services
 {
-    public static partial class UcxNativeGenerated
+    /// <summary>
+    /// Auto-generated P/Invoke declarations for all 365+ UCX API functions.
+    /// This is a partial class - struct definitions are in UcxNative.cs
+    /// </summary>
+    public static partial class UcxNative
     {
-        private const string DllName = "ucxclient_wrapper";
-
         #region BLUETOOTH Functions
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
@@ -288,16 +290,16 @@ namespace UcxAvaloniaApp.Services
         public static extern int ucx_diagnostics_Iperf5(IntPtr instance, int iperf_action, int protocol_type, int role, int port, int report_interval);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int ucx_diagnostics_Iperf7(IntPtr instance, int iperf_action, int protocol_type, int role, int port, int report_interval, int time_boundary, out int ip_addr);
+        public static extern int ucx_diagnostics_Iperf7(IntPtr instance, int iperf_action, int protocol_type, int role, int port, int report_interval, int time_boundary, out USockIpAddress ip_addr);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int ucx_diagnostics_Iperf8(IntPtr instance, int iperf_action, int protocol_type, int role, int port, int report_interval, int time_boundary, out int ip_addr, int length);
+        public static extern int ucx_diagnostics_Iperf8(IntPtr instance, int iperf_action, int protocol_type, int role, int port, int report_interval, int time_boundary, out USockIpAddress ip_addr, int length);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int ucx_diagnostics_Iperf9(IntPtr instance, int iperf_action, int protocol_type, int role, int port, int report_interval, int time_boundary, out int ip_addr, int length, int bandwidth);
+        public static extern int ucx_diagnostics_Iperf9(IntPtr instance, int iperf_action, int protocol_type, int role, int port, int report_interval, int time_boundary, out USockIpAddress ip_addr, int length, int bandwidth);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int ucx_diagnostics_Iperf10(IntPtr instance, int iperf_action, int protocol_type, int role, int port, int report_interval, int time_boundary, out int ip_addr, int length, int bandwidth, int bidirectional);
+        public static extern int ucx_diagnostics_Iperf10(IntPtr instance, int iperf_action, int protocol_type, int role, int port, int report_interval, int time_boundary, out USockIpAddress ip_addr, int length, int bandwidth, int bidirectional);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void ucx_diagnostics_RegisterPingComplete(IntPtr instance, int callback);
@@ -777,7 +779,7 @@ namespace UcxAvaloniaApp.Services
         public static extern int ucx_socket_GetOption(IntPtr instance, int socket_handle, int option, out int pValue);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int ucx_socket_GetHostByName(IntPtr instance, [MarshalAs(UnmanagedType.LPStr)] string host_name, out int pHostIp);
+        public static extern int ucx_socket_GetHostByName(IntPtr instance, [MarshalAs(UnmanagedType.LPStr)] string host_name, out USockIpAddress pHostIp);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void ucx_socket_RegisterConnect(IntPtr instance, int callback);
@@ -857,10 +859,10 @@ namespace UcxAvaloniaApp.Services
         public static extern int ucx_system_StoreConfiguration(IntPtr instance);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int ucx_system_GetLocalAddress(IntPtr instance, int interface_id, out int pAddress);
+        public static extern int ucx_system_GetLocalAddress(IntPtr instance, int interface_id, out UcxMacAddress pAddress);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int ucx_system_SetLocalAddress(IntPtr instance, int interface_id, out int address);
+        public static extern int ucx_system_SetLocalAddress(IntPtr instance, int interface_id, out UcxMacAddress address);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern int ucx_system_FactoryReset(IntPtr instance);
@@ -972,13 +974,13 @@ namespace UcxAvaloniaApp.Services
         public static extern bool ucx_wifi_StationGetConnectionParamsBegin(IntPtr instance, int wlan_handle, [MarshalAs(UnmanagedType.LPStr)] string ppSsid);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int ucx_wifi_StationSetIpConfigStatic4(IntPtr instance, int wlan_handle, out int ip_addr, out int subnet_mask, out int gateway);
+        public static extern int ucx_wifi_StationSetIpConfigStatic4(IntPtr instance, int wlan_handle, out USockIpAddress ip_addr, out USockIpAddress subnet_mask, out USockIpAddress gateway);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int ucx_wifi_StationSetIpConfigStatic5(IntPtr instance, int wlan_handle, out int ip_addr, out int subnet_mask, out int gateway, out int prim_dns);
+        public static extern int ucx_wifi_StationSetIpConfigStatic5(IntPtr instance, int wlan_handle, out USockIpAddress ip_addr, out USockIpAddress subnet_mask, out USockIpAddress gateway, out USockIpAddress prim_dns);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int ucx_wifi_StationSetIpConfigStatic6(IntPtr instance, int wlan_handle, out int ip_addr, out int subnet_mask, out int gateway, out int prim_dns, out int sec_dns);
+        public static extern int ucx_wifi_StationSetIpConfigStatic6(IntPtr instance, int wlan_handle, out USockIpAddress ip_addr, out USockIpAddress subnet_mask, out USockIpAddress gateway, out USockIpAddress prim_dns, out USockIpAddress sec_dns);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern int ucx_wifi_StationSetIpConfigDhcp(IntPtr instance, int wlan_handle);
@@ -993,7 +995,7 @@ namespace UcxAvaloniaApp.Services
         public static extern int ucx_wifi_StationDisconnect(IntPtr instance);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int ucx_wifi_StationGetNetworkStatus(IntPtr instance, int net_status_id, out int pNetStatusVal);
+        public static extern int ucx_wifi_StationGetNetworkStatus(IntPtr instance, int net_status_id, out USockIpAddress pNetStatusVal);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void ucx_wifi_StationListNetworkStatusBegin(IntPtr instance);
@@ -1026,13 +1028,13 @@ namespace UcxAvaloniaApp.Services
         public static extern void ucx_wifi_StationScan1Begin(IntPtr instance, int scan_mode);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern bool ucx_wifi_StationScan1GetNext(IntPtr instance, out int pWifiStationScanRsp);
+        public static extern bool ucx_wifi_StationScan1GetNext(IntPtr instance, out UcxWifiStationScan pWifiStationScanRsp);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void ucx_wifi_StationScan2Begin(IntPtr instance, int scan_mode, [MarshalAs(UnmanagedType.LPStr)] string ssid);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern bool ucx_wifi_StationScan2GetNext(IntPtr instance, out int pWifiStationScanRsp);
+        public static extern bool ucx_wifi_StationScan2GetNext(IntPtr instance, out UcxWifiStationScan pWifiStationScanRsp);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern bool ucx_wifi_StationStatusBegin(IntPtr instance, int status_id, out int pWifiStationStatusRsp);
@@ -1068,10 +1070,10 @@ namespace UcxAvaloniaApp.Services
         public static extern void ucx_wifi_ApListStationsBegin(IntPtr instance);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern bool ucx_wifi_ApListStationsGetNext(IntPtr instance, out int pMac);
+        public static extern bool ucx_wifi_ApListStationsGetNext(IntPtr instance, out UcxMacAddress pMac);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int ucx_wifi_ApGetNetworkStatus(IntPtr instance, int net_status_id, out int pNetStatusVal);
+        public static extern int ucx_wifi_ApGetNetworkStatus(IntPtr instance, int net_status_id, out USockIpAddress pNetStatusVal);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void ucx_wifi_ApListNetworkStatusBegin(IntPtr instance);

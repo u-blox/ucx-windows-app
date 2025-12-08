@@ -20,31 +20,57 @@ namespace UcxAvaloniaApp.Services
 
         #endregion
 
-        #region Structures
+        #region UCX API Struct Definitions
 
-        /// <summary>
-        /// WiFi connection information structure.
-        /// Must match the C structure ucx_wifi_connection_info_t in ucxclient_wrapper.h
-        /// </summary>
-        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
-        public struct WifiConnectionInfo
+        // IP Address structures (from u_cx_at_params.h)
+        public enum USockAddressType
         {
-            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 40)]
-            public string IpAddress;
+            V4 = 0,
+            V6 = 6
+        }
 
-            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 40)]
-            public string SubnetMask;
+        [StructLayout(LayoutKind.Explicit, Size = 20)]
+        public struct USockIpAddress
+        {
+            [FieldOffset(0)]
+            public USockAddressType type;
+            
+            [FieldOffset(4)]
+            public uint ipv4;
+            
+            [FieldOffset(4)]
+            public uint ipv6_0;
+            [FieldOffset(8)]
+            public uint ipv6_1;
+            [FieldOffset(12)]
+            public uint ipv6_2;
+            [FieldOffset(16)]
+            public uint ipv6_3;
+        }
 
-            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 40)]
-            public string Gateway;
+        // WiFi scan structures
+        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
+        public struct UcxMacAddress
+        {
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 6)]
+            public byte[] address;
+        }
 
-            public int Channel;
-            public int Rssi;
+        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
+        public struct UcxWifiStationScan
+        {
+            public UcxMacAddress bssid;
+            public IntPtr ssid;  // const char* in C
+            public int channel;
+            public int rssi;
+            public int authentication_suites;
+            public int unicast_ciphers;
+            public int group_ciphers;
         }
 
         #endregion
 
-        #region Core Functions (from ucxclient_wrapper_core.c)
+        #region Core Helper Functions
 
         /// <summary>
         /// Create a UCX client instance and open the serial port.
@@ -96,42 +122,13 @@ namespace UcxAvaloniaApp.Services
 
         #endregion
 
-        #region High-Level WiFi Functions (from ucxclient_wrapper_core.c)
+        #region Core Helper Functions
 
         /// <summary>
-        /// Connect to a WiFi network.
+        /// Call uCxEnd to terminate a Begin/GetNext sequence (e.g., after WiFi scan).
         /// </summary>
-        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int ucx_wifi_connect(
-            IntPtr handle,
-            [MarshalAs(UnmanagedType.LPStr)] string ssid,
-            [MarshalAs(UnmanagedType.LPStr)] string password,
-            int timeoutMs);
-
-        /// <summary>
-        /// Disconnect from WiFi network.
-        /// </summary>
-        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int ucx_wifi_disconnect(IntPtr handle);
-
-        /// <summary>
-        /// Get WiFi connection information (IP address, gateway, etc).
-        /// Uses ucx_wifi_StationGetNetworkStatus from the generated API.
-        /// </summary>
-        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int ucx_wifi_get_connection_info(
-            IntPtr handle,
-            out WifiConnectionInfo info);
-
-        /// <summary>
-        /// Scan for WiFi networks.
-        /// </summary>
-        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int ucx_wifi_scan(
-            IntPtr handle,
-            IntPtr results,
-            int maxResults,
-            int timeoutMs);
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "ucx_End")]
+        public static extern void ucx_End(IntPtr handle);
 
         #endregion
     }
