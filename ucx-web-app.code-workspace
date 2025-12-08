@@ -10,7 +10,8 @@
 			"ostream": "c"
 		},
 		"cmake.sourceDirectory": "${workspaceFolder}/examples",
-		"debug.focusEditorOnBreak": false
+		"debug.focusEditorOnBreak": false,
+		"git.ignoreLimitWarning": true
 	},
 	"extensions": {
 		"recommendations": [

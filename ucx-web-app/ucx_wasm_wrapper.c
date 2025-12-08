@@ -34,6 +34,7 @@
 #include "u_cx_wifi.h"
 #include "u_cx_bluetooth.h"
 #include "u_cx_system.h"
+#include "u_cx_general.h"
 
 /* ----------------------------------------------------------------
  * TYPES
@@ -372,7 +373,7 @@ int ucx_send_at_command(const char* command, char* response, int response_size) 
     
     // Send command and get response
     // Note: This is a simplified version - full implementation would parse multi-line responses
-    uCxAtClientCmdBegin(&g_instance->at_client, "AT", command);
+    uCxAtClientCmdBeginF(&g_instance->at_client, "AT", "%s", command);
     
     int32_t result = uCxAtClientCmdEnd(&g_instance->at_client);
     
@@ -397,16 +398,16 @@ int ucx_get_version(char* version, int version_size) {
         return -1;
     }
     
-    char version_str[64];
+    const char* version_str = NULL;
     
     // Get software version
-    bool result = uCxSystemGetSoftwareVersionBegin(&g_instance->cx_handle, version_str);
-    
-    if (result) {
-        strncpy(version, version_str, version_size - 1);
-        version[version_size - 1] = '\0';
-        printf("[WASM] Version: %s\n", version);
-        return 0;
+    if (uCxGeneralGetSoftwareVersionBegin(&g_instance->cx_handle, &version_str)) {
+        if (version_str) {
+            strncpy(version, version_str, version_size - 1);
+            version[version_size - 1] = '\0';
+            printf("[WASM] Version: %s\n", version);
+            return 0;
+        }
     }
     
     return -1;

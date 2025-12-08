@@ -1,3 +1,6 @@
 [submodule "ucxclient"]
 	path = ucxclient
 	url = https://github.com/u-blox/ucxclient.git
+[submodule "emsdk"]
+	path = emsdk
+	url = https://github.com/emscripten-core/emsdk.git

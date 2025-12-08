@@ -19,6 +19,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>UCX Web Terminal - NORA-W36</title>
+    <link rel="icon" type="image/x-icon" href="images/ShortRange.ico">
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -121,7 +122,7 @@
     <div class="section">
         <h2>Serial Connection</h2>
         <div id="serialStatus" class="status disconnected">Not Connected</div>
-        <button id="connectBtn" onclick="connectSerial()">Connect to Serial Port</button>
+        <button id="connectBtn" onclick="connectSerial()" disabled>Connect to Serial Port</button>
         <button id="disconnectBtn" onclick="disconnectSerial()" disabled>Disconnect</button>
         <p>Baud Rate: <select id="baudRate">
             <option value="115200" selected>115200</option>
@@ -147,6 +148,17 @@
         <button onclick="wifiDisconnect()" id="disconnectWifiBtn" disabled>Disconnect</button>
         <button onclick="getConnectionInfo()" id="connectionInfoBtn" disabled>Get Connection Info</button>
         <div id="connectionInfo"></div>
+    </div>
+
+    <div class="section">
+        <h2>AT Commands</h2>
+        <p>
+            <input type="text" id="atCommand" placeholder="Enter AT command (e.g., AT+UWSCAN)" style="width: 400px;">
+            <button onclick="sendATCommand()" id="sendATBtn" disabled>Send</button>
+        </p>
+        <p style="font-size: 12px; color: #666;">
+            Examples: AT+GMR (firmware version), AT+UWSCAN (WiFi scan), AT+UWSC=0,3,0 (connect to SSID in slot 0)
+        </p>
     </div>
 
     <div class="section">
@@ -224,10 +236,12 @@
                     
                     // Add to receive buffer
                     receiveBuffer.push(...value);
+                    console.log('[DEBUG] RX: Received', value.length, 'bytes, buffer now has', receiveBuffer.length, 'bytes');
                     
                     // Debug: show received data
                     const text = new TextDecoder().decode(value);
                     log(`RX: ${text}`);
+                    console.log('[DEBUG] RX data:', text.trim());
                 }
             } catch (error) {
                 log(`Read error: ${error}`);
@@ -242,6 +256,12 @@
         // Connect to serial port
         async function connectSerial() {
             try {
+                // Check if WASM module is loaded
+                if (!ucxModule) {
+                    alert('WASM module not loaded yet. Please wait a moment and try again.');
+                    return;
+                }
+
                 // Check Web Serial API support
                 if (!('serial' in navigator)) {
                     alert('Web Serial API not supported. Use Chrome or Edge browser.');
@@ -265,11 +285,19 @@
                 readSerial();
                 
                 // Initialize UCX client
-                ucxHandle = ucxModule.ccall('ucx_create', 'number', [], []);
-                if (ucxHandle === 0) {
+                const portName = '';
+                const portNameLen = ucxModule.lengthBytesUTF8(portName) + 1;
+                const portNamePtr = ucxModule._malloc(portNameLen);
+                ucxModule.stringToUTF8(portName, portNamePtr, portNameLen);
+                
+                const result = ucxModule.ccall('ucx_init', 'number', ['number', 'number'], [portNamePtr, 115200]);
+                ucxModule._free(portNamePtr);
+                
+                if (result !== 0) {
                     throw new Error('Failed to initialize UCX client');
                 }
-                log(`UCX client initialized (handle: ${ucxHandle})`);
+                ucxHandle = 1; // Mark as initialized
+                log('UCX client initialized');
                 
                 updateSerialStatus(true);
             } catch (error) {
@@ -289,7 +317,7 @@
                 
                 // Destroy UCX client
                 if (ucxHandle !== 0) {
-                    ucxModule.ccall('ucx_destroy', null, ['number'], [ucxHandle]);
+                    ucxModule.ccall('ucx_deinit', null, [], []);
                     ucxHandle = 0;
                 }
                 
@@ -309,41 +337,66 @@
         // WiFi scan
         async function wifiScan() {
             try {
+                console.log('[DEBUG] === wifiScan() called ===');
                 log('Starting WiFi scan...');
                 
+                console.log('[DEBUG] Calling ucx_wifi_scan_begin');
                 const scanId = ucxModule.ccall('ucx_wifi_scan_begin', 'number', [], []);
+                console.log('[DEBUG] ucx_wifi_scan_begin returned:', scanId);
                 if (scanId < 0) {
                     throw new Error('Failed to start WiFi scan');
                 }
                 
                 // Wait for scan to complete (simplified - in real app, poll or use callback)
+                console.log('[DEBUG] Waiting 5 seconds for scan to complete...');
                 await new Promise(resolve => setTimeout(resolve, 5000));
+                console.log('[DEBUG] Wait complete, retrieving results');
                 
                 // Get scan results
                 const networks = [];
-                const resultPtr = ucxModule._malloc(256);
+                const ssidPtr = ucxModule._malloc(33); // SSID buffer (32 + null terminator)
+                const rssiPtr = ucxModule._malloc(4);  // int32
+                const channelPtr = ucxModule._malloc(4); // int32
+                console.log('[DEBUG] Allocated memory - ssidPtr:', ssidPtr, 'rssiPtr:', rssiPtr, 'channelPtr:', channelPtr);
                 
+                let scanIndex = 0;
                 while (true) {
-                    const ret = ucxModule.ccall('ucx_wifi_scan_get_next', 'number', ['number'], [resultPtr]);
-                    if (ret !== 0) {
-                        break;
+                    console.log('[DEBUG] Calling ucx_wifi_scan_get_next, iteration:', scanIndex);
+                    const ret = ucxModule.ccall('ucx_wifi_scan_get_next', 'number', 
+                        ['number', 'number', 'number'], 
+                        [ssidPtr, rssiPtr, channelPtr]);
+                    console.log('[DEBUG] ucx_wifi_scan_get_next returned:', ret);
+                    
+                    if (ret !== 1) {
+                        console.log('[DEBUG] No more results (ret=' + ret + '), breaking loop');
+                        break; // 0 = no more results, -1 = error
                     }
                     
-                    const ssid = ucxModule.UTF8ToString(resultPtr);
-                    networks.push(ssid);
-                }
+                        const ssid = ucxModule.UTF8ToString(ssidPtr);
+                        const rssi = ucxModule.readInt32(rssiPtr);
+                        const channel = ucxModule.readInt32(channelPtr);
+                        console.log('[DEBUG] Network', scanIndex, '- SSID:', ssid, 'RSSI:', rssi, 'Channel:', channel);
+                        
+                        networks.push({ ssid, rssi, channel });
+                        scanIndex++;
+                    }                ucxModule._free(ssidPtr);
+                ucxModule._free(rssiPtr);
+                ucxModule._free(channelPtr);
+                console.log('[DEBUG] Freed memory');
                 
-                ucxModule._free(resultPtr);
+                console.log('[DEBUG] Calling ucx_wifi_scan_end');
                 ucxModule.ccall('ucx_wifi_scan_end', null, [], []);
+                console.log('[DEBUG] Scan complete, total networks:', networks.length);
+                log(`Found ${networks.length} networks`);
                 
                 // Display results
                 const resultsDiv = document.getElementById('scanResults');
                 if (networks.length === 0) {
                     resultsDiv.innerHTML = '<p>No networks found</p>';
                 } else {
-                    let html = '<table><tr><th>SSID</th><th>Action</th></tr>';
-                    for (const ssid of networks) {
-                        html += `<tr><td>${ssid}</td><td><button onclick="selectNetwork('${ssid}')">Select</button></td></tr>`;
+                    let html = '<table><tr><th>SSID</th><th>Channel</th><th>RSSI</th><th>Action</th></tr>';
+                    for (const net of networks) {
+                        html += `<tr><td>${net.ssid}</td><td>${net.channel}</td><td>${net.rssi} dBm</td><td><button onclick="selectNetwork('${net.ssid}')">Select</button></td></tr>`;
                     }
                     html += '</table>';
                     resultsDiv.innerHTML = html;
@@ -420,7 +473,7 @@
                 log('Getting connection info...');
                 
                 const infoPtr = ucxModule._malloc(256);
-                const ret = ucxModule.ccall('ucx_wifi_get_connection_info', 'number', ['number'], [infoPtr]);
+                const ret = ucxModule.ccall('ucx_wifi_get_ip', 'number', ['number'], [infoPtr]);
                 
                 if (ret === 0) {
                     const info = ucxModule.UTF8ToString(infoPtr);
@@ -455,8 +508,110 @@
             ucxModule.receiveBuffer = receiveBuffer;
             ucxModule.onURC = handleURC;
             
+            // Attach serial port functions that are called from WASM
+            ucxModule.serialPort = null; // Will be set when connected
+            ucxModule.writeQueue = Promise.resolve(); // Write queue to prevent lock conflicts
+            
+            ucxModule.serialWrite = function(buffer) {
+                try {
+                    console.log('[DEBUG] serialWrite called, buffer length:', buffer.length);
+                    if (!ucxModule.serialPort || !ucxModule.serialPort.writable) {
+                        console.error('[serialWrite] Serial port not writable');
+                        log('[ERROR] Serial port not writable');
+                        return -1;
+                    }
+                    
+                    // Convert to string for logging
+                    const text = new TextDecoder().decode(buffer);
+                    log(`TX (${buffer.length} bytes): ${text.trim()}`);
+                    console.log('[DEBUG] Writing to serial:', text.trim());
+                    
+                    // Queue the write to prevent lock conflicts
+                    ucxModule.writeQueue = ucxModule.writeQueue.then(async () => {
+                        const writer = ucxModule.serialPort.writable.getWriter();
+                        try {
+                            await writer.write(buffer);
+                            console.log('[DEBUG] Write completed successfully');
+                        } catch (error) {
+                            console.error('[serialWrite] Write error:', error);
+                        } finally {
+                            writer.releaseLock();
+                        }
+                    });
+                    
+                    return buffer.length;
+                } catch (error) {
+                    console.error('[serialWrite] Error:', error);
+                    log(`[ERROR] serialWrite: ${error.message}`);
+                    return -1;
+                }
+            };
+            
+            ucxModule.serialRead = function(maxLength) {
+                try {
+                    console.log('[DEBUG] serialRead called, maxLength:', maxLength, 'buffer has:', ucxModule.receiveBuffer?.length || 0);
+                    if (!ucxModule.receiveBuffer || ucxModule.receiveBuffer.length === 0) {
+                        console.log('[DEBUG] serialRead: no data available');
+                        return null;
+                    }
+                    
+                    // Read up to maxLength bytes from buffer
+                    const length = Math.min(maxLength, ucxModule.receiveBuffer.length);
+                    const data = ucxModule.receiveBuffer.slice(0, length);
+                    
+                    // Remove read data from buffer
+                    ucxModule.receiveBuffer = ucxModule.receiveBuffer.slice(length);
+                    
+                    console.log('[DEBUG] serialRead returning', length, 'bytes');
+                    return new Uint8Array(data);
+                } catch (error) {
+                    console.error('[serialRead] Error:', error);
+                    return null;
+                }
+            };
+            
+            // Helper to read int32 from WASM memory
+            ucxModule.readInt32 = function(ptr) {
+                // Get memory buffer - try different property names
+                let buffer;
+                if (ucxModule.HEAP8) {
+                    buffer = ucxModule.HEAP8.buffer;
+                } else if (ucxModule.wasmMemory) {
+                    buffer = ucxModule.wasmMemory.buffer;
+                } else if (ucxModule.memory) {
+                    buffer = ucxModule.memory.buffer;
+                }
+                
+                if (!buffer) {
+                    console.error('[readInt32] Cannot find WASM memory buffer');
+                    return 0;
+                }
+                
+                const view = new Int32Array(buffer, ptr, 1);
+                return view[0];
+            };
+            
+            ucxModule.serialAvailable = function() {
+                try {
+                    if (!ucxModule.receiveBuffer) {
+                        return 0;
+                    }
+                    const available = ucxModule.receiveBuffer.length;
+                    if (available > 0) {
+                        console.log('[DEBUG] serialAvailable:', available, 'bytes');
+                    }
+                    return available;
+                } catch (error) {
+                    console.error('[serialAvailable] Error:', error);
+                    return 0;
+                }
+            };
+            
             log('UCX WASM module loaded successfully');
             log('Click "Connect to Serial Port" to begin');
+            
+            // Enable the connect button now that module is loaded
+            document.getElementById('connectBtn').disabled = false;
         }).catch(error => {
             log(`Failed to load WASM module: ${error}`);
             alert(`Failed to load UCX module: ${error.message}`);

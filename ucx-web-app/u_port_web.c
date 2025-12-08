@@ -26,6 +26,7 @@
 #include <emscripten.h>
 #include <string.h>
 #include <stdio.h>
+#include <stdarg.h>
 
 /* ----------------------------------------------------------------
  * JAVASCRIPT FUNCTIONS (implemented in library.js)
@@ -40,7 +41,11 @@
  */
 EM_JS(int, js_serial_write, (const char* data, int length), {
     try {
-        const buffer = new Uint8Array(Module.HEAPU8.buffer, data, length);
+        // Create a copy of the data from WASM memory
+        const buffer = new Uint8Array(length);
+        for (let i = 0; i < length; i++) {
+            buffer[i] = HEAPU8[data + i];
+        }
         return Module.serialWrite(buffer);
     } catch (e) {
         console.error('js_serial_write error:', e);
@@ -58,7 +63,10 @@ EM_JS(int, js_serial_read, (char* buffer, int maxLength), {
     try {
         const jsBuffer = Module.serialRead(maxLength);
         if (jsBuffer && jsBuffer.length > 0) {
-            Module.HEAPU8.set(jsBuffer, buffer);
+            // Copy data into WASM memory
+            for (let i = 0; i < jsBuffer.length; i++) {
+                HEAPU8[buffer + i] = jsBuffer[i];
+            }
             return jsBuffer.length;
         }
         return 0;
@@ -91,6 +99,24 @@ EM_JS(void, js_sleep, (int ms), {
 });
 
 /* ----------------------------------------------------------------
+ * PORT INITIALIZATION
+ * -------------------------------------------------------------- */
+
+/**
+ * Initialize the port layer (no-op for web)
+ */
+void uPortInit(void) {
+    // No initialization needed for WebAssembly
+}
+
+/**
+ * Deinitialize the port layer (no-op for web)
+ */
+void uPortDeinit(void) {
+    // No cleanup needed for WebAssembly
+}
+
+/* ----------------------------------------------------------------
  * UCX PORT IMPLEMENTATION
  * These functions implement the ucxclient port interface
  * -------------------------------------------------------------- */
@@ -102,14 +128,12 @@ EM_JS(void, js_sleep, (int ms), {
  * in JavaScript before initializing the WASM module, so this
  * function just validates the connection.
  */
-int32_t uPortUartOpen(int32_t uart, int32_t baudRate, void* pReceiveBuffer,
-                      size_t receiveBufferSizeBytes,
-                      int32_t pinTx, int32_t pinRx,
-                      int32_t pinCts, int32_t pinRts) {
+void* uPortUartOpen(const char *pDevName, int32_t baudRate, bool useFlowControl) {
     // Web Serial port is already opened in JavaScript
     // Just log the configuration for debugging
-    printf("[u_port_web] UART open: uart=%d, baudRate=%d\n", uart, baudRate);
-    return 0; // Success
+    printf("[u_port_web] UART open: dev=%s, baudRate=%d, flowControl=%d\n", 
+           pDevName ? pDevName : "(null)", baudRate, useFlowControl);
+    return (void*)1; // Return non-NULL handle for success
 }
 
 /**
@@ -118,8 +142,8 @@ int32_t uPortUartOpen(int32_t uart, int32_t baudRate, void* pReceiveBuffer,
  * Cleanup is handled in JavaScript when the page unloads,
  * so this is mostly a no-op.
  */
-void uPortUartClose(int32_t uart) {
-    printf("[u_port_web] UART close: uart=%d\n", uart);
+void uPortUartClose(void* handle) {
+    printf("[u_port_web] UART close: handle=%p\n", handle);
     // Actual port closing is handled in JavaScript
 }
 
@@ -129,16 +153,16 @@ void uPortUartClose(int32_t uart) {
  * Sends data through the Web Serial API by calling the
  * JavaScript bridge function.
  */
-int32_t uPortUartWrite(int32_t uart, const void* pBuffer, size_t sizeBytes) {
-    if (!pBuffer || sizeBytes == 0) {
+int32_t uPortUartWrite(void* handle, const void* pData, size_t length) {
+    if (!pData || length == 0) {
         return 0;
     }
     
     // Debug output
-    printf("[u_port_web] Writing %zu bytes\n", sizeBytes);
+    printf("[u_port_web] Writing %zu bytes\n", length);
     
     // Call JavaScript function to write to Web Serial
-    int result = js_serial_write((const char*)pBuffer, sizeBytes);
+    int result = js_serial_write((const char*)pData, length);
     
     if (result < 0) {
         printf("[u_port_web] Write error\n");
@@ -154,13 +178,16 @@ int32_t uPortUartWrite(int32_t uart, const void* pBuffer, size_t sizeBytes) {
  * Reads from a buffer that is populated asynchronously by
  * JavaScript code listening to the Web Serial port.
  */
-int32_t uPortUartRead(int32_t uart, void* pBuffer, size_t sizeBytes) {
-    if (!pBuffer || sizeBytes == 0) {
+int32_t uPortUartRead(void* handle, void* pData, size_t length, int32_t timeoutMs) {
+    if (!pData || length == 0) {
         return 0;
     }
     
+    // Note: timeoutMs is ignored in web implementation
+    // JavaScript handles buffering asynchronously
+    
     // Call JavaScript function to read from receive buffer
-    int result = js_serial_read((char*)pBuffer, sizeBytes);
+    int result = js_serial_read((char*)pData, length);
     
     if (result > 0) {
         printf("[u_port_web] Read %d bytes\n", result);
@@ -172,21 +199,21 @@ int32_t uPortUartRead(int32_t uart, void* pBuffer, size_t sizeBytes) {
 /**
  * Get number of bytes available in receive buffer
  */
-int32_t uPortUartGetReceiveSize(int32_t uart) {
+int32_t uPortUartGetReceiveSize(void* handle) {
     return js_serial_available();
 }
 
 /**
  * Event send (not used in Web port)
  */
-int32_t uPortUartEventSend(int32_t uart, uint32_t eventBitMap) {
+int32_t uPortUartEventSend(void* handle, uint32_t eventBitMap) {
     return 0;
 }
 
 /**
  * Event receive (not used in Web port)
  */
-int32_t uPortUartEventReceive(int32_t uart, uint32_t* pEventBitMap) {
+int32_t uPortUartEventReceive(void* handle, uint32_t* pEventBitMap) {
     if (pEventBitMap) {
         *pEventBitMap = 0;
     }
@@ -196,7 +223,7 @@ int32_t uPortUartEventReceive(int32_t uart, uint32_t* pEventBitMap) {
 /**
  * Event send and receive (not used in Web port)
  */
-int32_t uPortUartEventSendReceive(int32_t uart, uint32_t eventSendBitMap,
+int32_t uPortUartEventSendReceive(void* handle, uint32_t eventSendBitMap,
                                    uint32_t* pEventReceiveBitMap) {
     if (pEventReceiveBitMap) {
         *pEventReceiveBitMap = 0;
@@ -207,7 +234,7 @@ int32_t uPortUartEventSendReceive(int32_t uart, uint32_t eventSendBitMap,
 /**
  * Get event queue handle (not used in Web port)
  */
-int32_t uPortUartEventQueueHandle(int32_t uart) {
+int32_t uPortUartEventQueueHandle(void* handle) {
     return -1;
 }
 
@@ -219,11 +246,11 @@ int32_t uPortUartEventQueueHandle(int32_t uart) {
  * Get system tick count in milliseconds
  * Uses JavaScript Date.now() for timing
  */
-EM_JS(int64_t, js_get_time_ms, (), {
-    return Date.now();
+EM_JS(int32_t, js_get_time_ms, (), {
+    return Date.now() & 0x7FFFFFFF; // Keep within int32_t range
 });
 
-int64_t uPortGetTickTimeMs(void) {
+int32_t uPortGetTickTimeMs(void) {
     return js_get_time_ms();
 }
 
@@ -275,21 +302,19 @@ int32_t uPortMutexTryLock(void* mutexHandle, int32_t timeoutMs) {
 }
 
 /* ----------------------------------------------------------------
- * INITIALIZATION
+ * BACKGROUND RX TASK (Not needed for web - data is buffered in JS)
  * -------------------------------------------------------------- */
 
-/**
- * Initialize the port layer
- * Called once when the WASM module loads
- */
-int32_t uPortInit(void) {
-    printf("[u_port_web] Port layer initialized\n");
-    return 0;
-}
+#include "u_cx_at_client.h"
 
 /**
- * Deinitialize the port layer
+ * Create background receive task
+ * 
+ * In WebAssembly, data reception is handled asynchronously in JavaScript,
+ * so no background task is needed.
  */
-void uPortDeinit(void) {
-    printf("[u_port_web] Port layer deinitialized\n");
+void uPortBgRxTaskCreate(uCxAtClient_t *pClient) {
+    // No background task needed - JavaScript handles async data reception
+    printf("[u_port_web] Background RX task creation (no-op)\n");
 }
+
