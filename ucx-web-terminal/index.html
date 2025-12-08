@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<!--
+  Copyright 2025 u-blox
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UCX Web Terminal - NORA-W36</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        h1 {
+            color: #003366;
+            border-bottom: 3px solid #0066cc;
+            padding-bottom: 10px;
+        }
+        .section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        button {
+            background: #0066cc;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        button:hover {
+            background: #0052a3;
+        }
+        button:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+        }
+        input[type="text"], input[type="password"], select {
+            padding: 8px;
+            margin: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .log {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 15px;
+            border-radius: 4px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .status.disconnected {
+            background: #ffe6e6;
+            color: #cc0000;
+        }
+        .status.connected {
+            background: #e6ffe6;
+            color: #006600;
+        }
+        .wifi-network {
+            padding: 10px;
+            margin: 5px 0;
+            background: #f9f9f9;
+            border-left: 4px solid #0066cc;
+            cursor: pointer;
+        }
+        .wifi-network:hover {
+            background: #e6f2ff;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background: #f0f0f0;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>🌐 UCX Web Terminal - NORA-W36</h1>
+    
+    <div class="section">
+        <h2>Serial Connection</h2>
+        <div id="serialStatus" class="status disconnected">Not Connected</div>
+        <button id="connectBtn" onclick="connectSerial()">Connect to Serial Port</button>
+        <button id="disconnectBtn" onclick="disconnectSerial()" disabled>Disconnect</button>
+        <p>Baud Rate: <select id="baudRate">
+            <option value="115200" selected>115200</option>
+            <option value="921600">921600</option>
+            <option value="460800">460800</option>
+            <option value="230400">230400</option>
+        </select></p>
+    </div>
+
+    <div class="section">
+        <h2>WiFi Scan</h2>
+        <button onclick="wifiScan()" id="scanBtn" disabled>Scan Networks</button>
+        <div id="scanResults"></div>
+    </div>
+
+    <div class="section">
+        <h2>WiFi Connection</h2>
+        <p>
+            SSID: <input type="text" id="ssid" placeholder="Network name"><br>
+            Password: <input type="password" id="password" placeholder="Password">
+        </p>
+        <button onclick="wifiConnect()" id="connectWifiBtn" disabled>Connect</button>
+        <button onclick="wifiDisconnect()" id="disconnectWifiBtn" disabled>Disconnect</button>
+        <button onclick="getConnectionInfo()" id="connectionInfoBtn" disabled>Get Connection Info</button>
+        <div id="connectionInfo"></div>
+    </div>
+
+    <div class="section">
+        <h2>Console Log</h2>
+        <button onclick="clearLog()">Clear Log</button>
+        <div id="log" class="log"></div>
+    </div>
+
+    <script src="ucxclient.js"></script>
+    <script>
+        let ucxModule = null;
+        let ucxHandle = 0;
+        let serialPort = null;
+        let receiveBuffer = [];
+        let reader = null;
+        let isReading = false;
+
+        // Log to console and UI
+        function log(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            const logMessage = `[${timestamp}] ${message}`;
+            console.log(logMessage);
+            
+            const logDiv = document.getElementById('log');
+            logDiv.textContent += logMessage + '\n';
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        function clearLog() {
+            document.getElementById('log').textContent = '';
+        }
+
+        // Update UI status
+        function updateSerialStatus(connected) {
+            const statusDiv = document.getElementById('serialStatus');
+            const connectBtn = document.getElementById('connectBtn');
+            const disconnectBtn = document.getElementById('disconnectBtn');
+            const scanBtn = document.getElementById('scanBtn');
+            const connectWifiBtn = document.getElementById('connectWifiBtn');
+            const disconnectWifiBtn = document.getElementById('disconnectWifiBtn');
+            const connectionInfoBtn = document.getElementById('connectionInfoBtn');
+
+            if (connected) {
+                statusDiv.textContent = 'Connected';
+                statusDiv.className = 'status connected';
+                connectBtn.disabled = true;
+                disconnectBtn.disabled = false;
+                scanBtn.disabled = false;
+                connectWifiBtn.disabled = false;
+                disconnectWifiBtn.disabled = false;
+                connectionInfoBtn.disabled = false;
+            } else {
+                statusDiv.textContent = 'Not Connected';
+                statusDiv.className = 'status disconnected';
+                connectBtn.disabled = false;
+                disconnectBtn.disabled = true;
+                scanBtn.disabled = true;
+                connectWifiBtn.disabled = true;
+                disconnectWifiBtn.disabled = true;
+                connectionInfoBtn.disabled = true;
+            }
+        }
+
+        // Read from serial port continuously
+        async function readSerial() {
+            isReading = true;
+            try {
+                reader = serialPort.readable.getReader();
+                
+                while (isReading) {
+                    const { value, done } = await reader.read();
+                    if (done) {
+                        break;
+                    }
+                    
+                    // Add to receive buffer
+                    receiveBuffer.push(...value);
+                    
+                    // Debug: show received data
+                    const text = new TextDecoder().decode(value);
+                    log(`RX: ${text}`);
+                }
+            } catch (error) {
+                log(`Read error: ${error}`);
+            } finally {
+                if (reader) {
+                    reader.releaseLock();
+                    reader = null;
+                }
+            }
+        }
+
+        // Connect to serial port
+        async function connectSerial() {
+            try {
+                // Check Web Serial API support
+                if (!('serial' in navigator)) {
+                    alert('Web Serial API not supported. Use Chrome or Edge browser.');
+                    return;
+                }
+
+                // Request port
+                serialPort = await navigator.serial.requestPort();
+                
+                // Open with selected baud rate
+                const baudRate = parseInt(document.getElementById('baudRate').value);
+                await serialPort.open({ baudRate });
+                
+                log(`Serial port opened at ${baudRate} baud`);
+                
+                // Make available to WASM module
+                ucxModule.serialPort = serialPort;
+                ucxModule.receiveBuffer = receiveBuffer;
+                
+                // Start reading
+                readSerial();
+                
+                // Initialize UCX client
+                ucxHandle = ucxModule.ccall('ucx_create', 'number', [], []);
+                if (ucxHandle === 0) {
+                    throw new Error('Failed to initialize UCX client');
+                }
+                log(`UCX client initialized (handle: ${ucxHandle})`);
+                
+                updateSerialStatus(true);
+            } catch (error) {
+                log(`Connection error: ${error}`);
+                alert(`Failed to connect: ${error.message}`);
+            }
+        }
+
+        // Disconnect serial port
+        async function disconnectSerial() {
+            try {
+                // Stop reading
+                isReading = false;
+                if (reader) {
+                    await reader.cancel();
+                }
+                
+                // Destroy UCX client
+                if (ucxHandle !== 0) {
+                    ucxModule.ccall('ucx_destroy', null, ['number'], [ucxHandle]);
+                    ucxHandle = 0;
+                }
+                
+                // Close port
+                if (serialPort) {
+                    await serialPort.close();
+                    serialPort = null;
+                }
+                
+                log('Serial port closed');
+                updateSerialStatus(false);
+            } catch (error) {
+                log(`Disconnect error: ${error}`);
+            }
+        }
+
+        // WiFi scan
+        async function wifiScan() {
+            try {
+                log('Starting WiFi scan...');
+                
+                const scanId = ucxModule.ccall('ucx_wifi_scan_begin', 'number', [], []);
+                if (scanId < 0) {
+                    throw new Error('Failed to start WiFi scan');
+                }
+                
+                // Wait for scan to complete (simplified - in real app, poll or use callback)
+                await new Promise(resolve => setTimeout(resolve, 5000));
+                
+                // Get scan results
+                const networks = [];
+                const resultPtr = ucxModule._malloc(256);
+                
+                while (true) {
+                    const ret = ucxModule.ccall('ucx_wifi_scan_get_next', 'number', ['number'], [resultPtr]);
+                    if (ret !== 0) {
+                        break;
+                    }
+                    
+                    const ssid = ucxModule.UTF8ToString(resultPtr);
+                    networks.push(ssid);
+                }
+                
+                ucxModule._free(resultPtr);
+                ucxModule.ccall('ucx_wifi_scan_end', null, [], []);
+                
+                // Display results
+                const resultsDiv = document.getElementById('scanResults');
+                if (networks.length === 0) {
+                    resultsDiv.innerHTML = '<p>No networks found</p>';
+                } else {
+                    let html = '<table><tr><th>SSID</th><th>Action</th></tr>';
+                    for (const ssid of networks) {
+                        html += `<tr><td>${ssid}</td><td><button onclick="selectNetwork('${ssid}')">Select</button></td></tr>`;
+                    }
+                    html += '</table>';
+                    resultsDiv.innerHTML = html;
+                }
+                
+                log(`Found ${networks.length} networks`);
+            } catch (error) {
+                log(`Scan error: ${error}`);
+            }
+        }
+
+        // Select network from scan results
+        function selectNetwork(ssid) {
+            document.getElementById('ssid').value = ssid;
+        }
+
+        // WiFi connect
+        async function wifiConnect() {
+            try {
+                const ssid = document.getElementById('ssid').value;
+                const password = document.getElementById('password').value;
+                
+                if (!ssid) {
+                    alert('Please enter SSID');
+                    return;
+                }
+                
+                log(`Connecting to ${ssid}...`);
+                
+                const ssidPtr = ucxModule._malloc(ucxModule.lengthBytesUTF8(ssid) + 1);
+                const passPtr = ucxModule._malloc(ucxModule.lengthBytesUTF8(password) + 1);
+                
+                ucxModule.stringToUTF8(ssid, ssidPtr, ucxModule.lengthBytesUTF8(ssid) + 1);
+                ucxModule.stringToUTF8(password, passPtr, ucxModule.lengthBytesUTF8(password) + 1);
+                
+                const ret = ucxModule.ccall('ucx_wifi_connect', 'number', ['number', 'number'], [ssidPtr, passPtr]);
+                
+                ucxModule._free(ssidPtr);
+                ucxModule._free(passPtr);
+                
+                if (ret === 0) {
+                    log('WiFi connected successfully');
+                    // Wait a bit then get connection info
+                    setTimeout(getConnectionInfo, 2000);
+                } else {
+                    log(`WiFi connection failed (error: ${ret})`);
+                }
+            } catch (error) {
+                log(`Connect error: ${error}`);
+            }
+        }
+
+        // WiFi disconnect
+        async function wifiDisconnect() {
+            try {
+                log('Disconnecting WiFi...');
+                
+                const ret = ucxModule.ccall('ucx_wifi_disconnect', 'number', [], []);
+                
+                if (ret === 0) {
+                    log('WiFi disconnected');
+                    document.getElementById('connectionInfo').innerHTML = '';
+                } else {
+                    log(`WiFi disconnect failed (error: ${ret})`);
+                }
+            } catch (error) {
+                log(`Disconnect error: ${error}`);
+            }
+        }
+
+        // Get connection info
+        async function getConnectionInfo() {
+            try {
+                log('Getting connection info...');
+                
+                const infoPtr = ucxModule._malloc(256);
+                const ret = ucxModule.ccall('ucx_wifi_get_connection_info', 'number', ['number'], [infoPtr]);
+                
+                if (ret === 0) {
+                    const info = ucxModule.UTF8ToString(infoPtr);
+                    log(`Connection info: ${info}`);
+                    
+                    // Display in UI
+                    const infoDiv = document.getElementById('connectionInfo');
+                    infoDiv.innerHTML = `<pre>${info}</pre>`;
+                } else {
+                    log(`Failed to get connection info (error: ${ret})`);
+                }
+                
+                ucxModule._free(infoPtr);
+            } catch (error) {
+                log(`Get info error: ${error}`);
+            }
+        }
+
+        // URC callback handler
+        function handleURC(urc) {
+            log(`[URC] ${urc}`);
+            
+            // Handle specific URCs
+            if (urc.includes('+UUWLE:')) {
+                log('WiFi connection state changed');
+            }
+        }
+
+        // Initialize WASM module
+        createUCXModule().then(module => {
+            ucxModule = module;
+            ucxModule.receiveBuffer = receiveBuffer;
+            ucxModule.onURC = handleURC;
+            
+            log('UCX WASM module loaded successfully');
+            log('Click "Connect to Serial Port" to begin');
+        }).catch(error => {
+            log(`Failed to load WASM module: ${error}`);
+            alert(`Failed to load UCX module: ${error.message}`);
+        });
+    </script>
+</body>
+</html>
