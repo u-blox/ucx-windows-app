@@ -19,7 +19,7 @@ This is a WebAssembly port of the ucxclient C library, enabling direct control o
 │  │  - WiFi scan/connect controls     │  │
 │  │  - Real-time logging display      │  │
 │  └────────────┬──────────────────────┘  │
-│               │ JavaScript calls         │
+│               │ JavaScript calls        │
 │  ┌────────────▼──────────────────────┐  │
 │  │  ucxclient.wasm                   │  │
 │  │  ┌─────────────────────────────┐  │  │
@@ -30,11 +30,11 @@ This is a WebAssembly port of the ucxclient C library, enabling direct control o
 │  │  │  u_port_web.c               │  │  │
 │  │  │  (Serial/timer platform)    │  │  │
 │  │  └──────────┬──────────────────┘  │  │
-│  └─────────────┼──────────────────────┘  │
-│                │ library.js bindings      │
-│  ┌─────────────▼──────────────────────┐  │
-│  │  Web Serial API                    │  │
-│  └─────────────┬──────────────────────┘  │
+│  └─────────────┼─────────────────────┘  │
+│                │ library.js bindings    │
+│  ┌─────────────▼─────────────────────┐  │
+│  │  Web Serial API                   │  │
+│  └─────────────┬─────────────────────┘  │
 └────────────────┼────────────────────────┘
                  │ USB/Serial
         ┌────────▼─────────┐
