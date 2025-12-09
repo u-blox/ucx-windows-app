@@ -6,7 +6,7 @@ Browser-based application for controlling u-blox NORA-W36 WiFi/Bluetooth modules
 
 This is a WebAssembly port of the ucxclient C library, enabling direct control of NORA-W36 modules from any modern web browser. It provides the same high-level UCX API used by desktop applications (Windows/Linux/Python), but runs entirely in the browser using Web Serial API for communication.
 
-**Key Innovation**: Instead of manually sending AT commands, developers can use the complete ucxclient API (365+ functions) compiled to WASM, achieving ~95% code reuse with desktop applications.
+**Key Innovation**: Use the complete ucxclient API (365+ functions) compiled to WASM, achieving ~95% code reuse with desktop applications.
 
 ## Architecture
 
@@ -45,7 +45,7 @@ This is a WebAssembly port of the ucxclient C library, enabling direct control o
 ## Features
 
 - ✅ **Full ucxclient API** - 365+ functions for WiFi, Bluetooth, HTTP, MQTT, sockets
-- ✅ **No AT commands needed** - High-level C API compiled to WASM
+- ✅ **High-level C API** - Complete ucxclient library compiled to WASM
 - ✅ **Web Serial API** - Direct USB/serial communication at 115200 baud
 - ✅ **Real-time logging** - TX/RX data monitoring with comprehensive debug output
 - ✅ **Cross-platform** - Works on Windows/Mac/Linux with Chrome/Edge 89+
@@ -220,7 +220,6 @@ The module exports these high-level functions for JavaScript:
 | `ucx_wifi_connect` | `ssid, password` | `int` | Connect to WiFi network |
 | `ucx_wifi_disconnect` | - | `int` | Disconnect from current network |
 | `ucx_wifi_get_ip` | `ip*` | `bool` | Get current IP address |
-| `ucx_send_at_command` | `command, response*, maxLen` | `int` | Send raw AT command |
 | `ucx_get_version` | `version**` | `bool` | Get module firmware version |
 
 **JavaScript Usage Example**:
@@ -331,7 +330,7 @@ Tested with real NORA-W36 hardware:
 - ✅ WiFi scanning (detected 16 networks)
 - ✅ SSID, RSSI, channel parsing
 - ✅ TX/RX data logging
-- ✅ AT command communication
+- ✅ Serial communication
 - ⚠️ WiFi connection (code implemented, needs testing)
 - ⚠️ IP address retrieval (code implemented, needs testing)
 
@@ -379,7 +378,7 @@ emmake make -C build
 ### Debugging
 
 **Browser Console Logging**:
-- TX data: Shows all outgoing AT commands
+- TX data: Shows all outgoing serial data
 - RX data: Shows all incoming responses
 - Buffer state: Monitors receive buffer size
 - Memory access: Traces pointer reads
@@ -393,12 +392,6 @@ ucxModule.setLogLevel(4);
 const versionPtr = ucxModule._malloc(4);
 ucxModule.ccall('ucx_get_version', 'number', ['number'], [versionPtr]);
 const version = ucxModule.UTF8ToString(ucxModule.readInt32(versionPtr));
-
-// Manual AT command
-const cmd = "AT+GMR";
-const respPtr = ucxModule._malloc(256);
-ucxModule.ccall('ucx_send_at_command', 'number', 
-                ['string', 'number', 'number'], [cmd, respPtr, 256]);
 ```
 
 ## Future Enhancements

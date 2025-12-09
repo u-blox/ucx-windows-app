@@ -29,6 +29,11 @@
 #include <stdarg.h>
 
 /* ----------------------------------------------------------------
+ * FORWARD DECLARATIONS
+ * -------------------------------------------------------------- */
+int32_t uPortGetTickTimeMs(void);
+
+/* ----------------------------------------------------------------
  * JAVASCRIPT FUNCTIONS (implemented in library.js)
  * These are JavaScript functions that can be called from C code
  * -------------------------------------------------------------- */
@@ -177,20 +182,63 @@ int32_t uPortUartWrite(void* handle, const void* pData, size_t length) {
  * 
  * Reads from a buffer that is populated asynchronously by
  * JavaScript code listening to the Web Serial port.
+ * Uses emscripten_sleep to yield to browser event loop.
  */
 int32_t uPortUartRead(void* handle, void* pData, size_t length, int32_t timeoutMs) {
     if (!pData || length == 0) {
         return 0;
     }
     
-    // Note: timeoutMs is ignored in web implementation
-    // JavaScript handles buffering asynchronously
+    // Implement timeout by polling with sleep to yield to browser
+    int32_t startTime = uPortGetTickTimeMs();
+    int result = 0;
     
-    // Call JavaScript function to read from receive buffer
-    int result = js_serial_read((char*)pData, length);
+    printf("[u_port_web] 📖 READ REQUESTED: length=%zu, timeout=%dms\n", length, timeoutMs);
+    int available_at_start = js_serial_available();
+    printf("[u_port_web]   Buffer has %d bytes available at start\n", available_at_start);
     
-    if (result > 0) {
-        printf("[u_port_web] Read %d bytes\n", result);
+    while (1) {
+        // Check how many bytes are available
+        int available = js_serial_available();
+        
+        // Try to read data
+        result = js_serial_read((char*)pData, length);
+        
+        if (result > 0) {
+            printf("[u_port_web] ✅ Read %d bytes (requested %zu, available was %d)\n", result, length, available);
+            // Print hex dump for debugging
+            printf("[u_port_web]   Hex: ");
+            for (int i = 0; i < result && i < 32; i++) {
+                printf("%02X ", (unsigned char)((char*)pData)[i]);
+            }
+            printf("\n");
+            // Print ASCII (printable chars only)
+            printf("[u_port_web]   ASCII: ");
+            for (int i = 0; i < result && i < 32; i++) {
+                char c = ((char*)pData)[i];
+                printf("%c", (c >= 32 && c < 127) ? c : '.');
+            }
+            printf("\n");
+            break;
+        }
+        
+        // Check timeout
+        int32_t elapsed = uPortGetTickTimeMs() - startTime;
+        if (elapsed >= timeoutMs) {
+            // Timeout - return 0 bytes read
+            int final_available = js_serial_available();
+            printf("[u_port_web] ⏰ Read timeout after %d ms\n", elapsed);
+            printf("[u_port_web]   ❌ TIMEOUT: requested=%zu, available_at_start=%d, available_now=%d\n", 
+                   length, available_at_start, final_available);
+            if (final_available > 0) {
+                printf("[u_port_web]   ⚠️  WARNING: %d bytes ARE available but not read!\n", final_available);
+            }
+            break;
+        }
+        
+        // Sleep briefly to yield to browser event loop (ASYNCIFY enabled)
+        // This allows JavaScript to process incoming serial data
+        emscripten_sleep(10);
     }
     
     return result;
