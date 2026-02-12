@@ -33,6 +33,8 @@
 #include "u_cx_at_client.h"
 #include "u_cx_wifi.h"
 #include "u_cx_bluetooth.h"
+#include "u_cx_gatt_client.h"
+#include "u_cx_gatt_server.h"
 #include "u_cx_system.h"
 #include "u_cx_general.h"
 
@@ -469,4 +471,440 @@ int ucx_get_version(char* version, int version_size) {
     }
     
     return -1;
+}
+
+/* ----------------------------------------------------------------
+ * BLUETOOTH FUNCTIONS
+ * -------------------------------------------------------------- */
+
+/**
+ * Start BLE discovery (foreground, no duplicates, active mode)
+ * @param timeout_ms Discovery duration in milliseconds (0 = default ~10s)
+ * @return 0 on success, negative on error
+ */
+EMSCRIPTEN_KEEPALIVE
+int ucx_bt_discovery_begin(int timeout_ms) {
+    if (!g_instance) {
+        return -1;
+    }
+
+    LOG_INFO("Starting BLE discovery (timeout=%d ms)", timeout_ms);
+
+    if (timeout_ms > 0) {
+        uCxBluetoothDiscovery3Begin(&g_instance->cx_handle,
+                                    U_BT_DISCOVERY_TYPE_ALL_NO_DUPLICATES,
+                                    U_BT_DISCOVERY_MODE_ACTIVE,
+                                    timeout_ms);
+    } else {
+        uCxBluetoothDiscovery2Begin(&g_instance->cx_handle,
+                                    U_BT_DISCOVERY_TYPE_ALL_NO_DUPLICATES,
+                                    U_BT_DISCOVERY_MODE_ACTIVE);
+    }
+
+    return 0;
+}
+
+/**
+ * Get next BLE discovery result.
+ * @param addr_str   Output buffer (min 18 bytes) for BD address as "AABBCCDDEEFF" + type suffix
+ * @param rssi       Output pointer for RSSI
+ * @param name       Output buffer (min 64 bytes) for device name
+ * @return 1 if result available, 0 if done, -1 on error
+ */
+EMSCRIPTEN_KEEPALIVE
+int ucx_bt_discovery_get_next(char* addr_str, int* rssi, char* name) {
+    if (!g_instance || !addr_str || !rssi || !name) {
+        return -1;
+    }
+
+    uCxBtDiscovery_t result;
+    bool has_more = uCxBluetoothDiscovery2GetNext(&g_instance->cx_handle, &result);
+
+    if (!has_more) {
+        return 0;
+    }
+
+    uCxBdAddressToString(&result.bd_addr, addr_str, 18);
+    *rssi = result.rssi;
+    if (result.device_name) {
+        strncpy(name, result.device_name, 63);
+        name[63] = '\0';
+    } else {
+        name[0] = '\0';
+    }
+
+    LOG_DEBUG("BLE device: %s rssi=%d name=\"%s\"", addr_str, *rssi, name);
+    return 1;
+}
+
+/**
+ * End BLE discovery.
+ */
+EMSCRIPTEN_KEEPALIVE
+void ucx_bt_discovery_end(void) {
+    if (!g_instance) return;
+    uCxEnd(&g_instance->cx_handle);
+    LOG_INFO("BLE discovery ended");
+}
+
+/**
+ * Connect to a BLE peripheral.
+ * @param addr_str BD address string (e.g. "AABBCCDDEEFF" with type suffix)
+ * @param conn_handle Output pointer for the connection handle
+ * @return 0 on success, negative on error
+ */
+EMSCRIPTEN_KEEPALIVE
+int ucx_bt_connect(const char* addr_str, int* conn_handle) {
+    if (!g_instance || !addr_str || !conn_handle) {
+        return -1;
+    }
+
+    uBtLeAddress_t addr;
+    if (uCxStringToBdAddress(addr_str, &addr) != 0) {
+        LOG_ERROR("Invalid BLE address: %s", addr_str);
+        return -1;
+    }
+
+    LOG_INFO("Connecting to BLE device: %s", addr_str);
+    int32_t result = uCxBluetoothConnect(&g_instance->cx_handle, &addr);
+    if (result < 0) {
+        LOG_ERROR("BLE connect failed: %d", result);
+        return result;
+    }
+
+    *conn_handle = result;
+    LOG_INFO("BLE connected, handle=%d", *conn_handle);
+    return 0;
+}
+
+/**
+ * Disconnect a BLE connection.
+ * @param conn_handle Connection handle from ucx_bt_connect
+ * @return 0 on success, negative on error
+ */
+EMSCRIPTEN_KEEPALIVE
+int ucx_bt_disconnect(int conn_handle) {
+    if (!g_instance) return -1;
+
+    LOG_INFO("Disconnecting BLE handle=%d", conn_handle);
+    return uCxBluetoothDisconnect(&g_instance->cx_handle, conn_handle);
+}
+
+/* ----------------------------------------------------------------
+ * GATT CLIENT FUNCTIONS
+ * -------------------------------------------------------------- */
+
+/**
+ * Discover primary services on a connected peer.
+ * @return 0 on success, negative on error
+ */
+EMSCRIPTEN_KEEPALIVE
+int ucx_gatt_discover_services_begin(int conn_handle) {
+    if (!g_instance) return -1;
+
+    LOG_INFO("GATT discover services (conn=%d)", conn_handle);
+    uCxGattClientDiscoverPrimaryServicesBegin(&g_instance->cx_handle, conn_handle);
+    return 0;
+}
+
+/**
+ * Get next discovered service.
+ * @param start_handle Output pointer for service start handle
+ * @param end_handle   Output pointer for service end handle
+ * @param uuid_hex     Output buffer (min 37 bytes) for UUID as hex string
+ * @return 1 if available, 0 if done, -1 on error
+ */
+EMSCRIPTEN_KEEPALIVE
+int ucx_gatt_discover_services_get_next(int* start_handle, int* end_handle, char* uuid_hex) {
+    if (!g_instance || !start_handle || !end_handle || !uuid_hex) return -1;
+
+    uCxGattClientDiscoverPrimaryServices_t rsp;
+    bool has_more = uCxGattClientDiscoverPrimaryServicesGetNext(&g_instance->cx_handle, &rsp);
+
+    if (!has_more) return 0;
+
+    *start_handle = rsp.start_handle;
+    *end_handle = rsp.end_handle;
+
+    // Convert UUID bytes to hex string
+    for (size_t i = 0; i < rsp.uuid.length && i < 16; i++) {
+        sprintf(uuid_hex + i * 2, "%02X", rsp.uuid.pData[i]);
+    }
+    uuid_hex[rsp.uuid.length * 2] = '\0';
+
+    LOG_DEBUG("Service: start=%d end=%d uuid=%s", *start_handle, *end_handle, uuid_hex);
+    return 1;
+}
+
+/**
+ * End service discovery.
+ */
+EMSCRIPTEN_KEEPALIVE
+void ucx_gatt_discover_services_end(void) {
+    if (!g_instance) return;
+    uCxEnd(&g_instance->cx_handle);
+}
+
+/**
+ * Discover characteristics of a service.
+ * @return 0 on success
+ */
+EMSCRIPTEN_KEEPALIVE
+int ucx_gatt_discover_chars_begin(int conn_handle, int start_handle, int end_handle) {
+    if (!g_instance) return -1;
+
+    LOG_INFO("GATT discover chars (conn=%d, range=%d-%d)", conn_handle, start_handle, end_handle);
+    uCxGattClientDiscoverServiceCharsBegin(&g_instance->cx_handle, conn_handle, start_handle, end_handle);
+    return 0;
+}
+
+/**
+ * Get next discovered characteristic.
+ * @param attr_handle   Output: attribute handle
+ * @param value_handle  Output: value handle (used for read/write)
+ * @param properties    Output: properties bitmask
+ * @param uuid_hex      Output: UUID hex string
+ * @return 1 if available, 0 if done, -1 on error
+ */
+EMSCRIPTEN_KEEPALIVE
+int ucx_gatt_discover_chars_get_next(int* attr_handle, int* value_handle,
+                                      int* properties, char* uuid_hex) {
+    if (!g_instance || !attr_handle || !value_handle || !properties || !uuid_hex)
+        return -1;
+
+    uCxGattClientDiscoverServiceChars_t rsp;
+    bool has_more = uCxGattClientDiscoverServiceCharsGetNext(&g_instance->cx_handle, &rsp);
+
+    if (!has_more) return 0;
+
+    *attr_handle = rsp.attr_handle;
+    *value_handle = rsp.value_handle;
+
+    // Properties is a byte array but typically 1 byte bitmask
+    *properties = 0;
+    if (rsp.properties.length > 0 && rsp.properties.pData) {
+        *properties = rsp.properties.pData[0];
+    }
+
+    for (size_t i = 0; i < rsp.uuid.length && i < 16; i++) {
+        sprintf(uuid_hex + i * 2, "%02X", rsp.uuid.pData[i]);
+    }
+    uuid_hex[rsp.uuid.length * 2] = '\0';
+
+    LOG_DEBUG("Char: attr=%d val=%d props=0x%02X uuid=%s",
+              *attr_handle, *value_handle, *properties, uuid_hex);
+    return 1;
+}
+
+/**
+ * End characteristic discovery.
+ */
+EMSCRIPTEN_KEEPALIVE
+void ucx_gatt_discover_chars_end(void) {
+    if (!g_instance) return;
+    uCxEnd(&g_instance->cx_handle);
+}
+
+/**
+ * Read a GATT characteristic value.
+ * @param conn_handle   Connection handle
+ * @param value_handle  Characteristic value handle
+ * @param out_data      Output buffer for data bytes
+ * @param out_max       Max bytes to read
+ * @return Number of bytes read, or negative on error
+ */
+EMSCRIPTEN_KEEPALIVE
+int ucx_gatt_read(int conn_handle, int value_handle, uint8_t* out_data, int out_max) {
+    if (!g_instance || !out_data) return -1;
+
+    LOG_DEBUG("GATT read (conn=%d, val=%d)", conn_handle, value_handle);
+
+    uByteArray_t data;
+    bool ok = uCxGattClientReadBegin(&g_instance->cx_handle,
+                                      conn_handle, value_handle, &data);
+    if (!ok) {
+        LOG_ERROR("GATT read failed");
+        return -1;
+    }
+
+    int len = (int)data.length;
+    if (len > out_max) len = out_max;
+    memcpy(out_data, data.pData, len);
+
+    return len;
+}
+
+/**
+ * Write a GATT characteristic value (with response).
+ * @param conn_handle   Connection handle
+ * @param value_handle  Characteristic value handle
+ * @param data          Data bytes to write
+ * @param data_len      Number of bytes
+ * @return 0 on success, negative on error
+ */
+EMSCRIPTEN_KEEPALIVE
+int ucx_gatt_write(int conn_handle, int value_handle,
+                    const uint8_t* data, int data_len) {
+    if (!g_instance || !data) return -1;
+
+    LOG_DEBUG("GATT write (conn=%d, val=%d, len=%d)", conn_handle, value_handle, data_len);
+    return uCxGattClientWrite(&g_instance->cx_handle,
+                               conn_handle, value_handle, data, data_len);
+}
+
+/**
+ * Enable/disable GATT notifications or indications on a CCCD.
+ * @param conn_handle Connection handle
+ * @param cccd_handle CCCD descriptor handle (value_handle + 1 typically)
+ * @param config      0=none, 1=notifications, 2=indications, 3=both
+ * @return 0 on success, negative on error
+ */
+EMSCRIPTEN_KEEPALIVE
+int ucx_gatt_config_write(int conn_handle, int cccd_handle, int config) {
+    if (!g_instance) return -1;
+
+    LOG_INFO("GATT config write (conn=%d, cccd=%d, cfg=%d)", conn_handle, cccd_handle, config);
+    return uCxGattClientConfigWrite(&g_instance->cx_handle,
+                                     conn_handle, cccd_handle,
+                                     (uGattClientConfig_t)config);
+}
+
+/* ----------------------------------------------------------------
+ * GATT SERVER FUNCTIONS
+ * -------------------------------------------------------------- */
+
+/**
+ * Define a GATT service.
+ * @param uuid_bytes  Raw UUID bytes (2 for 16-bit, 16 for 128-bit)
+ * @param uuid_len    Length: 2 or 16
+ * @param ser_handle  Output: service handle
+ * @return 0 on success, negative on error
+ */
+EMSCRIPTEN_KEEPALIVE
+int ucx_gatt_server_service_define(const uint8_t* uuid_bytes, int uuid_len,
+                                    int* ser_handle) {
+    if (!g_instance || !uuid_bytes || !ser_handle) return -1;
+
+    int32_t handle;
+    int32_t result = uCxGattServerServiceDefine(&g_instance->cx_handle,
+                                                 uuid_bytes, uuid_len, &handle);
+    if (result != 0) {
+        LOG_ERROR("GATT server service define failed: %d", result);
+        return result;
+    }
+
+    *ser_handle = handle;
+    LOG_INFO("GATT server service defined, handle=%d", handle);
+    return 0;
+}
+
+/**
+ * Define a GATT server characteristic.
+ * @param uuid_bytes  Raw UUID bytes
+ * @param uuid_len    UUID length
+ * @param props       Properties bitmask (0x02=read, 0x08=write, 0x10=notify, etc.)
+ * @param initial_value  Initial value bytes (can be NULL)
+ * @param initial_len    Initial value length
+ * @param value_handle   Output: value handle
+ * @param cccd_handle    Output: CCCD handle (-1 if no notify/indicate)
+ * @return 0 on success, negative on error
+ */
+EMSCRIPTEN_KEEPALIVE
+int ucx_gatt_server_char_define(const uint8_t* uuid_bytes, int uuid_len,
+                                 int props,
+                                 const uint8_t* initial_value, int initial_len,
+                                 int* value_handle, int* cccd_handle) {
+    if (!g_instance || !uuid_bytes || !value_handle || !cccd_handle) return -1;
+
+    uint8_t props_byte = (uint8_t)props;
+    uCxGattServerCharDefine_t rsp;
+
+    int32_t result = uCxGattServerCharDefine5(
+        &g_instance->cx_handle,
+        uuid_bytes, uuid_len,
+        &props_byte, 1,
+        U_GATT_SERVER_READ_SECURITY_NONE,
+        U_GATT_SERVER_WRITE_SECURITY_NONE,
+        initial_value ? initial_value : (const uint8_t*)"", initial_len,
+        &rsp);
+
+    if (result != 0) {
+        LOG_ERROR("GATT server char define failed: %d", result);
+        return result;
+    }
+
+    *value_handle = rsp.value_handle;
+    *cccd_handle = rsp.cccd_handle;
+    LOG_INFO("GATT server char defined, val=%d, cccd=%d", rsp.value_handle, rsp.cccd_handle);
+    return 0;
+}
+
+/**
+ * Activate the GATT server (make services visible to peers).
+ * @return 0 on success, negative on error
+ */
+EMSCRIPTEN_KEEPALIVE
+int ucx_gatt_server_activate(void) {
+    if (!g_instance) return -1;
+
+    LOG_INFO("Activating GATT server");
+    return uCxGattServerServiceActivate(&g_instance->cx_handle);
+}
+
+/**
+ * Set a GATT server attribute value.
+ * @param attr_handle Attribute handle (value_handle from char define)
+ * @param value       Data bytes
+ * @param value_len   Data length
+ * @return 0 on success, negative on error
+ */
+EMSCRIPTEN_KEEPALIVE
+int ucx_gatt_server_set_value(int attr_handle,
+                               const uint8_t* value, int value_len) {
+    if (!g_instance || !value) return -1;
+
+    LOG_DEBUG("GATT server set value (handle=%d, len=%d)", attr_handle, value_len);
+    return uCxGattServerSetAttrValue(&g_instance->cx_handle,
+                                      attr_handle, value, value_len);
+}
+
+/**
+ * Send a GATT notification to a connected client.
+ * @param conn_handle  Connection handle
+ * @param char_handle  Characteristic value handle
+ * @param value        Data bytes
+ * @param value_len    Data length
+ * @return 0 on success, negative on error
+ */
+EMSCRIPTEN_KEEPALIVE
+int ucx_gatt_server_send_notification(int conn_handle, int char_handle,
+                                       const uint8_t* value, int value_len) {
+    if (!g_instance || !value) return -1;
+
+    LOG_DEBUG("GATT notify (conn=%d, char=%d, len=%d)", conn_handle, char_handle, value_len);
+    return uCxGattServerSendNotification(&g_instance->cx_handle,
+                                          conn_handle, char_handle,
+                                          value, value_len);
+}
+
+/**
+ * Start BLE advertising (so peripherals can find us / connect).
+ * @return 0 on success, negative on error
+ */
+EMSCRIPTEN_KEEPALIVE
+int ucx_bt_advertise_start(void) {
+    if (!g_instance) return -1;
+    LOG_INFO("Starting BLE advertising");
+    return uCxBluetoothLegacyAdvertisementStart(&g_instance->cx_handle);
+}
+
+/**
+ * Stop BLE advertising.
+ * @return 0 on success, negative on error
+ */
+EMSCRIPTEN_KEEPALIVE
+int ucx_bt_advertise_stop(void) {
+    if (!g_instance) return -1;
+    LOG_INFO("Stopping BLE advertising");
+    return uCxBluetoothLegacyAdvertisementStop(&g_instance->cx_handle);
 }

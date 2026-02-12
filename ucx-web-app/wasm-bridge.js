@@ -175,6 +175,340 @@ class WasmBridge {
         }
     }
 
+    // ---- BLE Scan ----
+
+    /**
+     * Scan for BLE devices.
+     * @param {number} timeoutMs  Discovery duration (0 = default ~10 s)
+     * @returns {Array<{addr: string, rssi: number, name: string}>}
+     */
+    async btScan(timeoutMs = 10000) {
+        const rc = await this.module.ccall(
+            'ucx_bt_discovery_begin', 'number', ['number'], [timeoutMs]);
+        if (rc < 0) throw new Error(`BLE scan start failed (${rc})`);
+
+        // Allow the module time to collect responses
+        await new Promise(r => setTimeout(r, timeoutMs + 2000));
+
+        const devices = [];
+        const addrPtr = this.module._malloc(32);
+        const rssiPtr = this.module._malloc(4);
+        const namePtr = this.module._malloc(64);
+
+        try {
+            while (true) {
+                const ret = await this.module.ccall(
+                    'ucx_bt_discovery_get_next', 'number',
+                    ['number', 'number', 'number'], [addrPtr, rssiPtr, namePtr]);
+                if (ret !== 1) break;
+
+                const addr = this.module.UTF8ToString(addrPtr);
+                const rssi = this._readInt32(rssiPtr);
+                const name = this.module.UTF8ToString(namePtr);
+                devices.push({ addr, rssi, name });
+            }
+        } finally {
+            this.module._free(addrPtr);
+            this.module._free(rssiPtr);
+            this.module._free(namePtr);
+            this.module.ccall('ucx_bt_discovery_end', null, [], []);
+        }
+        return devices;
+    }
+
+    // ---- BLE Connect / Disconnect ----
+
+    /**
+     * Connect to a BLE peripheral.
+     * @param {string} addrStr  BD address string (e.g. "AABBCCDDEEFF" with type suffix)
+     * @returns {number} Connection handle (>= 0)
+     */
+    async btConnect(addrStr) {
+        const chPtr = this.module._malloc(4);
+        try {
+            const rc = await this.module.ccall(
+                'ucx_bt_connect', 'number',
+                ['string', 'number'], [addrStr, chPtr]);
+            if (rc !== 0) throw new Error(`BLE connect failed (${rc})`);
+            return this._readInt32(chPtr);
+        } finally {
+            this.module._free(chPtr);
+        }
+    }
+
+    /**
+     * Disconnect a BLE connection.
+     * @param {number} connHandle
+     * @returns {number} 0 on success
+     */
+    async btDisconnect(connHandle) {
+        return await this.module.ccall(
+            'ucx_bt_disconnect', 'number', ['number'], [connHandle]);
+    }
+
+    // ---- GATT Client ----
+
+    /**
+     * Discover primary services on a connected BLE peer.
+     * @param {number} connHandle
+     * @returns {Array<{startHandle: number, endHandle: number, uuid: string}>}
+     */
+    async gattDiscoverServices(connHandle) {
+        const rc = await this.module.ccall(
+            'ucx_gatt_discover_services_begin', 'number',
+            ['number'], [connHandle]);
+        if (rc < 0) throw new Error(`Service discovery failed (${rc})`);
+
+        const services = [];
+        const shPtr = this.module._malloc(4);
+        const ehPtr = this.module._malloc(4);
+        const uuidPtr = this.module._malloc(40);
+
+        try {
+            while (true) {
+                const ret = await this.module.ccall(
+                    'ucx_gatt_discover_services_get_next', 'number',
+                    ['number', 'number', 'number'], [shPtr, ehPtr, uuidPtr]);
+                if (ret !== 1) break;
+
+                services.push({
+                    startHandle: this._readInt32(shPtr),
+                    endHandle:   this._readInt32(ehPtr),
+                    uuid:        this.module.UTF8ToString(uuidPtr)
+                });
+            }
+        } finally {
+            this.module._free(shPtr);
+            this.module._free(ehPtr);
+            this.module._free(uuidPtr);
+            this.module.ccall('ucx_gatt_discover_services_end', null, [], []);
+        }
+        return services;
+    }
+
+    /**
+     * Discover characteristics of a service.
+     * @param {number} connHandle
+     * @param {number} startHandle
+     * @param {number} endHandle
+     * @returns {Array<{attrHandle, valueHandle, properties, uuid}>}
+     */
+    async gattDiscoverChars(connHandle, startHandle, endHandle) {
+        const rc = await this.module.ccall(
+            'ucx_gatt_discover_chars_begin', 'number',
+            ['number', 'number', 'number'], [connHandle, startHandle, endHandle]);
+        if (rc < 0) throw new Error(`Char discovery failed (${rc})`);
+
+        const chars = [];
+        const ahPtr = this.module._malloc(4);
+        const vhPtr = this.module._malloc(4);
+        const prPtr = this.module._malloc(4);
+        const uuidPtr = this.module._malloc(40);
+
+        try {
+            while (true) {
+                const ret = await this.module.ccall(
+                    'ucx_gatt_discover_chars_get_next', 'number',
+                    ['number', 'number', 'number', 'number'],
+                    [ahPtr, vhPtr, prPtr, uuidPtr]);
+                if (ret !== 1) break;
+
+                chars.push({
+                    attrHandle:  this._readInt32(ahPtr),
+                    valueHandle: this._readInt32(vhPtr),
+                    properties:  this._readInt32(prPtr),
+                    uuid:        this.module.UTF8ToString(uuidPtr)
+                });
+            }
+        } finally {
+            this.module._free(ahPtr);
+            this.module._free(vhPtr);
+            this.module._free(prPtr);
+            this.module._free(uuidPtr);
+            this.module.ccall('ucx_gatt_discover_chars_end', null, [], []);
+        }
+        return chars;
+    }
+
+    /**
+     * Read a GATT characteristic.
+     * @param {number} connHandle
+     * @param {number} valueHandle
+     * @returns {Uint8Array} read data
+     */
+    async gattRead(connHandle, valueHandle) {
+        const bufSize = 256;
+        const bufPtr = this.module._malloc(bufSize);
+        try {
+            const len = await this.module.ccall(
+                'ucx_gatt_read', 'number',
+                ['number', 'number', 'number', 'number'],
+                [connHandle, valueHandle, bufPtr, bufSize]);
+            if (len < 0) throw new Error(`GATT read failed (${len})`);
+            const result = new Uint8Array(len);
+            for (let i = 0; i < len; i++) {
+                result[i] = this.module.HEAPU8[bufPtr + i];
+            }
+            return result;
+        } finally {
+            this.module._free(bufPtr);
+        }
+    }
+
+    /**
+     * Write a GATT characteristic (with response).
+     * @param {number} connHandle
+     * @param {number} valueHandle
+     * @param {Uint8Array|Array<number>} data
+     * @returns {number} 0 on success
+     */
+    async gattWrite(connHandle, valueHandle, data) {
+        const ptr = this.module._malloc(data.length);
+        try {
+            this.module.HEAPU8.set(data, ptr);
+            return await this.module.ccall(
+                'ucx_gatt_write', 'number',
+                ['number', 'number', 'number', 'number'],
+                [connHandle, valueHandle, ptr, data.length]);
+        } finally {
+            this.module._free(ptr);
+        }
+    }
+
+    /**
+     * Enable / disable notifications or indications on a CCCD.
+     * @param {number} connHandle
+     * @param {number} cccdHandle
+     * @param {number} config  0=none, 1=notifications, 2=indications, 3=both
+     * @returns {number} 0 on success
+     */
+    async gattConfigWrite(connHandle, cccdHandle, config) {
+        return await this.module.ccall(
+            'ucx_gatt_config_write', 'number',
+            ['number', 'number', 'number'],
+            [connHandle, cccdHandle, config]);
+    }
+
+    // ---- GATT Server ----
+
+    /**
+     * Define a GATT service.
+     * @param {Uint8Array|Array<number>} uuidBytes  (2 bytes for 16-bit, 16 for 128-bit)
+     * @returns {number} service handle
+     */
+    async gattServerDefineService(uuidBytes) {
+        const uPtr = this.module._malloc(uuidBytes.length);
+        const shPtr = this.module._malloc(4);
+        try {
+            this.module.HEAPU8.set(uuidBytes, uPtr);
+            const rc = await this.module.ccall(
+                'ucx_gatt_server_service_define', 'number',
+                ['number', 'number', 'number'],
+                [uPtr, uuidBytes.length, shPtr]);
+            if (rc !== 0) throw new Error(`Service define failed (${rc})`);
+            return this._readInt32(shPtr);
+        } finally {
+            this.module._free(uPtr);
+            this.module._free(shPtr);
+        }
+    }
+
+    /**
+     * Define a GATT server characteristic.
+     * @param {Uint8Array|Array<number>} uuidBytes
+     * @param {number} properties  bitmask (0x02=read, 0x08=write, 0x10=notify …)
+     * @param {Uint8Array|Array<number>|null} initialValue
+     * @returns {{valueHandle: number, cccdHandle: number}}
+     */
+    async gattServerDefineChar(uuidBytes, properties, initialValue) {
+        const uPtr = this.module._malloc(uuidBytes.length);
+        const vhPtr = this.module._malloc(4);
+        const chPtr = this.module._malloc(4);
+
+        let ivPtr = 0;
+        let ivLen = 0;
+        if (initialValue && initialValue.length > 0) {
+            ivPtr = this.module._malloc(initialValue.length);
+            this.module.HEAPU8.set(initialValue, ivPtr);
+            ivLen = initialValue.length;
+        }
+
+        try {
+            this.module.HEAPU8.set(uuidBytes, uPtr);
+            const rc = await this.module.ccall(
+                'ucx_gatt_server_char_define', 'number',
+                ['number', 'number', 'number', 'number', 'number', 'number', 'number'],
+                [uPtr, uuidBytes.length, properties, ivPtr, ivLen, vhPtr, chPtr]);
+            if (rc !== 0) throw new Error(`Char define failed (${rc})`);
+            return {
+                valueHandle: this._readInt32(vhPtr),
+                cccdHandle:  this._readInt32(chPtr)
+            };
+        } finally {
+            this.module._free(uPtr);
+            this.module._free(vhPtr);
+            this.module._free(chPtr);
+            if (ivPtr) this.module._free(ivPtr);
+        }
+    }
+
+    /** Activate the GATT server. @returns {number} 0 on success */
+    async gattServerActivate() {
+        return await this.module.ccall(
+            'ucx_gatt_server_activate', 'number', [], []);
+    }
+
+    /**
+     * Set a GATT server attribute value.
+     * @param {number} attrHandle
+     * @param {Uint8Array|Array<number>} value
+     * @returns {number} 0 on success
+     */
+    async gattServerSetValue(attrHandle, value) {
+        const ptr = this.module._malloc(value.length);
+        try {
+            this.module.HEAPU8.set(value, ptr);
+            return await this.module.ccall(
+                'ucx_gatt_server_set_value', 'number',
+                ['number', 'number', 'number'],
+                [attrHandle, ptr, value.length]);
+        } finally {
+            this.module._free(ptr);
+        }
+    }
+
+    /**
+     * Send a GATT notification.
+     * @param {number} connHandle
+     * @param {number} charHandle
+     * @param {Uint8Array|Array<number>} value
+     * @returns {number} 0 on success
+     */
+    async gattServerNotify(connHandle, charHandle, value) {
+        const ptr = this.module._malloc(value.length);
+        try {
+            this.module.HEAPU8.set(value, ptr);
+            return await this.module.ccall(
+                'ucx_gatt_server_send_notification', 'number',
+                ['number', 'number', 'number', 'number'],
+                [connHandle, charHandle, ptr, value.length]);
+        } finally {
+            this.module._free(ptr);
+        }
+    }
+
+    /** Start BLE advertising. @returns {number} 0 on success */
+    async btAdvertiseStart() {
+        return await this.module.ccall(
+            'ucx_bt_advertise_start', 'number', [], []);
+    }
+
+    /** Stop BLE advertising. @returns {number} 0 on success */
+    async btAdvertiseStop() {
+        return await this.module.ccall(
+            'ucx_bt_advertise_stop', 'number', [], []);
+    }
+
     // ---- helpers ----
 
     _readInt32(ptr) {

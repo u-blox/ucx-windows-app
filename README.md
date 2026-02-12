@@ -27,7 +27,7 @@ This is a WebAssembly port of the ucxclient C library, enabling direct control o
 |  |  |  WiFi, Bluetooth, HTTP, MQTT, Socket |  |  |
 |  |  +-----------------+-------------------+|  |  |
 |  |  +-----------------v-------------------+|  |  |
-|  |  |  ucx_wasm_wrapper.c  (13 exports)   ||  |  |
+|  |  |  ucx_wasm_wrapper.c  (33 exports)   ||  |  |
 |  |  |  u_port_web.c  (EM_JS serial bridge)||  |  |
 |  |  +-----------------+-------------------+|  |  |
 |  +---------------------+------------------+  |  |
@@ -45,6 +45,12 @@ This is a WebAssembly port of the ucxclient C library, enabling direct control o
 ## Features
 
 - **Full ucxclient API** - WiFi, Bluetooth, HTTP, MQTT, sockets compiled to WASM
+- **WiFi** - Scan networks, connect/disconnect, DHCP, IP address retrieval
+- **BLE Scan** - Foreground discovery with configurable timeout, RSSI, device names
+- **BLE Connect** - Connect/disconnect to BLE peripherals with connection handle management
+- **GATT Client** - Discover services and characteristics, read/write values, enable notifications/indications
+- **GATT Server** - Define services and characteristics, activate, set attribute values, send notifications
+- **BLE Advertising** - Start/stop legacy BLE advertising
 - **Modular JavaScript** - Clean separation: `serial.js`, `wasm-bridge.js`, `app.js`
 - **Web Serial API** - Direct USB/serial with 16 KB ring buffer and write queue
 - **Runtime log levels** - Configurable via `ucx_set_log_level` (none/error/info/debug)
@@ -52,7 +58,7 @@ This is a WebAssembly port of the ucxclient C library, enabling direct control o
 - **Auto-reconnect** - Remembers previously paired serial ports
 - **Disconnect detection** - Monitors serial port and cleans up on unplug
 - **RX line reassembly** - Accumulates serial chunks, displays complete lines
-- **URC handling** - Processes +UEWLU, +UEWSNU, +UEWSND, +UUWLE events
+- **URC handling** - Processes WiFi (+UEWLU, +UEWSNU, +UEWSND) and BLE (+UEBTC, +UEBTDC, +UEBTGCN, +UEBTGSW) events
 - **Cross-platform** - Windows/Mac/Linux with Chrome/Edge 89+
 - **One-click launcher** - `launch-ucx-web-app.cmd` builds and serves
 
@@ -92,6 +98,10 @@ This is a WebAssembly port of the ucxclient C library, enabling direct control o
    - Click "Scan Networks" to detect WiFi networks
    - Enter credentials and click "Connect" to join a network
    - Click "Get Connection Info" to see the assigned IP address
+   - Click "BLE Scan" to discover nearby Bluetooth devices
+   - Select a device and click "Connect" to establish a BLE connection
+   - Use GATT Client to discover services, read/write characteristics, enable notifications
+   - Use GATT Server to define services/characteristics and advertise
 
 ### Manual Build (Linux/Mac)
 
@@ -143,7 +153,7 @@ ucx-web-app/                         # repository root
     +-- library.js                   # Emscripten --js-library stub
     +-- u_port_web.c                 # Platform layer (EM_JS serial bridge)
     +-- u_port_clib.h                # Platform header (mutex no-ops)
-    +-- ucx_wasm_wrapper.c           # WASM-exported C API (13 functions)
+    +-- ucx_wasm_wrapper.c           # WASM-exported C API (33 functions)
     +-- ucxclient.js                 # Generated WASM loader (not in git)
     +-- ucxclient.wasm               # Compiled WASM binary (not in git)
     +-- images/                      # Icons
@@ -157,7 +167,7 @@ ucx-web-app/                         # repository root
 | File | Class / Role | Responsibility |
 |------|-------------|----------------|
 | `serial.js` | `SerialManager`, `RingBuffer` | Web Serial connection, 16 KB ring buffer, write queue, disconnect detection |
-| `wasm-bridge.js` | `WasmBridge` | Loads WASM module, provides typed async API (`wifiScan()`, `wifiConnect()`, etc.) |
+| `wasm-bridge.js` | `WasmBridge` | Loads WASM module, provides typed async API (WiFi, BLE scan, GATT client/server) |
 | `app.js` | (functions) | DOM events, URC dispatcher, RX line reassembly, logging |
 | `library.js` | (empty stub) | Required by `--js-library` flag; all bindings are EM_JS in `u_port_web.c` |
 
@@ -191,6 +201,30 @@ The link step exports these C functions for JavaScript via `ccall`:
 | `ucx_send_at_command` | `cmd, response, size` | `int` | Send raw AT command |
 | `ucx_get_version` | `version*, size` | `int` | Get module firmware version |
 | `ucx_get_last_error` | - | `char*` | Get last error message |
+| **Bluetooth** | | | |
+| `ucx_bt_discovery_begin` | `timeout_ms` | `int` | Start BLE discovery |
+| `ucx_bt_discovery_get_next` | `addr*, rssi*, name*` | `int` | 1 = device available, 0 = done |
+| `ucx_bt_discovery_end` | - | `void` | End BLE discovery |
+| `ucx_bt_connect` | `addr_str, conn_handle*` | `int` | Connect to BLE peripheral |
+| `ucx_bt_disconnect` | `conn_handle` | `int` | Disconnect BLE connection |
+| `ucx_bt_advertise_start` | - | `int` | Start legacy BLE advertising |
+| `ucx_bt_advertise_stop` | - | `int` | Stop BLE advertising |
+| **GATT Client** | | | |
+| `ucx_gatt_discover_services_begin` | `conn_handle` | `int` | Start primary service discovery |
+| `ucx_gatt_discover_services_get_next` | `start*, end*, uuid*` | `int` | 1 = service available, 0 = done |
+| `ucx_gatt_discover_services_end` | - | `void` | End service discovery |
+| `ucx_gatt_discover_chars_begin` | `conn, start, end` | `int` | Start characteristic discovery |
+| `ucx_gatt_discover_chars_get_next` | `attr*, val*, props*, uuid*` | `int` | 1 = char available, 0 = done |
+| `ucx_gatt_discover_chars_end` | - | `void` | End char discovery |
+| `ucx_gatt_read` | `conn, val_handle, buf, max` | `int` | Read characteristic (returns byte count) |
+| `ucx_gatt_write` | `conn, val_handle, data, len` | `int` | Write characteristic (with response) |
+| `ucx_gatt_config_write` | `conn, cccd, config` | `int` | Enable notifications/indications |
+| **GATT Server** | | | |
+| `ucx_gatt_server_service_define` | `uuid, uuid_len, handle*` | `int` | Define a GATT service |
+| `ucx_gatt_server_char_define` | `uuid, len, props, val, len, vh*, cccd*` | `int` | Define a characteristic |
+| `ucx_gatt_server_activate` | - | `int` | Activate GATT server |
+| `ucx_gatt_server_set_value` | `attr, value, len` | `int` | Set attribute value |
+| `ucx_gatt_server_send_notification` | `conn, char, value, len` | `int` | Send notification |
 
 ### Web Serial API Flow
 
@@ -217,7 +251,7 @@ When the WASM memory grows, **all JavaScript typed array views** (`HEAP8`, `HEAP
 - **Windows link workaround**: The `.cmd` script calls `emcc.py` directly via Python to bypass `emcc.bat`/`emcc.ps1` wrapper bugs
 - **ASYNCIFY enabled**: `-s ASYNCIFY=1 -s ASYNCIFY_IMPORTS=js_serial_write,js_serial_read`
 - **26 C source files** compiled (ucxclient core + web wrappers)
-- **Output**: `ucxclient.js` (~20 KB) + `ucxclient.wasm` (~58 KB)
+- **Output**: `ucxclient.js` (~23 KB) + `ucxclient.wasm` (~72 KB)
 
 ## Troubleshooting
 
@@ -261,7 +295,12 @@ Tested with real NORA-W36 hardware on Windows 10/11, Chrome 131+:
 - WiFi scanning with correct SSID, RSSI (dBm), and channel values
 - WiFi connect/disconnect with WPA2 credentials
 - IP address retrieval via DHCP
-- URC event handling (+UEWLU link up/down, +UEWSNU DHCP, +UEWSND)
+- BLE scanning with device names, addresses, and RSSI
+- BLE connect/disconnect to peripherals
+- GATT client service and characteristic discovery
+- GATT client read/write and notification subscription
+- GATT server service/characteristic definition and activation
+- URC event handling (WiFi: +UEWLU, +UEWSNU, +UEWSND; BLE: +UEBTC, +UEBTDC, +UEBTGCN, +UEBTGSW)
 - Serial disconnect detection and cleanup
 - RX line reassembly from fragmented serial chunks
 

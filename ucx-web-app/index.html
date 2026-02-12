@@ -141,6 +141,51 @@
     </div>
 
     <div class="section">
+        <h2>BLE Scan</h2>
+        <p>Timeout (ms): <input type="text" id="btScanTimeout" value="10000" style="width:80px"></p>
+        <button onclick="btScan()" id="btScanBtn" disabled>Scan BLE Devices</button>
+        <div id="btScanResults"></div>
+    </div>
+
+    <div class="section">
+        <h2>BLE Connection</h2>
+        <p>
+            Address: <input type="text" id="btAddr" placeholder="AABBCCDDEEFF" style="width:200px">
+            Conn Handle: <input type="text" id="btConnHandle" placeholder="auto" style="width:60px" readonly>
+        </p>
+        <button onclick="btConnect()" id="btConnectBtn" disabled>Connect</button>
+        <button onclick="btDisconnect()" id="btDisconnectBtn" disabled>Disconnect</button>
+    </div>
+
+    <div class="section">
+        <h2>GATT Client</h2>
+        <button onclick="gattDiscover()" id="gattDiscoverBtn" disabled>Discover Services</button>
+        <button onclick="gattReadChar(parseInt(document.getElementById('btConnHandle').value), parseInt(prompt('Value handle:')))" id="gattReadBtn" disabled>Read Handle</button>
+        <button onclick="promptGattWrite(parseInt(document.getElementById('btConnHandle').value), parseInt(prompt('Value handle:')))" id="gattWriteBtn" disabled>Write Handle</button>
+        <button onclick="gattEnableNotify(parseInt(document.getElementById('btConnHandle').value), parseInt(prompt('CCCD handle:')), 1)" id="gattNotifyBtn" disabled>Enable Notify</button>
+        <div id="gattServices"></div>
+    </div>
+
+    <div class="section">
+        <h2>GATT Server</h2>
+        <p>
+            Service UUID: <input type="text" id="gattSrvUuid" value="180D" placeholder="e.g. 180D" style="width:160px"><br>
+            Char UUID: <input type="text" id="gattSrvCharUuid" value="2A37" placeholder="e.g. 2A37" style="width:160px">
+            Props (hex): <input type="text" id="gattSrvCharProps" value="1A" placeholder="1A=R+W+N" style="width:60px">
+        </p>
+        <button onclick="gattServerDefine()" id="gattServerDefineBtn" disabled>Define Service + Char</button>
+        <button onclick="gattServerActivate()" id="gattServerActivateBtn" disabled>Activate</button>
+        <p>Value: <input type="text" id="gattSrvValue" value="Hello" placeholder="UTF-8 text" style="width:200px"></p>
+        <button onclick="gattServerSetValue()" id="gattServerSetValueBtn" disabled>Set Value</button>
+        <button onclick="gattServerNotify()" id="gattServerNotifyBtn" disabled>Send Notification</button>
+        <p>
+            <button onclick="btAdvertiseStart()" id="btAdvStartBtn" disabled>Start Advertising</button>
+            <button onclick="btAdvertiseStop()" id="btAdvStopBtn" disabled>Stop Advertising</button>
+        </p>
+        <div id="gattServerInfo"></div>
+    </div>
+
+    <div class="section">
         <h2>Console Log</h2>
         <button onclick="clearLog()">Clear Log</button>
         <div id="log" class="log"></div>

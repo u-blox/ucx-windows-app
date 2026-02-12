@@ -8,12 +8,12 @@ For a project overview, build instructions, and quick start guide, see the [root
 
 | File | Lines | Purpose |
 |------|-------|---------|
-| `index.html` | ~140 | Markup + CSS (loads JS modules below) |
+| `index.html` | ~200 | Markup + CSS (loads JS modules below) |
 | `serial.js` | ~230 | `SerialManager` class + `RingBuffer` for Web Serial I/O |
-| `wasm-bridge.js` | ~180 | `WasmBridge` class wrapping the Emscripten module |
-| `app.js` | ~330 | UI logic, URC handling, RX line reassembly |
+| `wasm-bridge.js` | ~470 | `WasmBridge` class wrapping the Emscripten module |
+| `app.js` | ~600 | UI logic, URC handling, RX line reassembly |
 | `library.js` | ~30 | Empty `mergeInto` stub (kept for `--js-library` flag) |
-| `ucx_wasm_wrapper.c` | ~470 | WASM-exported C functions (13 exports) |
+| `ucx_wasm_wrapper.c` | ~910 | WASM-exported C functions (33 exports) |
 | `u_port_web.c` | ~370 | Platform port: EM_JS serial bridge + timer |
 | `u_port_clib.h` | ~50 | Mutex/thread no-op macros for single-threaded WASM |
 | `CMakeLists.txt` | ~80 | Emscripten build configuration |
@@ -51,6 +51,20 @@ Loads the Emscripten WASM module and provides a typed async JavaScript API.
 - `wifiDisconnect()` - Returns 0 on success
 - `getIP()` - Returns IP string or null
 - `getVersion()` - Returns firmware version string or null
+- `btScan(timeoutMs)` - Returns `[{addr, rssi, name}, ...]`
+- `btConnect(addrStr)` - Returns connection handle
+- `btDisconnect(connHandle)` - Returns 0 on success
+- `gattDiscoverServices(connHandle)` - Returns `[{startHandle, endHandle, uuid}, ...]`
+- `gattDiscoverChars(conn, start, end)` - Returns `[{attrHandle, valueHandle, properties, uuid}, ...]`
+- `gattRead(connHandle, valueHandle)` - Returns `Uint8Array`
+- `gattWrite(connHandle, valueHandle, data)` - Returns 0 on success
+- `gattConfigWrite(conn, cccd, config)` - Enable notifications/indications
+- `gattServerDefineService(uuidBytes)` - Returns service handle
+- `gattServerDefineChar(uuid, props, initialValue)` - Returns `{valueHandle, cccdHandle}`
+- `gattServerActivate()` - Returns 0 on success
+- `gattServerSetValue(attrHandle, value)` - Returns 0 on success
+- `gattServerNotify(conn, charHandle, value)` - Returns 0 on success
+- `btAdvertiseStart()` / `btAdvertiseStop()` - Returns 0 on success
 - `_readInt32(ptr)` - Calls `ucx_read_int32` via ccall (safe ASYNCIFY memory read)
 
 ### app.js - Application Logic
@@ -61,7 +75,13 @@ Top-level UI orchestration, wired to `index.html` buttons.
 - `initApp()` - Creates `SerialManager` + `WasmBridge`, loads WASM, attempts auto-connect
 - `connectSerial()` / `disconnectSerial()` / `autoConnectSerial()` - Serial lifecycle
 - `wifiScan()` / `wifiConnect()` / `wifiDisconnect()` / `getConnectionInfo()` - WiFi ops
-- `handleURC(urc)` - Dispatches +UEWLU, +UEWSNU, +UEWSND, +UUWLE events
+- `btScan()` / `btConnect()` / `btDisconnect()` - BLE scan and connection management
+- `gattDiscover()` / `gattDiscoverChars()` - GATT service/char discovery with inline actions
+- `gattReadChar()` / `promptGattWrite()` / `gattEnableNotify()` - GATT client operations
+- `gattServerDefine()` / `gattServerActivate()` - GATT server setup
+- `gattServerSetValue()` / `gattServerNotify()` - GATT server data operations
+- `btAdvertiseStart()` / `btAdvertiseStop()` - BLE advertising control
+- `handleURC(urc)` - Dispatches WiFi (+UEWLU, +UEWSNU, +UEWSND) and BLE (+UEBTC, +UEBTDC, +UEBTGCN, +UEBTGSW) events
 - `onSerialReceive(text)` - RX line reassembly buffer (displays complete lines only)
 - `log(message)` / `clearLog()` - Timestamped UI console
 
@@ -80,6 +100,14 @@ Simplified C API exported to JavaScript. Wraps the full ucxclient library.
 - `ucx_set_log_level`, `ucx_read_int32` - Utilities
 - `ucx_wifi_scan_begin/get_next/end` - WiFi scanning
 - `ucx_wifi_connect`, `ucx_wifi_disconnect`, `ucx_wifi_get_ip` - WiFi management
+- `ucx_bt_discovery_begin/get_next/end` - BLE scanning
+- `ucx_bt_connect`, `ucx_bt_disconnect` - BLE connection management
+- `ucx_bt_advertise_start/stop` - BLE advertising
+- `ucx_gatt_discover_services_begin/get_next/end` - GATT service discovery
+- `ucx_gatt_discover_chars_begin/get_next/end` - GATT characteristic discovery
+- `ucx_gatt_read`, `ucx_gatt_write`, `ucx_gatt_config_write` - GATT client operations
+- `ucx_gatt_server_service_define`, `ucx_gatt_server_char_define` - GATT server setup
+- `ucx_gatt_server_activate`, `ucx_gatt_server_set_value`, `ucx_gatt_server_send_notification` - GATT server operations
 - `ucx_send_at_command`, `ucx_get_version`, `ucx_get_last_error` - System
 
 ### u_port_web.c
@@ -118,7 +146,17 @@ Platform port layer bridging ucxclient's UART abstraction to Web Serial API.
 -s EXPORTED_FUNCTIONS=_ucx_init,_ucx_deinit,_ucx_set_log_level,_ucx_read_int32,
     _ucx_wifi_connect,_ucx_wifi_disconnect,_ucx_wifi_scan_begin,
     _ucx_wifi_scan_get_next,_ucx_wifi_scan_end,_ucx_wifi_get_ip,
-    _ucx_send_at_command,_ucx_get_version,_malloc,_free
+    _ucx_send_at_command,_ucx_get_version,
+    _ucx_bt_discovery_begin,_ucx_bt_discovery_get_next,_ucx_bt_discovery_end,
+    _ucx_bt_connect,_ucx_bt_disconnect,
+    _ucx_bt_advertise_start,_ucx_bt_advertise_stop,
+    _ucx_gatt_discover_services_begin,_ucx_gatt_discover_services_get_next,
+    _ucx_gatt_discover_services_end,_ucx_gatt_discover_chars_begin,
+    _ucx_gatt_discover_chars_get_next,_ucx_gatt_discover_chars_end,
+    _ucx_gatt_read,_ucx_gatt_write,_ucx_gatt_config_write,
+    _ucx_gatt_server_service_define,_ucx_gatt_server_char_define,
+    _ucx_gatt_server_activate,_ucx_gatt_server_set_value,
+    _ucx_gatt_server_send_notification,_malloc,_free
 -s ALLOW_MEMORY_GROWTH=1
 -s INITIAL_MEMORY=16777216
 -s ASYNCIFY=1
@@ -157,6 +195,17 @@ bridge.setLogLevel(3);
 // Manual WiFi scan
 const results = await bridge.wifiScan();
 console.table(results);
+
+// BLE scan
+const devices = await bridge.btScan(5000);
+console.table(devices);
+
+// Connect to a BLE device
+const handle = await bridge.btConnect('AABBCCDDEEFF');
+
+// Discover GATT services
+const services = await bridge.gattDiscoverServices(handle);
+console.table(services);
 
 // Get firmware version
 const ver = await bridge.getVersion();
