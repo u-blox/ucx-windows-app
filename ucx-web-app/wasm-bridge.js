@@ -123,7 +123,6 @@ class WasmBridge {
                 const ssid = this.module.UTF8ToString(ssidPtr);
                 const rssi = this._readInt32(rssiPtr);
                 const channel = this._readInt32(channelPtr);
-                console.log(`[wasm-bridge] scan result: ssid="${ssid}" rssi=${rssi} ch=${channel} (ptrs: rssi@${rssiPtr} ch@${channelPtr})`);
 
                 networks.push({ ssid, rssi, channel });
             }

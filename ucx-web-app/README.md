@@ -1,228 +1,167 @@
-# UCX Web Terminal - NORA-W36
+﻿# UCX Web App - Implementation Details
 
-Browser-based terminal for controlling NORA-W36 module using the full UCX API via WebAssembly.
+Detailed implementation documentation for the browser-based NORA-W36 WebAssembly application.
 
-## Overview
+For a project overview, build instructions, and quick start guide, see the [root README](../README.md).
 
-This project compiles the ucxclient C library to WebAssembly, allowing you to control a NORA-W36 module directly from a web browser using the same high-level UCX API used by the desktop applications. This eliminates the need to manually send AT commands.
+## File Reference
 
-## Architecture
+| File | Lines | Purpose |
+|------|-------|---------|
+| `index.html` | ~140 | Markup + CSS (loads JS modules below) |
+| `serial.js` | ~230 | `SerialManager` class + `RingBuffer` for Web Serial I/O |
+| `wasm-bridge.js` | ~180 | `WasmBridge` class wrapping the Emscripten module |
+| `app.js` | ~330 | UI logic, URC handling, RX line reassembly |
+| `library.js` | ~30 | Empty `mergeInto` stub (kept for `--js-library` flag) |
+| `ucx_wasm_wrapper.c` | ~470 | WASM-exported C functions (13 exports) |
+| `u_port_web.c` | ~370 | Platform port: EM_JS serial bridge + timer |
+| `u_port_clib.h` | ~50 | Mutex/thread no-op macros for single-threaded WASM |
+| `CMakeLists.txt` | ~80 | Emscripten build configuration |
 
-```
-Browser (JavaScript)
-    ↓
-WASM Module (ucxclient compiled to WebAssembly)
-    ↓
-Web Serial API Bridge (u_port_web.c)
-    ↓
-Web Serial API
-    ↓
-NORA-W36 Module (USB/Serial)
-```
+## JavaScript Modules
 
-## Features
+### serial.js - SerialManager
 
-- ✅ **Full UCX API in browser** - Same API as desktop C#/Python applications
-- ✅ **WiFi scanning and connection** - Use high-level functions instead of AT commands
-- ✅ **Web Serial API** - Direct USB/serial communication from browser
-- ✅ **Real-time logging** - See all serial communication and URCs
-- ✅ **Cross-platform** - Works on any OS with Chrome/Edge browser
+Manages the Web Serial API connection lifecycle.
 
-## Requirements
+**Classes**:
+- `RingBuffer(capacity=16384)` - Circular byte buffer with `push()`, `read()`, `available`, `clear()`
+- `SerialManager` - Connection management:
+  - `autoConnect(baudRate)` - Reconnect to previously paired port
+  - `connect(baudRate)` - Prompt user to select a port
+  - `disconnect()` - Close port and clean up
+  - `serialWrite(buffer)` - Queued writes (prevents `WritableStream` lock conflicts)
+  - `serialRead(maxLength)` - Read from ring buffer (called by WASM)
+  - `serialAvailable()` - Bytes waiting in ring buffer
+  - Callbacks: `onReceive(text, bytes)`, `onDisconnect()`, `onError(msg)`
 
-### Browser Support
-- **Chrome/Edge 89+** (Web Serial API support)
-- ~77% market share as of 2024
-- Safari and Firefox do not support Web Serial API yet
+### wasm-bridge.js - WasmBridge
 
-### Build Tools
-- **Emscripten SDK** - Compile C to WebAssembly
-- **CMake 3.10+** - Build system
-- **Git** - Version control
+Loads the Emscripten WASM module and provides a typed async JavaScript API.
 
-## Installation
+**Constructor**: `new WasmBridge(serialManager)`
 
-### 1. Install Emscripten SDK
+**Methods**:
+- `load()` - Load WASM module and wire serial I/O hooks
+- `init(baudRate)` - Initialize UCX AT client (returns 0 on success)
+- `deinit()` - Clean up UCX client
+- `setLogLevel(level)` - 0=none, 1=error, 2=info, 3=debug
+- `wifiScan()` - Returns `[{ssid, rssi, channel}, ...]`
+- `wifiConnect(ssid, password)` - Returns 0 on success
+- `wifiDisconnect()` - Returns 0 on success
+- `getIP()` - Returns IP string or null
+- `getVersion()` - Returns firmware version string or null
+- `_readInt32(ptr)` - Calls `ucx_read_int32` via ccall (safe ASYNCIFY memory read)
 
-```bash
-# Clone Emscripten SDK
-git clone https://github.com/emscripten-core/emsdk.git
-cd emsdk
+### app.js - Application Logic
 
-# Install latest version
-./emsdk install latest
-./emsdk activate latest
+Top-level UI orchestration, wired to `index.html` buttons.
 
-# Add to PATH (Windows PowerShell)
-.\emsdk_env.ps1
+**Key functions**:
+- `initApp()` - Creates `SerialManager` + `WasmBridge`, loads WASM, attempts auto-connect
+- `connectSerial()` / `disconnectSerial()` / `autoConnectSerial()` - Serial lifecycle
+- `wifiScan()` / `wifiConnect()` / `wifiDisconnect()` / `getConnectionInfo()` - WiFi ops
+- `handleURC(urc)` - Dispatches +UEWLU, +UEWSNU, +UEWSND, +UUWLE events
+- `onSerialReceive(text)` - RX line reassembly buffer (displays complete lines only)
+- `log(message)` / `clearLog()` - Timestamped UI console
 
-# Verify installation
-emcc --version
-```
+## C Source Files
 
-### 2. Build WASM Module
+### ucx_wasm_wrapper.c
 
-```bash
-cd ucx-web-terminal
+Simplified C API exported to JavaScript. Wraps the full ucxclient library.
 
-# Configure build
-emcmake cmake -B build
+**Log level macros**: `LOG_ERROR`, `LOG_INFO`, `LOG_DEBUG` (controlled by `g_log_level`)
 
-# Build
-emmake make -C build
+**Instance**: Single `ucx_wasm_instance_t` containing AT client, CX handle, RX/URC buffers.
 
-# Output: build/ucxclient.js and build/ucxclient.wasm
-```
+**Exported functions** (see root README for full table):
+- `ucx_init`, `ucx_deinit` - Lifecycle
+- `ucx_set_log_level`, `ucx_read_int32` - Utilities
+- `ucx_wifi_scan_begin/get_next/end` - WiFi scanning
+- `ucx_wifi_connect`, `ucx_wifi_disconnect`, `ucx_wifi_get_ip` - WiFi management
+- `ucx_send_at_command`, `ucx_get_version`, `ucx_get_last_error` - System
 
-## Usage
+### u_port_web.c
 
-### 1. Start Web Server
+Platform port layer bridging ucxclient's UART abstraction to Web Serial API.
 
-```bash
-# Simple HTTP server (Python)
-python -m http.server 8000
+**EM_JS functions** (called from C, executed in JavaScript):
+- `js_serial_write(data, length)` - Copies bytes to `Uint8Array`, calls `Module.serialWrite()`
+- `js_serial_read(buffer, maxLength)` - Calls `Module.serialRead()`, copies back to WASM heap
+- `js_get_time_ms()` - Returns `Date.now() & 0x7FFFFFFF`
 
-# OR using Node.js
-npx http-server -p 8000
-```
+**Port API implementations**:
+- `uPortUartOpen()` / `uPortUartClose()` - Open/close (no-op; port managed by JS)
+- `uPortUartRead()` / `uPortUartWrite()` - Delegate to EM_JS functions
+- `uPortGetTickTimeMs()` - Millisecond timer
+- Mutex functions - All no-ops (single-threaded WASM)
+- `uPortLog()` - `printf` with configurable port log level (`PLOG_*` macros)
 
-### 2. Open in Browser
+## Build Configuration
 
-Navigate to `http://localhost:8000/index.html`
+### CMakeLists.txt
 
-### 3. Connect to NORA-W36
+- Project: `ucx-web-terminal` (CMake project name)
+- Target: `ucxclient` → outputs `ucxclient.js` + `ucxclient.wasm`
+- Module: `NORA-W36X` (sets `UCX_MODULE` for ucxclient.cmake)
+- Memory: 16 MB initial, growable (`ALLOW_MEMORY_GROWTH`)
+- Optimization: `-O2` (link), `-O3` in the `.cmd` script
 
-1. Click **"Connect to Serial Port"**
-2. Select your NORA-W36 USB device (e.g., `COM3` or `/dev/ttyUSB0`)
-3. Serial port opens at 115200 baud (default)
-4. UCX client automatically initializes
-
-### 4. Scan WiFi Networks
-
-1. Click **"Scan Networks"**
-2. Wait ~5 seconds for scan to complete
-3. Results display in table with "Select" buttons
-
-### 5. Connect to WiFi
-
-1. Enter SSID and password (or select from scan results)
-2. Click **"Connect"**
-3. Wait for connection (monitor console log)
-4. Click **"Get Connection Info"** to see IP address
-
-## File Structure
+### Link flags (from launch-ucx-web-app.cmd)
 
 ```
-ucx-web-terminal/
-├── CMakeLists.txt           # Emscripten build configuration
-├── index.html               # Web terminal UI
-├── library.js               # JavaScript functions for C code
-├── u_port_web.c             # Web Serial API bridge
-├── ucx_wasm_wrapper.c       # Simplified WASM API
-└── README.md                # This file
+-s WASM=1
+-s MODULARIZE=1
+-s EXPORT_NAME=createUCXModule
+-s EXPORTED_RUNTIME_METHODS=ccall,cwrap,UTF8ToString,stringToUTF8,lengthBytesUTF8
+-s EXPORTED_FUNCTIONS=_ucx_init,_ucx_deinit,_ucx_set_log_level,_ucx_read_int32,
+    _ucx_wifi_connect,_ucx_wifi_disconnect,_ucx_wifi_scan_begin,
+    _ucx_wifi_scan_get_next,_ucx_wifi_scan_end,_ucx_wifi_get_ip,
+    _ucx_send_at_command,_ucx_get_version,_malloc,_free
+-s ALLOW_MEMORY_GROWTH=1
+-s INITIAL_MEMORY=16777216
+-s ASYNCIFY=1
+-s ASYNCIFY_IMPORTS=js_serial_write,js_serial_read
+--js-library ../library.js
 ```
 
-## API Functions
+## Key Design Decisions
 
-The WASM module exports these simplified functions:
+### Why EM_JS instead of library.js?
 
-| Function | Description |
-|----------|-------------|
-| `ucx_create()` | Initialize UCX client |
-| `ucx_destroy(handle)` | Cleanup UCX client |
-| `ucx_wifi_scan_begin()` | Start WiFi scan |
-| `ucx_wifi_scan_get_next(result)` | Get next scan result |
-| `ucx_wifi_scan_end()` | End WiFi scan |
-| `ucx_wifi_connect(ssid, pass)` | Connect to WiFi network |
-| `ucx_wifi_disconnect()` | Disconnect from WiFi |
-| `ucx_wifi_get_connection_info(info)` | Get IP/subnet/gateway |
+The original `library.js` contained `mergeInto(LibraryManager.library, {...})` functions.
+These were moved to `EM_JS` blocks within `u_port_web.c` because:
+- EM_JS functions can use ASYNCIFY (library.js functions cannot easily)
+- The serial I/O hooks (`Module.serialWrite`, etc.) are wired at runtime by `WasmBridge`
+- `library.js` is kept as an empty stub so the `--js-library` flag in the build command remains valid
 
-## Code Reuse
+### Why ucx_read_int32?
 
-This project achieves **~95% code reuse** with the desktop applications:
+ASYNCIFY-instrumented WASM functions can grow memory during any async yield (`emscripten_sleep`, serial read/write). When memory grows, the `ArrayBuffer` backing `HEAP8`, `HEAP32`, etc. is detached. Any JavaScript code that cached a typed array view before the growth will read stale zeros.
 
-- ✅ **ucxclient core** - All 365+ UCX functions (100% shared)
-- ✅ **Parser/buffer logic** - Shared between all platforms
-- ✅ **WiFi/BT/Socket APIs** - Identical across desktop and web
-- ⚠️ **Platform layer only** - Different for each platform:
-  - Desktop: Native serial port APIs (Windows/Linux)
-  - Web: Web Serial API bridge (~250 lines)
+`ucx_read_int32(int* ptr)` is a trivial C function that dereferences a pointer—inside WASM, where the linear memory is always valid regardless of `ArrayBuffer` detachment. JavaScript calls it via `ccall` to safely read `int32` values from WASM memory.
 
-## Browser Console
+### Why RX line reassembly?
 
-Use the browser console to call UCX functions directly:
+Serial data arrives in arbitrary-sized chunks (e.g., 64-byte USB packets). A single AT response line like `+UWSSC:0,"MyNetwork",-65,6` may span multiple chunks. Without reassembly, the console shows garbled partial lines. The `rxLineBuffer` in `app.js` accumulates text and only displays complete `\n`-delimited lines.
+
+## Browser Console API
+
+For debugging, the `serial` and `bridge` objects are global:
 
 ```javascript
+// Set verbose logging
+bridge.setLogLevel(3);
+
 // Manual WiFi scan
-const scanId = ucxModule.ccall('ucx_wifi_scan_begin', 'number', [], []);
+const results = await bridge.wifiScan();
+console.table(results);
 
-// Get scan result
-const resultPtr = ucxModule._malloc(256);
-ucxModule.ccall('ucx_wifi_scan_get_next', 'number', ['number'], [resultPtr]);
-const ssid = ucxModule.UTF8ToString(resultPtr);
-ucxModule._free(resultPtr);
+// Get firmware version
+const ver = await bridge.getVersion();
+console.log(ver);
 
-// Connect to WiFi
-const ssidPtr = ucxModule._malloc(64);
-const passPtr = ucxModule._malloc(64);
-ucxModule.stringToUTF8("MyNetwork", ssidPtr, 64);
-ucxModule.stringToUTF8("password123", passPtr, 64);
-ucxModule.ccall('ucx_wifi_connect', 'number', ['number', 'number'], [ssidPtr, passPtr]);
-ucxModule._free(ssidPtr);
-ucxModule._free(passPtr);
+// Check serial buffer
+console.log('RX bytes:', serial.serialAvailable());
 ```
-
-## Troubleshooting
-
-### Web Serial API Not Available
-- **Symptom**: Alert "Web Serial API not supported"
-- **Solution**: Use Chrome or Edge browser (version 89+)
-
-### Serial Port Not Opening
-- **Symptom**: Error when clicking "Connect to Serial Port"
-- **Solution**: 
-  - Check NORA-W36 is connected via USB
-  - Try different baud rate (115200 default)
-  - Check browser console for errors
-
-### WiFi Scan Returns No Results
-- **Symptom**: "No networks found" after scan
-- **Solution**:
-  - Wait longer (WiFi scan takes ~5 seconds)
-  - Check serial communication in console log
-  - Verify NORA-W36 is responding to AT commands
-
-### WASM Module Not Loading
-- **Symptom**: "Failed to load WASM module" error
-- **Solution**:
-  - Rebuild with `emmake make -C build`
-  - Check `ucxclient.js` and `ucxclient.wasm` exist in same directory as `index.html`
-  - Serve via HTTP server (not `file://` URLs)
-
-## Performance
-
-- **Binary Size**: ~200KB (compressed WASM)
-- **Load Time**: <1 second on broadband
-- **Execution Speed**: Near-native (within 10% of compiled C)
-- **Memory Usage**: ~4MB (includes ucxclient buffers)
-
-## Security
-
-- **Web Serial API** requires user permission (browser prompts)
-- **HTTPS required** for production deployment
-- **Same-origin policy** applies to WASM modules
-- **No credentials stored** in browser (all in-memory)
-
-## Future Enhancements
-
-- [ ] Bluetooth scanning and pairing
-- [ ] Socket/HTTP/MQTT testing
-- [ ] Multi-device support (connect to multiple modules)
-- [ ] Configuration save/restore (localStorage)
-- [ ] Firmware update via browser
-
-## License
-
-Copyright 2025 u-blox
-
-Licensed under the Apache License, Version 2.0

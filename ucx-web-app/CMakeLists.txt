@@ -13,7 +13,7 @@
 # limitations under the License.
 
 cmake_minimum_required(VERSION 3.10)
-project(ucx-web-terminal)
+project(ucx-web-app)
 
 # Disable response files for linking (Emscripten doesn't handle them well on Windows)
 set(CMAKE_C_USE_RESPONSE_FILE_FOR_OBJECTS OFF)
