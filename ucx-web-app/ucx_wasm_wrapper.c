@@ -37,6 +37,21 @@
 #include "u_cx_general.h"
 
 /* ----------------------------------------------------------------
+ * LOG LEVELS
+ * -------------------------------------------------------------- */
+
+#define UCX_LOG_NONE    0
+#define UCX_LOG_ERROR   1
+#define UCX_LOG_INFO    2
+#define UCX_LOG_DEBUG   3
+
+static int g_log_level = UCX_LOG_INFO;
+
+#define LOG_ERROR(fmt, ...) do { if (g_log_level >= UCX_LOG_ERROR) printf("[WASM-ERR] " fmt "\n", ##__VA_ARGS__); } while(0)
+#define LOG_INFO(fmt, ...)  do { if (g_log_level >= UCX_LOG_INFO)  printf("[WASM] " fmt "\n", ##__VA_ARGS__); } while(0)
+#define LOG_DEBUG(fmt, ...) do { if (g_log_level >= UCX_LOG_DEBUG) printf("[WASM-DBG] " fmt "\n", ##__VA_ARGS__); } while(0)
+
+/* ----------------------------------------------------------------
  * TYPES
  * -------------------------------------------------------------- */
 
@@ -83,7 +98,7 @@ static void internal_urc_callback(struct uCxAtClient *pClient, void *pTag,
     memcpy(urc_line, pLine, copy_len);
     urc_line[copy_len] = '\0';
     
-    printf("[WASM-URC] %s\n", urc_line);
+    LOG_DEBUG("URC: %s", urc_line);
     
     // Forward to JavaScript
     js_urc_callback(urc_line);
@@ -99,19 +114,30 @@ static void internal_urc_callback(struct uCxAtClient *pClient, void *pTag,
  * @param baudRate Baud rate (usually 115200)
  * @return 0 on success, -1 on error
  */
+/**
+ * Set log verbosity level.
+ * @param level 0=none, 1=error, 2=info, 3=debug
+ */
+EMSCRIPTEN_KEEPALIVE
+void ucx_set_log_level(int level) {
+    if (level >= UCX_LOG_NONE && level <= UCX_LOG_DEBUG) {
+        g_log_level = level;
+    }
+}
+
 EMSCRIPTEN_KEEPALIVE
 int ucx_init(const char* portName, int baudRate) {
     if (g_instance) {
-        printf("[WASM] UCX already initialized\n");
+        LOG_INFO("UCX already initialized");
         return 0;
     }
     
-    printf("[WASM] Initializing UCX: port=%s, baud=%d\n", portName, baudRate);
+    LOG_INFO("Initializing UCX: port=%s, baud=%d", portName, baudRate);
     
     // Allocate instance
     g_instance = (ucx_wasm_instance_t*)malloc(sizeof(ucx_wasm_instance_t));
     if (!g_instance) {
-        printf("[WASM] Failed to allocate instance\n");
+        LOG_ERROR("Failed to allocate instance");
         return -1;
     }
     
@@ -131,7 +157,7 @@ int ucx_init(const char* portName, int baudRate) {
     // Open UART (Web Serial port)
     int32_t result = uCxAtClientOpen(&g_instance->at_client, baudRate, false);
     if (result < 0) {
-        printf("[WASM] Failed to open UART: %d\n", result);
+        LOG_ERROR("Failed to open UART: %d", result);
         free(g_instance);
         g_instance = NULL;
         return -1;
@@ -144,16 +170,15 @@ int ucx_init(const char* portName, int baudRate) {
     uCxInit(&g_instance->at_client, &g_instance->cx_handle);
     
     // Turn off echo mode for better AT command parsing
-    printf("[WASM] Disabling AT echo (ATE0)...\n");
+    LOG_DEBUG("Disabling AT echo (ATE0)...");
     result = uCxSystemSetEchoOff(&g_instance->cx_handle);
     if (result != 0) {
-        printf("[WASM] Warning: Failed to disable echo: %d (continuing anyway)\n", result);
-        // Don't fail initialization, just warn - echo might already be off
+        LOG_INFO("Warning: Failed to disable echo: %d (continuing anyway)", result);
     } else {
-        printf("[WASM] AT echo disabled successfully\n");
+        LOG_DEBUG("AT echo disabled");
     }
     
-    printf("[WASM] UCX initialized successfully\n");
+    LOG_INFO("UCX initialized successfully");
     return 0;
 }
 
@@ -166,7 +191,7 @@ void ucx_deinit(void) {
         return;
     }
     
-    printf("[WASM] Deinitializing UCX\n");
+    LOG_INFO("Deinitializing UCX");
     
     uCxAtClientClose(&g_instance->at_client);
     free(g_instance);
@@ -199,9 +224,7 @@ int ucx_wifi_scan_begin(void) {
         return -1;
     }
     
-    printf("[WASM] Starting WiFi scan\n");
-    
-    // Start passive scan using enum
+    LOG_INFO("Starting WiFi scan");
     uCxWifiStationScan1Begin(&g_instance->cx_handle, U_WIFI_SCAN_MODE_ACTIVE);
     
     return 0;
@@ -233,7 +256,7 @@ int ucx_wifi_scan_get_next(char* ssid, int* rssi, int* channel) {
     *rssi = scan_result.rssi;
     *channel = scan_result.channel;
     
-    printf("[WASM] Scan result: %s (ch:%d, rssi:%d)\n", ssid, *channel, *rssi);
+    LOG_DEBUG("Scan result: %s (ch:%d, rssi:%d)", ssid, *channel, *rssi);
     
     return 1; // Result available
 }
@@ -248,7 +271,7 @@ void ucx_wifi_scan_end(void) {
     }
     
     uCxEnd(&g_instance->cx_handle);
-    printf("[WASM] WiFi scan ended\n");
+    LOG_INFO("WiFi scan ended");
 }
 
 /**
@@ -259,136 +282,66 @@ void ucx_wifi_scan_end(void) {
  */
 EMSCRIPTEN_KEEPALIVE
 int ucx_wifi_connect(const char* ssid, const char* password) {
-    printf("\n");
-    printf("╔═══════════════════════════════════════════════════════════╗\n");
-    printf("║  ucx_wifi_connect() - ENTERING FUNCTION                  ║\n");
-    printf("╚═══════════════════════════════════════════════════════════╝\n");
-    
-    // Validate parameters
-    printf("[WASM-CONNECT] Step 0: Parameter validation\n");
-    printf("[WASM-CONNECT]   g_instance = %p\n", (void*)g_instance);
-    printf("[WASM-CONNECT]   ssid = %p\n", (void*)ssid);
-    printf("[WASM-CONNECT]   password = %p\n", (void*)password);
-    
     if (!g_instance) {
-        printf("[WASM-CONNECT] ❌ ERROR: g_instance is NULL!\n");
+        LOG_ERROR("Not initialized");
         return -1;
     }
     if (!ssid) {
-        printf("[WASM-CONNECT] ❌ ERROR: ssid is NULL!\n");
+        LOG_ERROR("SSID is NULL");
         return -1;
     }
     
-    printf("[WASM-CONNECT] ✓ Parameters validated\n");
-    printf("[WASM-CONNECT]   SSID: \"%s\" (len=%zu)\n", ssid, strlen(ssid));
-    if (password && strlen(password) > 0) {
-        printf("[WASM-CONNECT]   Password: \"***\" (len=%zu, WPA/WPA2 mode)\n", strlen(password));
-    } else {
-        printf("[WASM-CONNECT]   Password: (none - OPEN network mode)\n");
-    }
+    LOG_INFO("WiFi connect: SSID=\"%s\", security=%s", ssid,
+             (password && strlen(password) > 0) ? "WPA" : "OPEN");
     
     int32_t wlan_handle = 0; // Station interface
     int32_t result;
     
-    printf("[WASM-CONNECT]   wlan_handle = %d\n", wlan_handle);
-    printf("[WASM-CONNECT]   cx_handle = %p\n", (void*)&g_instance->cx_handle);
-    printf("\n");
-    
     // Step 1: Set connection parameters (SSID)
-    printf("╔═══════════════════════════════════════════════════════════╗\n");
-    printf("║  STEP 1: Set Connection Parameters (SSID)                ║\n");
-    printf("╚═══════════════════════════════════════════════════════════╝\n");
-    printf("[WASM-CONNECT] Calling uCxWifiStationSetConnectionParams()\n");
-    printf("[WASM-CONNECT]   cx_handle = %p\n", (void*)&g_instance->cx_handle);
-    printf("[WASM-CONNECT]   wlan_handle = %d\n", wlan_handle);
-    printf("[WASM-CONNECT]   ssid = \"%s\"\n", ssid);
-    
+    LOG_DEBUG("Setting connection params (SSID)");
     result = uCxWifiStationSetConnectionParams(&g_instance->cx_handle, wlan_handle, ssid);
-    
-    printf("[WASM-CONNECT] ← uCxWifiStationSetConnectionParams returned: %d\n", result);
     if (result != 0) {
-        printf("[WASM-CONNECT] ❌ FAILED to set SSID (error %d)\n", result);
+        LOG_ERROR("Failed to set SSID: %d", result);
         snprintf(g_instance->error_msg, sizeof(g_instance->error_msg),
                  "Failed to set SSID: %d", result);
         return result;
     }
-    printf("[WASM-CONNECT] ✓ SSID set successfully\n\n");
     
     // Step 2: Set security
-    printf("╔═══════════════════════════════════════════════════════════╗\n");
-    printf("║  STEP 2: Set Security Mode                               ║\n");
-    printf("╚═══════════════════════════════════════════════════════════╝\n");
-    
     if (password && strlen(password) > 0) {
-        // WPA/WPA2 security using enum constant
-        printf("[WASM-CONNECT] Security Mode: WPA/WPA2\n");
-        printf("[WASM-CONNECT] Calling uCxWifiStationSetSecurityWpa()\n");
-        printf("[WASM-CONNECT]   cx_handle = %p\n", (void*)&g_instance->cx_handle);
-        printf("[WASM-CONNECT]   wlan_handle = %d\n", wlan_handle);
-        printf("[WASM-CONNECT]   password = \"***\" (len=%zu)\n", strlen(password));
-        printf("[WASM-CONNECT]   threshold = U_WIFI_WPA_THRESHOLD_WPA2 (%d)\n", U_WIFI_WPA_THRESHOLD_WPA2);
-        
+        LOG_DEBUG("Setting WPA security");
         result = uCxWifiStationSetSecurityWpa(&g_instance->cx_handle, 
                                              wlan_handle, 
                                              password, 
                                              U_WIFI_WPA_THRESHOLD_WPA2);
-        
-        printf("[WASM-CONNECT] ← uCxWifiStationSetSecurityWpa returned: %d\n", result);
         if (result != 0) {
-            printf("[WASM-CONNECT] ❌ FAILED to set WPA security (error %d)\n", result);
+            LOG_ERROR("Failed to set WPA security: %d", result);
             snprintf(g_instance->error_msg, sizeof(g_instance->error_msg),
                      "Failed to set WPA security: %d", result);
             return result;
         }
-        printf("[WASM-CONNECT] ✓ WPA/WPA2 security set successfully\n\n");
     } else {
-        // Open network
-        printf("[WASM-CONNECT] Security Mode: OPEN (no password)\n");
-        printf("[WASM-CONNECT] Calling uCxWifiStationSetSecurityOpen()\n");
-        printf("[WASM-CONNECT]   cx_handle = %p\n", (void*)&g_instance->cx_handle);
-        printf("[WASM-CONNECT]   wlan_handle = %d\n", wlan_handle);
-        
+        LOG_DEBUG("Setting open security");
         result = uCxWifiStationSetSecurityOpen(&g_instance->cx_handle, wlan_handle);
-        
-        printf("[WASM-CONNECT] ← uCxWifiStationSetSecurityOpen returned: %d\n", result);
         if (result != 0) {
-            printf("[WASM-CONNECT] ❌ FAILED to set open security (error %d)\n", result);
+            LOG_ERROR("Failed to set open security: %d", result);
             snprintf(g_instance->error_msg, sizeof(g_instance->error_msg),
                      "Failed to set open security: %d", result);
             return result;
         }
-        printf("[WASM-CONNECT] ✓ OPEN security set successfully\n\n");
     }
     
     // Step 3: Connect
-    printf("╔═══════════════════════════════════════════════════════════╗\n");
-    printf("║  STEP 3: Execute Station Connect Command                 ║\n");
-    printf("╚═══════════════════════════════════════════════════════════╝\n");
-    printf("[WASM-CONNECT] Calling uCxWifiStationConnect()\n");
-    printf("[WASM-CONNECT]   cx_handle = %p\n", (void*)&g_instance->cx_handle);
-    printf("[WASM-CONNECT]   wlan_handle = %d\n", wlan_handle);
-    printf("[WASM-CONNECT] >>> THIS IS THE CRITICAL CALL <<<\n");
-    
+    LOG_DEBUG("Sending connect command");
     result = uCxWifiStationConnect(&g_instance->cx_handle, wlan_handle);
-    
-    printf("[WASM-CONNECT] ← uCxWifiStationConnect returned: %d\n", result);
     if (result != 0) {
-        printf("[WASM-CONNECT] ❌ FAILED to execute connect command (error %d)\n", result);
+        LOG_ERROR("Failed to connect: %d", result);
         snprintf(g_instance->error_msg, sizeof(g_instance->error_msg),
                  "Failed to connect: %d", result);
         return result;
     }
-    printf("[WASM-CONNECT] ✓ Connect command sent successfully\n");
     
-    printf("\n");
-    printf("╔═══════════════════════════════════════════════════════════╗\n");
-    printf("║  ucx_wifi_connect() - SUCCESS - EXITING FUNCTION         ║\n");
-    printf("╚═══════════════════════════════════════════════════════════╝\n");
-    printf("[WASM-CONNECT] All steps completed successfully\n");
-    printf("[WASM-CONNECT] Connection is now in progress on the module\n");
-    printf("[WASM-CONNECT] Watch for URCs to see connection status\n");
-    printf("\n");
-    
+    LOG_INFO("WiFi connect command sent successfully");
     return 0;
 }
 
@@ -402,12 +355,11 @@ int ucx_wifi_disconnect(void) {
         return -1;
     }
     
-    printf("[WASM] Disconnecting WiFi\n");
+    LOG_INFO("Disconnecting WiFi");
     
     int32_t result = uCxWifiStationDisconnect(&g_instance->cx_handle);
     if (result != 0) {
-        snprintf(g_instance->error_msg, sizeof(g_instance->error_msg),
-                 "Failed to disconnect: %d", result);
+        LOG_ERROR("Failed to disconnect: %d", result);
         return result;
     }
     
@@ -445,7 +397,7 @@ int ucx_wifi_get_ip(char* ip_str) {
              (ipv4 >> 8) & 0xFF,
              ipv4 & 0xFF);
     
-    printf("[WASM] IP address: %s\n", ip_str);
+    LOG_INFO("IP address: %s", ip_str);
     return 0;
 }
 
@@ -466,10 +418,9 @@ int ucx_send_at_command(const char* command, char* response, int response_size) 
         return -1;
     }
     
-    printf("[WASM] Sending AT command: AT%s\n", command);
+    LOG_DEBUG("Sending AT command: AT%s", command);
     
     // Send command and get response
-    // Note: This is a simplified version - full implementation would parse multi-line responses
     uCxAtClientCmdBeginF(&g_instance->at_client, "AT", "%s", command);
     
     int32_t result = uCxAtClientCmdEnd(&g_instance->at_client);
@@ -502,7 +453,7 @@ int ucx_get_version(char* version, int version_size) {
         if (version_str) {
             strncpy(version, version_str, version_size - 1);
             version[version_size - 1] = '\0';
-            printf("[WASM] Version: %s\n", version);
+            LOG_INFO("Version: %s", version);
             return 0;
         }
     }

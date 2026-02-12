@@ -29,6 +29,21 @@
 #include <stdarg.h>
 
 /* ----------------------------------------------------------------
+ * LOG LEVELS (matches ucx_wasm_wrapper.c)
+ * -------------------------------------------------------------- */
+
+#define PORT_LOG_NONE    0
+#define PORT_LOG_ERROR   1
+#define PORT_LOG_INFO    2
+#define PORT_LOG_DEBUG   3
+
+static int g_port_log_level = PORT_LOG_INFO;
+
+#define PLOG_ERROR(fmt, ...) do { if (g_port_log_level >= PORT_LOG_ERROR) printf("[PORT-ERR] " fmt "\n", ##__VA_ARGS__); } while(0)
+#define PLOG_INFO(fmt, ...)  do { if (g_port_log_level >= PORT_LOG_INFO)  printf("[PORT] " fmt "\n", ##__VA_ARGS__); } while(0)
+#define PLOG_DEBUG(fmt, ...) do { if (g_port_log_level >= PORT_LOG_DEBUG) printf("[PORT-DBG] " fmt "\n", ##__VA_ARGS__); } while(0)
+
+/* ----------------------------------------------------------------
  * FORWARD DECLARATIONS
  * -------------------------------------------------------------- */
 int32_t uPortGetTickTimeMs(void);
@@ -134,10 +149,7 @@ void uPortDeinit(void) {
  * function just validates the connection.
  */
 void* uPortUartOpen(const char *pDevName, int32_t baudRate, bool useFlowControl) {
-    // Web Serial port is already opened in JavaScript
-    // Just log the configuration for debugging
-    printf("[u_port_web] UART open: dev=%s, baudRate=%d, flowControl=%d\n", 
-           pDevName ? pDevName : "(null)", baudRate, useFlowControl);
+    PLOG_INFO("UART open: dev=%s, baudRate=%d", pDevName ? pDevName : "(null)", baudRate);
     return (void*)1; // Return non-NULL handle for success
 }
 
@@ -148,8 +160,7 @@ void* uPortUartOpen(const char *pDevName, int32_t baudRate, bool useFlowControl)
  * so this is mostly a no-op.
  */
 void uPortUartClose(void* handle) {
-    printf("[u_port_web] UART close: handle=%p\n", handle);
-    // Actual port closing is handled in JavaScript
+    PLOG_INFO("UART closed");
 }
 
 /**
@@ -163,14 +174,12 @@ int32_t uPortUartWrite(void* handle, const void* pData, size_t length) {
         return 0;
     }
     
-    // Debug output
-    printf("[u_port_web] Writing %zu bytes\n", length);
+    PLOG_DEBUG("Writing %zu bytes", length);
     
-    // Call JavaScript function to write to Web Serial
     int result = js_serial_write((const char*)pData, length);
     
     if (result < 0) {
-        printf("[u_port_web] Write error\n");
+        PLOG_ERROR("Write error");
         return -1;
     }
     
@@ -189,55 +198,27 @@ int32_t uPortUartRead(void* handle, void* pData, size_t length, int32_t timeoutM
         return 0;
     }
     
-    // Implement timeout by polling with sleep to yield to browser
     int32_t startTime = uPortGetTickTimeMs();
     int result = 0;
     
-    printf("[u_port_web] 📖 READ REQUESTED: length=%zu, timeout=%dms\n", length, timeoutMs);
-    int available_at_start = js_serial_available();
-    printf("[u_port_web]   Buffer has %d bytes available at start\n", available_at_start);
+    PLOG_DEBUG("Read requested: len=%zu, timeout=%dms", length, timeoutMs);
     
     while (1) {
-        // Check how many bytes are available
-        int available = js_serial_available();
-        
-        // Try to read data
         result = js_serial_read((char*)pData, length);
         
         if (result > 0) {
-            printf("[u_port_web] ✅ Read %d bytes (requested %zu, available was %d)\n", result, length, available);
-            // Print hex dump for debugging
-            printf("[u_port_web]   Hex: ");
-            for (int i = 0; i < result && i < 32; i++) {
-                printf("%02X ", (unsigned char)((char*)pData)[i]);
-            }
-            printf("\n");
-            // Print ASCII (printable chars only)
-            printf("[u_port_web]   ASCII: ");
-            for (int i = 0; i < result && i < 32; i++) {
-                char c = ((char*)pData)[i];
-                printf("%c", (c >= 32 && c < 127) ? c : '.');
-            }
-            printf("\n");
+            PLOG_DEBUG("Read %d bytes", result);
             break;
         }
         
         // Check timeout
         int32_t elapsed = uPortGetTickTimeMs() - startTime;
         if (elapsed >= timeoutMs) {
-            // Timeout - return 0 bytes read
-            int final_available = js_serial_available();
-            printf("[u_port_web] ⏰ Read timeout after %d ms\n", elapsed);
-            printf("[u_port_web]   ❌ TIMEOUT: requested=%zu, available_at_start=%d, available_now=%d\n", 
-                   length, available_at_start, final_available);
-            if (final_available > 0) {
-                printf("[u_port_web]   ⚠️  WARNING: %d bytes ARE available but not read!\n", final_available);
-            }
+            PLOG_DEBUG("Read timeout after %dms", elapsed);
             break;
         }
         
         // Sleep briefly to yield to browser event loop (ASYNCIFY enabled)
-        // This allows JavaScript to process incoming serial data
         emscripten_sleep(10);
     }
     
@@ -362,7 +343,6 @@ int32_t uPortMutexTryLock(void* mutexHandle, int32_t timeoutMs) {
  * so no background task is needed.
  */
 void uPortBgRxTaskCreate(uCxAtClient_t *pClient) {
-    // No background task needed - JavaScript handles async data reception
-    printf("[u_port_web] Background RX task creation (no-op)\n");
+    PLOG_DEBUG("Background RX task creation (no-op in browser)");
 }
 
