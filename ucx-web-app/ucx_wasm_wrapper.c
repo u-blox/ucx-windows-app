@@ -908,3 +908,169 @@ int ucx_bt_advertise_stop(void) {
     LOG_INFO("Stopping BLE advertising");
     return uCxBluetoothLegacyAdvertisementStop(&g_instance->cx_handle);
 }
+
+/* ----------------------------------------------------------------
+ * SAFE BYTE COPY HELPER
+ * -------------------------------------------------------------- */
+
+/**
+ * Copy bytes from one WASM memory location to another.
+ * Used by JS to safely read byte arrays from WASM after ASYNCIFY
+ * calls (avoids stale HEAPU8 typed-array views).
+ *
+ * @param src    Source pointer in WASM memory
+ * @param dst    Destination pointer in WASM memory
+ * @param len    Number of bytes to copy
+ */
+EMSCRIPTEN_KEEPALIVE
+void ucx_copy_bytes(const uint8_t* src, uint8_t* dst, int len) {
+    if (src && dst && len > 0) {
+        memcpy(dst, src, len);
+    }
+}
+
+/* ----------------------------------------------------------------
+ * BLE DEVICE NAME
+ * -------------------------------------------------------------- */
+
+/**
+ * Set the local BLE device name (visible during advertising/scan).
+ * @param name  Device name string (max ~29 chars for BLE)
+ * @return 0 on success, negative on error
+ */
+EMSCRIPTEN_KEEPALIVE
+int ucx_bt_set_local_name(const char* name) {
+    if (!g_instance || !name) return -1;
+    LOG_INFO("Setting BLE local name: \"%s\"", name);
+    return uCxBluetoothSetLocalName(&g_instance->cx_handle, name);
+}
+
+/**
+ * Get the current BLE device name.
+ * @param name       Output buffer (min 64 bytes)
+ * @param name_size  Buffer size
+ * @return 0 on success, negative on error
+ */
+EMSCRIPTEN_KEEPALIVE
+int ucx_bt_get_local_name(char* name, int name_size) {
+    if (!g_instance || !name) return -1;
+
+    const char* device_name = NULL;
+    bool ok = uCxBluetoothGetLocalNameBegin(&g_instance->cx_handle, &device_name);
+    if (ok && device_name) {
+        strncpy(name, device_name, name_size - 1);
+        name[name_size - 1] = '\0';
+        LOG_INFO("BLE local name: \"%s\"", name);
+        return 0;
+    }
+    return -1;
+}
+
+/* ----------------------------------------------------------------
+ * PAIRING / BONDING
+ * -------------------------------------------------------------- */
+
+/**
+ * Set BLE pairing mode.
+ * @param mode 0 = disable, 1 = enable
+ * @return 0 on success, negative on error
+ */
+EMSCRIPTEN_KEEPALIVE
+int ucx_bt_set_pairing_mode(int mode) {
+    if (!g_instance) return -1;
+    LOG_INFO("Setting BLE pairing mode: %d", mode);
+    return uCxBluetoothSetPairingMode(&g_instance->cx_handle,
+                                       (uBtPairingMode_t)mode);
+}
+
+/**
+ * Set BLE I/O capabilities for pairing.
+ * @param io_cap 0=NoInputNoOutput, 1=DisplayOnly, 2=DisplayYesNo,
+ *               3=KeyboardOnly, 4=KeyboardDisplay
+ * @return 0 on success, negative on error
+ */
+EMSCRIPTEN_KEEPALIVE
+int ucx_bt_set_io_capabilities(int io_cap) {
+    if (!g_instance) return -1;
+    LOG_INFO("Setting BLE I/O capabilities: %d", io_cap);
+    return uCxBluetoothSetIoCapabilities(&g_instance->cx_handle,
+                                          (uBtIoCap_t)io_cap);
+}
+
+/**
+ * Respond to a user-confirmation pairing request (+UEUBTUC URC).
+ * @param addr_str  BD address of the requesting peer
+ * @param confirm   0 = deny, 1 = accept
+ * @return 0 on success, negative on error
+ */
+EMSCRIPTEN_KEEPALIVE
+int ucx_bt_user_confirmation(const char* addr_str, int confirm) {
+    if (!g_instance || !addr_str) return -1;
+
+    uBtLeAddress_t addr;
+    if (uCxStringToBdAddress(addr_str, &addr) != 0) {
+        LOG_ERROR("Invalid address: %s", addr_str);
+        return -1;
+    }
+
+    LOG_INFO("User confirmation for %s: %s", addr_str, confirm ? "YES" : "NO");
+    return uCxBluetoothUserConfirmation(&g_instance->cx_handle,
+                                         &addr, (uBtConfirm_t)confirm);
+}
+
+/* ----------------------------------------------------------------
+ * GATT CLIENT - DESCRIPTOR DISCOVERY
+ * -------------------------------------------------------------- */
+
+/**
+ * Discover descriptors of a characteristic (to find the real CCCD handle).
+ * @param conn_handle   Connection handle
+ * @param value_handle  Characteristic value handle
+ * @param char_end      End handle of the characteristic (next char start - 1, or service end)
+ * @return 0 on success
+ */
+EMSCRIPTEN_KEEPALIVE
+int ucx_gatt_discover_descriptors_begin(int conn_handle, int value_handle, int char_end) {
+    if (!g_instance) return -1;
+    LOG_INFO("GATT discover descriptors (conn=%d, val=%d, end=%d)", conn_handle, value_handle, char_end);
+    uCxGattClientDiscoverCharDescriptorsBegin(&g_instance->cx_handle,
+                                               conn_handle, value_handle, char_end);
+    return 0;
+}
+
+/**
+ * Get next descriptor.
+ * @param char_handle   Output: characteristic handle
+ * @param desc_handle   Output: descriptor handle
+ * @param uuid_hex      Output: UUID hex string
+ * @return 1 if available, 0 if done, -1 on error
+ */
+EMSCRIPTEN_KEEPALIVE
+int ucx_gatt_discover_descriptors_get_next(int* char_handle, int* desc_handle, char* uuid_hex) {
+    if (!g_instance || !char_handle || !desc_handle || !uuid_hex) return -1;
+
+    uCxGattClientDiscoverCharDescriptors_t rsp;
+    bool has_more = uCxGattClientDiscoverCharDescriptorsGetNext(&g_instance->cx_handle, &rsp);
+
+    if (!has_more) return 0;
+
+    *char_handle = rsp.char_handle;
+    *desc_handle = rsp.desc_handle;
+
+    for (size_t i = 0; i < rsp.uuid.length && i < 16; i++) {
+        sprintf(uuid_hex + i * 2, "%02X", rsp.uuid.pData[i]);
+    }
+    uuid_hex[rsp.uuid.length * 2] = '\0';
+
+    LOG_DEBUG("Descriptor: char=%d desc=%d uuid=%s", *char_handle, *desc_handle, uuid_hex);
+    return 1;
+}
+
+/**
+ * End descriptor discovery.
+ */
+EMSCRIPTEN_KEEPALIVE
+void ucx_gatt_discover_descriptors_end(void) {
+    if (!g_instance) return;
+    uCxEnd(&g_instance->cx_handle);
+}

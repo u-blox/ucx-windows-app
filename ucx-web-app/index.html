@@ -155,6 +155,25 @@
         </p>
         <button onclick="btConnect()" id="btConnectBtn" disabled>Connect</button>
         <button onclick="btDisconnect()" id="btDisconnectBtn" disabled>Disconnect</button>
+        <hr>
+        <p>
+            Device Name: <input type="text" id="btDeviceName" placeholder="e.g. NORA-W36" style="width:160px">
+            <button onclick="btSetLocalName()" id="btSetNameBtn" disabled>Set Name</button>
+            <button onclick="btGetLocalName()" id="btGetNameBtn" disabled>Get Name</button>
+        </p>
+        <hr>
+        <p>
+            <label><input type="checkbox" id="btPairingMode" onchange="btSetPairingMode()" disabled> Enable Pairing</label>
+            &nbsp; I/O Cap:
+            <select id="btIoCap" style="width:150px">
+                <option value="0">NoInputNoOutput</option>
+                <option value="1">DisplayOnly</option>
+                <option value="2" selected>DisplayYesNo</option>
+                <option value="3">KeyboardOnly</option>
+                <option value="4">KeyboardDisplay</option>
+            </select>
+            <button onclick="btSetIoCapabilities()" id="btSetIoCapBtn" disabled>Set I/O</button>
+        </p>
     </div>
 
     <div class="section">
@@ -173,7 +192,7 @@
             Char UUID: <input type="text" id="gattSrvCharUuid" value="2A37" placeholder="e.g. 2A37" style="width:160px">
             Props (hex): <input type="text" id="gattSrvCharProps" value="1A" placeholder="1A=R+W+N" style="width:60px">
         </p>
-        <button onclick="gattServerDefine()" id="gattServerDefineBtn" disabled>Define Service + Char</button>
+        <button onclick="gattServerDefine()" id="gattServerDefineBtn" disabled>Define Service / Add Char</button>
         <button onclick="gattServerActivate()" id="gattServerActivateBtn" disabled>Activate</button>
         <p>Value: <input type="text" id="gattSrvValue" value="Hello" placeholder="UTF-8 text" style="width:200px"></p>
         <button onclick="gattServerSetValue()" id="gattServerSetValueBtn" disabled>Set Value</button>

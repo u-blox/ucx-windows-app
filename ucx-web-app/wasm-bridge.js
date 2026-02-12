@@ -339,19 +339,24 @@ class WasmBridge {
     async gattRead(connHandle, valueHandle) {
         const bufSize = 256;
         const bufPtr = this.module._malloc(bufSize);
+        const copyPtr = this.module._malloc(bufSize);
         try {
             const len = await this.module.ccall(
                 'ucx_gatt_read', 'number',
                 ['number', 'number', 'number', 'number'],
                 [connHandle, valueHandle, bufPtr, bufSize]);
             if (len < 0) throw new Error(`GATT read failed (${len})`);
+            // Use C-side copy to avoid stale HEAPU8 after ASYNCIFY
+            this.module.ccall('ucx_copy_bytes', null,
+                ['number', 'number', 'number'], [bufPtr, copyPtr, len]);
             const result = new Uint8Array(len);
             for (let i = 0; i < len; i++) {
-                result[i] = this.module.HEAPU8[bufPtr + i];
+                result[i] = this.module.HEAPU8[copyPtr + i];
             }
             return result;
         } finally {
             this.module._free(bufPtr);
+            this.module._free(copyPtr);
         }
     }
 
@@ -507,6 +512,111 @@ class WasmBridge {
     async btAdvertiseStop() {
         return await this.module.ccall(
             'ucx_bt_advertise_stop', 'number', [], []);
+    }
+
+    // ---- BLE Device Name ----
+
+    /**
+     * Set the local BLE device name.
+     * @param {string} name  Device name (max ~29 chars)
+     * @returns {number} 0 on success
+     */
+    async btSetLocalName(name) {
+        return await this.module.ccall(
+            'ucx_bt_set_local_name', 'number', ['string'], [name]);
+    }
+
+    /**
+     * Get the current BLE device name.
+     * @returns {string|null}
+     */
+    async btGetLocalName() {
+        const ptr = this.module._malloc(64);
+        try {
+            const rc = await this.module.ccall(
+                'ucx_bt_get_local_name', 'number',
+                ['number', 'number'], [ptr, 64]);
+            return rc === 0 ? this.module.UTF8ToString(ptr) : null;
+        } finally {
+            this.module._free(ptr);
+        }
+    }
+
+    // ---- Pairing / Bonding ----
+
+    /**
+     * Set BLE pairing mode.
+     * @param {number} mode  0 = disabled, 1 = enabled
+     * @returns {number} 0 on success
+     */
+    async btSetPairingMode(mode) {
+        return await this.module.ccall(
+            'ucx_bt_set_pairing_mode', 'number', ['number'], [mode]);
+    }
+
+    /**
+     * Set BLE I/O capabilities for pairing.
+     * @param {number} ioCap  0=NoIO, 1=DisplayOnly, 2=DisplayYesNo, 3=KeyboardOnly, 4=KeyboardDisplay
+     * @returns {number} 0 on success
+     */
+    async btSetIoCapabilities(ioCap) {
+        return await this.module.ccall(
+            'ucx_bt_set_io_capabilities', 'number', ['number'], [ioCap]);
+    }
+
+    /**
+     * Respond to a user-confirmation pairing request.
+     * @param {string} addrStr  BD address of requesting peer
+     * @param {boolean} accept  true to accept, false to deny
+     * @returns {number} 0 on success
+     */
+    async btUserConfirmation(addrStr, accept) {
+        return await this.module.ccall(
+            'ucx_bt_user_confirmation', 'number',
+            ['string', 'number'], [addrStr, accept ? 1 : 0]);
+    }
+
+    // ---- GATT Client Descriptor Discovery ----
+
+    /**
+     * Discover descriptors of a characteristic (finds the real CCCD handle).
+     * @param {number} connHandle
+     * @param {number} valueHandle  Characteristic value handle
+     * @param {number} charEnd      End handle of the characteristic range
+     * @returns {Array<{charHandle: number, descHandle: number, uuid: string}>}
+     */
+    async gattDiscoverDescriptors(connHandle, valueHandle, charEnd) {
+        const rc = await this.module.ccall(
+            'ucx_gatt_discover_descriptors_begin', 'number',
+            ['number', 'number', 'number'],
+            [connHandle, valueHandle, charEnd]);
+        if (rc < 0) throw new Error(`Descriptor discovery failed (${rc})`);
+
+        const descs = [];
+        const chPtr = this.module._malloc(4);
+        const dhPtr = this.module._malloc(4);
+        const uuidPtr = this.module._malloc(40);
+
+        try {
+            while (true) {
+                const ret = await this.module.ccall(
+                    'ucx_gatt_discover_descriptors_get_next', 'number',
+                    ['number', 'number', 'number'], [chPtr, dhPtr, uuidPtr]);
+                if (ret !== 1) break;
+
+                descs.push({
+                    charHandle: this._readInt32(chPtr),
+                    descHandle: this._readInt32(dhPtr),
+                    uuid:       this.module.UTF8ToString(uuidPtr)
+                });
+            }
+        } finally {
+            this.module._free(chPtr);
+            this.module._free(dhPtr);
+            this.module._free(uuidPtr);
+            this.module.ccall('ucx_gatt_discover_descriptors_end', null, [], []);
+        }
+        return descs;
     }
 
     // ---- helpers ----

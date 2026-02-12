@@ -59,7 +59,9 @@ function updateSerialStatus(connected) {
                      'gattNotifyBtn',
                      'gattServerDefineBtn', 'gattServerActivateBtn',
                      'gattServerSetValueBtn', 'gattServerNotifyBtn',
-                     'btAdvStartBtn', 'btAdvStopBtn'];
+                     'btAdvStartBtn', 'btAdvStopBtn',
+                     'btSetNameBtn', 'btGetNameBtn',
+                     'btPairingMode', 'btSetIoCapBtn'];
 
     if (connected) {
         status.textContent = 'Connected';
@@ -202,6 +204,48 @@ function handleURC(urc) {
     // Background BLE discovery events: +UEBTBGD:<addr>,<rssi>,<name>,<data_type>,<data>
     if (urc.includes('+UEBTBGD:')) {
         log(`[BT-DISCOVERY] ${urc}`);
+        return;
+    }
+
+    // Bonding events: +UEBTB:<addr>,<status>
+    if (urc.includes('+UEBTB:')) {
+        const m = urc.match(/\+UEBTB:([^,]+),(\d+)/);
+        if (m) {
+            log(`BLE BOND ${m[2] === '0' ? 'SUCCESS' : 'FAILED'} (addr=${m[1]})`);
+        } else {
+            log(`[URC] ${urc}`);
+        }
+        return;
+    }
+
+    // User confirmation request: +UEUBTUC:<addr>,<numeric>
+    if (urc.includes('+UEUBTUC:') || urc.includes('+UEBTUC:')) {
+        const m = urc.match(/\+U?EBTUC:([^,]+),(\d+)/);
+        if (m) {
+            log(`PAIRING REQUEST from ${m[1]}, numeric: ${m[2]}`);
+            // Auto-accept or prompt user
+            const accept = confirm(`BLE pairing request from ${m[1]}\nNumeric comparison: ${m[2]}\n\nAccept?`);
+            bridge.btUserConfirmation(m[1], accept);
+        } else {
+            log(`[URC] ${urc}`);
+        }
+        return;
+    }
+
+    // Passkey entry request: +UEBTUPE:<addr>
+    if (urc.includes('+UEBTUPE:')) {
+        log(`PASSKEY ENTRY REQUEST: ${urc}`);
+        return;
+    }
+
+    // Passkey display: +UEUBTUPD:<addr>,<passkey>
+    if (urc.includes('+UEBTUPD:') || urc.includes('+UEUBTUPD:')) {
+        const m = urc.match(/\+U?EBTUPD:([^,]+),(\d+)/);
+        if (m) {
+            log(`PASSKEY DISPLAY: ${m[2]} (for ${m[1]})`);
+        } else {
+            log(`[URC] ${urc}`);
+        }
         return;
     }
 
@@ -466,6 +510,27 @@ async function gattDiscoverChars(connHandle, startHandle, endHandle) {
             return;
         }
 
+        // Resolve CCCD handles via descriptor discovery
+        for (let i = 0; i < chars.length; i++) {
+            const c = chars[i];
+            c.cccdHandle = null;
+            if (c.properties & 0x10 || c.properties & 0x20) {
+                // Determine char end handle: next char's attrHandle - 1, or service endHandle
+                const charEnd = (i + 1 < chars.length) ? chars[i + 1].attrHandle - 1 : endHandle;
+                try {
+                    const descs = await bridge.gattDiscoverDescriptors(connHandle, c.valueHandle, charEnd);
+                    // CCCD UUID is 2902
+                    const cccd = descs.find(d => d.uuid === '0229' || d.uuid === '2902');
+                    if (cccd) {
+                        c.cccdHandle = cccd.descHandle;
+                        log(`  Char ${c.uuid}: CCCD handle=${cccd.descHandle}`);
+                    }
+                } catch (e) {
+                    log(`  Descriptor discovery failed for char ${c.uuid}: ${e.message}`);
+                }
+            }
+        }
+
         let html = '<table><tr><th>UUID</th><th>Value Handle</th><th>Properties</th><th>Actions</th></tr>';
         for (const c of chars) {
             const props = formatBleProperties(c.properties);
@@ -476,11 +541,11 @@ async function gattDiscoverChars(connHandle, startHandle, endHandle) {
             if (c.properties & 0x08 || c.properties & 0x04) {
                 actions += `<button onclick="promptGattWrite(${connHandle},${c.valueHandle})">Write</button> `;
             }
-            if (c.properties & 0x10) {
-                actions += `<button onclick="gattEnableNotify(${connHandle},${c.valueHandle + 1},1)">Notify ON</button> `;
+            if ((c.properties & 0x10) && c.cccdHandle != null) {
+                actions += `<button onclick="gattEnableNotify(${connHandle},${c.cccdHandle},1)">Notify ON</button> `;
             }
-            if (c.properties & 0x20) {
-                actions += `<button onclick="gattEnableNotify(${connHandle},${c.valueHandle + 1},2)">Indicate ON</button> `;
+            if ((c.properties & 0x20) && c.cccdHandle != null) {
+                actions += `<button onclick="gattEnableNotify(${connHandle},${c.cccdHandle},2)">Indicate ON</button> `;
             }
             html += `<tr><td><code>${c.uuid}</code></td><td>${c.valueHandle}</td>`
                   + `<td>${props}</td><td>${actions}</td></tr>`;
@@ -582,13 +647,17 @@ async function gattServerDefine() {
         const svcUuid = document.getElementById('gattSrvUuid').value.trim();
         if (!svcUuid) { alert('Enter a service UUID'); return; }
 
-        const svcBytes = parseUuidHex(svcUuid);
-        log(`Defining GATT service (UUID=${svcUuid}, ${svcBytes.length} bytes)...`);
-        const svcHandle = await bridge.gattServerDefineService(svcBytes);
-        gattServerState.serviceHandle = svcHandle;
-        log(`Service defined (handle=${svcHandle})`);
+        // Only define service if not yet defined
+        if (gattServerState.serviceHandle == null) {
+            const svcBytes = parseUuidHex(svcUuid);
+            log(`Defining GATT service (UUID=${svcUuid}, ${svcBytes.length} bytes)...`);
+            const svcHandle = await bridge.gattServerDefineService(svcBytes);
+            gattServerState.serviceHandle = svcHandle;
+            log(`Service defined (handle=${svcHandle})`);
+        } else {
+            log(`Service already defined (handle=${gattServerState.serviceHandle}), adding characteristic...`);
+        }
 
-        // Define a read+write+notify characteristic
         const charUuid = document.getElementById('gattSrvCharUuid').value.trim();
         if (!charUuid) { alert('Enter a characteristic UUID'); return; }
 
@@ -596,7 +665,7 @@ async function gattServerDefine() {
         const propsStr = document.getElementById('gattSrvCharProps').value;
         const props = parseInt(propsStr, 16) || 0x1A; // default: Read+Write+Notify
 
-        const initialVal = new TextEncoder().encode('Hello');
+        const initialVal = new TextEncoder().encode(document.getElementById('gattSrvValue').value || 'Hello');
         log(`Defining characteristic (UUID=${charUuid}, props=0x${props.toString(16)})...`);
         const charResult = await bridge.gattServerDefineChar(charBytes, props, initialVal);
         gattServerState.chars.push({
@@ -607,9 +676,24 @@ async function gattServerDefine() {
         });
         log(`Char defined (valueHandle=${charResult.valueHandle}, cccdHandle=${charResult.cccdHandle})`);
 
-        document.getElementById('gattServerInfo').innerHTML =
-            `<p style="color:green">Service handle: ${svcHandle}<br>`
-            + `Char value handle: ${charResult.valueHandle}, CCCD handle: ${charResult.cccdHandle}</p>`;
+        // Update info display with all defined chars
+        let info = `<p style="color:green">Service handle: ${gattServerState.serviceHandle}<br>`;
+        for (const ch of gattServerState.chars) {
+            info += `Char <code>${ch.name}</code>: val=${ch.valueHandle}, cccd=${ch.cccdHandle}, props=0x${ch.properties.toString(16)}<br>`;
+        }
+        info += '</p>';
+
+        // Show char selector if multiple chars defined
+        if (gattServerState.chars.length > 1) {
+            info += '<p>Active char: <select id="gattSrvCharSelect">';
+            for (let i = 0; i < gattServerState.chars.length; i++) {
+                info += `<option value="${i}"${i === gattServerState.chars.length - 1 ? ' selected' : ''}>` +
+                        `${gattServerState.chars[i].name} (val=${gattServerState.chars[i].valueHandle})</option>`;
+            }
+            info += '</select></p>';
+        }
+
+        document.getElementById('gattServerInfo').innerHTML = info;
     } catch (err) {
         log(`GATT server define error: ${err.message}`);
     }
@@ -629,6 +713,12 @@ async function gattServerActivate() {
     }
 }
 
+/** Get the currently selected server char index */
+function getSelectedServerCharIndex() {
+    const sel = document.getElementById('gattSrvCharSelect');
+    return sel ? parseInt(sel.value) : 0;
+}
+
 async function gattServerSetValue() {
     try {
         if (gattServerState.chars.length === 0) {
@@ -637,7 +727,8 @@ async function gattServerSetValue() {
         }
         const valStr = document.getElementById('gattSrvValue').value;
         const data = new TextEncoder().encode(valStr);
-        const vh = gattServerState.chars[0].valueHandle;
+        const idx = getSelectedServerCharIndex();
+        const vh = gattServerState.chars[idx].valueHandle;
 
         log(`Setting attr value (handle=${vh}, "${valStr}")...`);
         const rc = await bridge.gattServerSetValue(vh, data);
@@ -662,7 +753,8 @@ async function gattServerNotify() {
 
         const valStr = document.getElementById('gattSrvValue').value;
         const data = new TextEncoder().encode(valStr);
-        const charHandle = gattServerState.chars[0].valueHandle;
+        const idx = getSelectedServerCharIndex();
+        const charHandle = gattServerState.chars[idx].valueHandle;
 
         log(`Sending notification (conn=${ch}, char=${charHandle}, "${valStr}")...`);
         const rc = await bridge.gattServerNotify(ch, charHandle, data);
@@ -695,6 +787,72 @@ async function btAdvertiseStop() {
         else log(`Advertise stop failed (${rc})`);
     } catch (err) {
         log(`Advertise error: ${err.message}`);
+    }
+}
+
+// ----------------------------------------------------------------
+// BLE DEVICE NAME
+// ----------------------------------------------------------------
+
+async function btSetLocalName() {
+    try {
+        const name = document.getElementById('btDeviceName').value.trim();
+        if (!name) { alert('Enter a device name'); return; }
+        log(`Setting BLE device name: "${name}"...`);
+        const rc = await bridge.btSetLocalName(name);
+        if (rc === 0) {
+            log('Device name set');
+        } else {
+            log(`Set name failed (${rc})`);
+        }
+    } catch (err) {
+        log(`Set name error: ${err.message}`);
+    }
+}
+
+async function btGetLocalName() {
+    try {
+        log('Reading BLE device name...');
+        const name = await bridge.btGetLocalName();
+        log(`Device name: "${name}"`);
+        document.getElementById('btDeviceName').value = name;
+    } catch (err) {
+        log(`Get name error: ${err.message}`);
+    }
+}
+
+// ----------------------------------------------------------------
+// BLE PAIRING
+// ----------------------------------------------------------------
+
+async function btSetPairingMode() {
+    try {
+        const enabled = document.getElementById('btPairingMode').checked ? 1 : 0;
+        log(`Setting pairing mode: ${enabled ? 'ENABLED' : 'DISABLED'}...`);
+        const rc = await bridge.btSetPairingMode(enabled);
+        if (rc === 0) {
+            log(`Pairing mode ${enabled ? 'enabled' : 'disabled'}`);
+        } else {
+            log(`Set pairing mode failed (${rc})`);
+        }
+    } catch (err) {
+        log(`Pairing mode error: ${err.message}`);
+    }
+}
+
+async function btSetIoCapabilities() {
+    try {
+        const val = parseInt(document.getElementById('btIoCap').value);
+        const names = ['NoInputNoOutput', 'DisplayOnly', 'DisplayYesNo', 'KeyboardOnly', 'KeyboardDisplay'];
+        log(`Setting I/O capabilities: ${names[val] || val}...`);
+        const rc = await bridge.btSetIoCapabilities(val);
+        if (rc === 0) {
+            log('I/O capabilities set');
+        } else {
+            log(`Set I/O capabilities failed (${rc})`);
+        }
+    } catch (err) {
+        log(`I/O capabilities error: ${err.message}`);
     }
 }
 
