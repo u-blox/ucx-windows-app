@@ -115,6 +115,16 @@ static void internal_urc_callback(struct uCxAtClient *pClient, void *pTag,
  * @return 0 on success, -1 on error
  */
 /**
+ * Read an int32 value from a WASM memory pointer.
+ * Used by JS to safely read memory without relying on HEAP32 views
+ * which can become stale after ASYNCIFY memory growth.
+ */
+EMSCRIPTEN_KEEPALIVE
+int ucx_read_int32(int* ptr) {
+    return ptr ? *ptr : 0;
+}
+
+/**
  * Set log verbosity level.
  * @param level 0=none, 1=error, 2=info, 3=debug
  */

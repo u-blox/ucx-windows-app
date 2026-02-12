@@ -73,19 +73,29 @@ function selectNetwork(ssid) {
 }
 
 // ----------------------------------------------------------------
-// SERIAL RX DISPLAY
+// SERIAL RX DISPLAY (line-reassembly to handle fragmented chunks)
 // ----------------------------------------------------------------
 
+let rxLineBuffer = '';
+
 function onSerialReceive(text) {
-    const trimmed = text.trim();
-    if (trimmed.length === 0) return;
+    rxLineBuffer += text;
 
-    let prefix = 'RX';
-    if (trimmed.includes('+UUWLE') || trimmed.includes('+UEWLU')) prefix = 'RX [WIFI-URC]';
-    else if (trimmed.includes('OK'))    prefix = 'RX [OK]';
-    else if (trimmed.includes('ERROR')) prefix = 'RX [ERROR]';
+    // Process complete lines (delimited by \r\n or \n)
+    let newlineIdx;
+    while ((newlineIdx = rxLineBuffer.indexOf('\n')) !== -1) {
+        const line = rxLineBuffer.substring(0, newlineIdx).replace(/\r$/, '');
+        rxLineBuffer = rxLineBuffer.substring(newlineIdx + 1);
 
-    log(`${prefix}: ${trimmed}`);
+        if (line.length === 0) continue;
+
+        let prefix = 'RX';
+        if (line.includes('+UUWLE') || line.includes('+UEWLU')) prefix = 'RX [WIFI-URC]';
+        else if (line.includes('OK'))    prefix = 'RX [OK]';
+        else if (line.includes('ERROR')) prefix = 'RX [ERROR]';
+
+        log(`${prefix}: ${line}`);
+    }
 }
 
 // ----------------------------------------------------------------

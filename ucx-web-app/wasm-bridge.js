@@ -120,11 +120,12 @@ class WasmBridge {
                     ['number', 'number', 'number'], [ssidPtr, rssiPtr, channelPtr]);
                 if (ret !== 1) break;
 
-                networks.push({
-                    ssid: this.module.UTF8ToString(ssidPtr),
-                    rssi: this._readInt32(rssiPtr),
-                    channel: this._readInt32(channelPtr),
-                });
+                const ssid = this.module.UTF8ToString(ssidPtr);
+                const rssi = this._readInt32(rssiPtr);
+                const channel = this._readInt32(channelPtr);
+                console.log(`[wasm-bridge] scan result: ssid="${ssid}" rssi=${rssi} ch=${channel} (ptrs: rssi@${rssiPtr} ch@${channelPtr})`);
+
+                networks.push({ ssid, rssi, channel });
             }
         } finally {
             this.module._free(ssidPtr);
@@ -178,10 +179,8 @@ class WasmBridge {
     // ---- helpers ----
 
     _readInt32(ptr) {
-        const buf = this.module.HEAP8 ? this.module.HEAP8.buffer
-                  : this.module.wasmMemory ? this.module.wasmMemory.buffer
-                  : null;
-        if (!buf) return 0;
-        return new Int32Array(buf, ptr, 1)[0];
+        // Call back into C to read the value — avoids all JS typed-array
+        // view staleness issues after ASYNCIFY memory growth.
+        return this.module.ccall('ucx_read_int32', 'number', ['number'], [ptr]);
     }
 }
