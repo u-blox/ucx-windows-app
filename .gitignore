@@ -35,6 +35,7 @@ Thumbs.db
 *.tmp
 *.temp
 *.log
+*.bak
 build_log.txt
 build_env.txt
 debug_output.txt
